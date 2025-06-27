@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>BTC & ETH 每日分析报告</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 2em;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    h2 {
+      color: #2980b9;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 0.3em;
+    }
+    .section {
+      margin-bottom: 2em;
+    }
+    .footer {
+      text-align: center;
+      font-size: 0.9em;
+      color: #999;
+      margin-top: 2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 BTC & ETH 每日分析报告</h1>
+
+    <div class="section">
+      <h2>📈 BTC 技术分析</h2>
+      <p>当前价格：$<span id="btc-price">...</span></p>
+      <p>MA20：$<span id="btc-ma">...</span></p>
+      <p>RSI：<span id="btc-rsi">...</span></p>
+      <p><strong>建议：</strong><span id="btc-signal">正在加载...</span></p>
+    </div>
+
+    <div class="section">
+      <h2>💹 ETH 技术分析</h2>
+      <p>当前价格：$<span id="eth-price">...</span></p>
+      <p>MA20：$<span id="eth-ma">...</span></p>
+      <p>RSI：<span id="eth-rsi">...</span></p>
+      <p><strong>建议：</strong><span id="eth-signal">正在加载...</span></p>
+    </div>
+
+    <div class="section">
+      <h2>📰 宏观事件提醒</h2>
+      <ul id="macro-events">
+        <li>加载中...</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>🧠 市场情绪与策略建议</h2>
+      <p id="sentiment">加载中...</p>
+    </div>
+
+    <div class="footer">
+      更新于：<span id="update-time">...</span>
+    </div>
+  </div>
+
+  <script>
+    // 模拟数据（你可以用 Python 模板引擎或前端框架动态填充）
+    document.getElementById("btc-price").textContent = "64,200.35";
+    document.getElementById("btc-ma").textContent = "63,890.10";
+    document.getElementById("btc-rsi").textContent = "58.2";
+    document.getElementById("btc-signal").textContent = "观望信号：震荡区间无明确信号";
+
+    document.getElementById("eth-price").textContent = "3,480.55";
+    document.getElementById("eth-ma").textContent = "3,450.20";
+    document.getElementById("eth-rsi").textContent = "61.5";
+    document.getElementById("eth-signal").textContent = "轻仓多单，突破确认前不加仓";
+
+    document.getElementById("macro-events").innerHTML = `
+      <li>美国CPI公布（2025-06-28，1天后）：若超预期，BTC或承压</li>
+      <li>FOMC利率会议（2025-07-03，6天后）：加息可能引发波动</li>
+      <li>SEC审查比特币ETF（2025-07-10，13天后）：若通过，或引发大涨</li>
+    `;
+
+    document.getElementById("sentiment").textContent = "当前恐惧与贪婪指数为 58，市场情绪偏乐观，建议合理控制仓位。1000 美元本金建议单笔控制风险不超过 $20，每次交易限于 1-2 单。";
+
+    document.getElementById("update-time").textContent = new Date().toLocaleString();
+  </script>
+</body>
+</html>
