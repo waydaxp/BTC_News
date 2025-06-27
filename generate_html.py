@@ -1,13 +1,17 @@
 from jinja2 import Environment, FileSystemLoader
 from generate_data import get_all_analysis
-from datetime import datetime, timedelta
+from datetime import datetime
+import pytz
 
 def generate_html():
     # 获取所有数据
     data = get_all_analysis()
 
     # 转为北京时间（UTC+8）
-    beijing_time = (datetime.utcnow() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M 北京时间")
+    # 获取当前 UTC 时间并转换为北京时间
+    utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+    beijing_time = utc_now.astimezone(pytz.timezone("Asia/Shanghai"))
+    data["last_updated"] = beijing_time.strftime("%Y-%m-%d %H:%M 北京时间")
 
     # 加载模板文件
     env = Environment(loader=FileSystemLoader("."))
