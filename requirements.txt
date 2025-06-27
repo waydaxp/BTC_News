@@ -1,3 +1,32 @@
-yfinance
-pandas
-requests
+# 基础数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 获取行情数据（如 yfinance）
+yfinance>=0.2.30
+
+# 网络请求相关
+requests>=2.31.0
+beautifulsoup4>=4.12.2
+
+# 图表生成
+matplotlib>=3.7.0
+seaborn>=0.12.2
+
+# 时间处理
+python-dateutil>=2.8.2
+
+# 金十财经网页解析（非API模式）
+lxml>=4.9.3
+
+# 图片处理（可选，若需加文字或压缩）
+Pillow>=10.0.0
+
+# Binance API
+python-binance>=1.0.17
+
+# Bybit API（如选用）
+pybit>=5.3.0
+
+# 支持 Telegram 文件上传（使用 multipart/form-data）
+python-telegram-bot>=13.0
