@@ -1,73 +1,22 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>BTC 技术分析报告</title>
-    <style>
-        body {
-            font-family: "Helvetica Neue", sans-serif;
-            background: #f7f7f7;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h2 {
-            background: #ffffff;
-            padding: 10px;
-            border-left: 5px solid #4CAF50;
-            font-size: 20px;
-        }
-        .section {
-            background: #ffffff;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-left: 3px solid #4CAF50;
-        }
-        .footer {
-            font-size: 14px;
-            color: gray;
-            text-align: right;
-        }
-    </style>
-</head>
-<body>
+from jinja2 import Environment, FileSystemLoader
+from generate_data import get_all_analysis
+from datetime import datetime
 
-<h2>📉【BTC 技术分析】</h2>
-<div class="section">
-    当前价格: {{ btc_price }}<br>
-    MA20: {{ btc_ma20 }}<br>
-    RSI: {{ btc_rsi }}<br>
-    技术信号: {{ btc_signal }}
-</div>
+def generate_html():
+    # 获取所有数据
+    data = get_all_analysis()
 
-<h2>📊 操作建议：</h2>
-<div class="section">
-    - 💰 建议单笔风险金额: {{ btc_risk }}<br>
-    - 🛠 杠杆后下单量: {{ btc_position }}<br>
-    - 📌 建议建仓价: {{ btc_entry }}<br>
-    - 🛑 止损设定: {{ btc_stop }}<br>
-    - 🎯 止盈目标: {{ btc_target }}
-</div>
+    # 添加当前 UTC 更新时间（如需北京时间，可 + timedelta(hours=8)）
+    data["last_updated"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-<h2>📉【ETH 技术分析】</h2>
-<div class="section">
-    当前价格: {{ eth_price }}<br>
-    MA20: {{ eth_ma20 }}<br>
-    RSI: {{ eth_rsi }}<br>
-    技术信号: {{ eth_signal }}
-</div>
+    # 加载模板文件
+    env = Environment(loader=FileSystemLoader("."))
+    template = env.get_template("index_template.html")
 
-<h2>📅【宏观事件提醒】</h2>
-<div class="section">
-    {{ macro_events }}
-</div>
+    # 渲染 HTML 并写入文件
+    rendered_html = template.render(data)
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(rendered_html)
 
-<h2>📊 恐惧与贪婪指数（{{ fear_date }}）</h2>
-<div class="section">
-    当前值: {{ fear_index }}（{{ fear_level }}）
-</div>
-
-<hr>
-<p class="footer">⏱️ 最后更新：{{ last_updated }}</p>
-
-</body>
-</html>
+if __name__ == "__main__":
+    generate_html()
