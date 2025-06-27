@@ -2,7 +2,7 @@ name: BTC Bot Every 5 Minutes
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/50000000 * * * *'
   workflow_dispatch:
 
 jobs:
