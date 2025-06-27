@@ -1,38 +1,54 @@
-"""Render index.html from template with single‑direction suggestion."""
+"""
+Read index_template.html, replace placeholders,
+conditionally keep long/short block according to direction,
+then write index.html
+"""
+
 from generate_data import get_all_analysis
-from datetime import datetime, timedelta
 
-data = get_all_analysis()
+analysis = get_all_analysis()
 
-# 读取模板
-with open("index_template.html", "r", encoding="utf-8") as f:
+with open("index_template.html", encoding="utf-8") as f:
     tpl = f.read()
 
-# 先填充通用占位符
-tpl_rendered = tpl.format(
-    btc_price=data["btc_price"], btc_ma20=data["btc_ma20"], btc_rsi=data["btc_rsi"], btc_signal=data["btc_signal"],
-    entry=data["entry"], stop=data["stop"], target=data["target"],
-    risk=data["risk"], position=data["position"], strategy=data["strategy"],
-    eth_price=data["eth_price"], eth_ma20=data["eth_ma20"], eth_rsi=data["eth_rsi"], eth_signal=data["eth_signal"],
-    macro_events=data["macro_events"], fear_index=data["fear_index"], fear_level=data["fear_level"],
-    fear_date=data["fear_date"], updated_time=data["updated_time"]
+# --- 普通占位符替换 ---
+html = tpl.format(
+    btc_price=analysis["btc_price"],
+    btc_ma20=analysis["btc_ma20"],
+    btc_rsi=analysis["btc_rsi"],
+    btc_signal=analysis["btc_signal"],
+
+    entry=analysis["entry"],
+    stop=analysis["stop"],
+    target=analysis["target"],
+    risk=analysis["risk"],
+    position=analysis["position"],
+    strategy=analysis["strategy"].replace("\n", "<br>"),
+
+    eth_price=analysis["eth_price"],
+    eth_ma20=analysis["eth_ma20"],
+    eth_rsi=analysis["eth_rsi"],
+    eth_signal=analysis["eth_signal"],
+
+    macro_events=analysis["macro_events"],
+    fear_index=analysis["fear_index"],
+    fear_level=analysis["fear_level"],
+    fear_date=analysis["fear_date"],
+    updated_time=analysis["updated_time"]
 )
 
-# === 条件块处理 ===
-if data["direction"] == "long":
-    # 保留做多块，注释做空块
-    tpl_rendered = tpl_rendered.replace("{long_block_start}", "").replace("{long_block_end}", "")
-    tpl_rendered = tpl_rendered.replace("{short_block_start}", "<!--").replace("{short_block_end}", "-->")
-elif data["direction"] == "short":
-    tpl_rendered = tpl_rendered.replace("{short_block_start}", "").replace("{short_block_end}", "")
-    tpl_rendered = tpl_rendered.replace("{long_block_start}", "<!--").replace("{long_block_end}", "-->")
+# --- 条件块处理 ---
+if analysis["direction"] == "long":
+    html = html.replace("{long_block_start}", "").replace("{long_block_end}", "")
+    html = html.replace("{short_block_start}", "<!--").replace("{short_block_end}", "-->")
+elif analysis["direction"] == "short":
+    html = html.replace("{short_block_start}", "").replace("{short_block_end}", "")
+    html = html.replace("{long_block_start}", "<!--").replace("{long_block_end}", "-->")
 else:  # neutral
-    tpl_rendered = tpl_rendered.replace("{long_block_start}", "<!--")\
-                                 .replace("{long_block_end}", "-->")\
-                                 .replace("{short_block_start}", "<!--")\
-                                 .replace("{short_block_end}", "-->")
+    html = html.replace("{long_block_start}", "<!--").replace("{long_block_end}", "-->")
+    html = html.replace("{short_block_start}", "<!--").replace("{short_block_end}", "-->")
 
 with open("index.html", "w", encoding="utf-8") as f:
-    f.write(tpl_rendered)
+    f.write(html)
 
 print("✅ index.html 已生成")
