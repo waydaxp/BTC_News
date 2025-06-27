@@ -47,48 +47,50 @@
   <div class="section">
     <h2>📈【BTC 技术分析】</h2>
     <pre>
-当前价格: {{ btc_price }}
-MA20: {{ btc_ma20 }}
-RSI: {{ btc_rsi }}
-技术信号: {{ btc_signal }}
+当前价格: 107252.52
+MA20: 107097.44
+RSI: 49.07
+技术信号: ✅ 做多信号：突破 MA20 且 RSI 健康
     </pre>
 
     <h3>📊 操作建议：</h3>
     <pre>
-- 💰 建议单笔风险金额: {{ btc_risk }}
-- 🔧 杠杆后下单量: {{ btc_position }}
-- 📌 建议建仓价: {{ btc_entry }}
-- 🛑 止损设定: {{ btc_stop }}
-- 🎯 止盈目标: {{ btc_target }}
+- 💰 建议单笔风险金额: 20.0
+- 🔧 杠杆后下单量: 400.0
+- 📌 建议建仓价: 107252.52
+- 🛑 止损设定: 105643.73
+- 🎯 止盈目标: 110470.09
     </pre>
   </div>
 
   <div class="section">
     <h2>📉【ETH 技术分析】</h2>
     <pre>
-当前价格: {{ eth_price }}
-MA20: {{ eth_ma20 }}
-RSI: {{ eth_rsi }}
-技术信号: {{ eth_signal }}
+当前价格: 2435.38
+MA20: 2435.51
+RSI: 48.39
+技术信号: 🔻 做空信号：跌破 MA20 且 RSI 弱势
     </pre>
   </div>
 
   <div class="section">
     <h2>📅【宏观事件提醒】</h2>
     <pre>
-{{ macro_events }}
+- 美国CPI公布（2025-06-28，0天后）：若超预期，BTC或承压
+- FOMC利率会议（2025-07-03，5天后）：加息可能引发波动
+- SEC审查比特币ETF（2025-07-10，12天后）：若通过，或引发大涨
     </pre>
   </div>
 
   <div class="section">
-    <h2>📊 恐惧与贪婪指数（{{ fear_date }}）</h2>
+    <h2>📊 恐惧与贪婪指数（1750982400）</h2>
     <pre>
-当前值: {{ fear_index }}（{{ fear_level }}）
+当前值: 65（Greed）
     </pre>
   </div>
 
   <div class="footer">
-    由 GitHub Actions 自动生成 · 最后更新：{{ updated_at }}
+    由 GitHub Actions 自动生成 · 最后更新：
   </div>
 </body>
 </html>
