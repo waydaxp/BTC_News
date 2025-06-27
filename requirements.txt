@@ -32,3 +32,5 @@ matplotlib
 
 jinja2
 
+pytz
+
