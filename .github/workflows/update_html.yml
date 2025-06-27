@@ -1,4 +1,4 @@
-name: Update BTC HTML Every 5 Min
+name: Update HTML Page
 
 on:
   schedule:
@@ -8,6 +8,7 @@ on:
 jobs:
   update-html:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -15,19 +16,21 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Generate HTML
-        run: python generate_html.py
+      - name: Run HTML generator
+        run: python generate_index.py  # 或者你用的是 main.py 也可以
 
       - name: Commit and push changes
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add index.html
-          git commit -m "🕒 Auto update at $(date '+%Y-%m-%d %H:%M')" || echo "No changes"
-          git push
+          git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
