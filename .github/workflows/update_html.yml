@@ -5,10 +5,12 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write  # 👈 允许写入权限
+
 jobs:
   update-html:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -19,11 +21,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run HTML generator
-        run: python generate_index.py  # 或者你用的是 main.py 也可以
+        run: python generate_html.py
 
       - name: Commit and push changes
         run: |
@@ -32,5 +33,3 @@ jobs:
           git add index.html
           git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
           git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
