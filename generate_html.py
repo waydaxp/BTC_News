@@ -1,31 +1,73 @@
-import json
-from datetime import datetime
-from jinja2 import Environment, FileSystemLoader
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>BTC 技术分析报告</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", sans-serif;
+            background: #f7f7f7;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h2 {
+            background: #ffffff;
+            padding: 10px;
+            border-left: 5px solid #4CAF50;
+            font-size: 20px;
+        }
+        .section {
+            background: #ffffff;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 3px solid #4CAF50;
+        }
+        .footer {
+            font-size: 14px;
+            color: gray;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
 
-def generate_html():
-    # 加载 JSON 数据
-    with open("data.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
+<h2>📉【BTC 技术分析】</h2>
+<div class="section">
+    当前价格: {{ btc_price }}<br>
+    MA20: {{ btc_ma20 }}<br>
+    RSI: {{ btc_rsi }}<br>
+    技术信号: {{ btc_signal }}
+</div>
 
-    # 处理更新时间戳（Unix → 可读格式）
-    timestamp = data.get("update_time")
-    if isinstance(timestamp, int):
-        data["update_time"] = datetime.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M UTC")
-    elif not timestamp:
-        data["update_time"] = "未知时间"
+<h2>📊 操作建议：</h2>
+<div class="section">
+    - 💰 建议单笔风险金额: {{ btc_risk }}<br>
+    - 🛠 杠杆后下单量: {{ btc_position }}<br>
+    - 📌 建议建仓价: {{ btc_entry }}<br>
+    - 🛑 止损设定: {{ btc_stop }}<br>
+    - 🎯 止盈目标: {{ btc_target }}
+</div>
 
-    # 加载模板引擎
-    env = Environment(loader=FileSystemLoader("."))
-    template = env.get_template("index_template.html")
+<h2>📉【ETH 技术分析】</h2>
+<div class="section">
+    当前价格: {{ eth_price }}<br>
+    MA20: {{ eth_ma20 }}<br>
+    RSI: {{ eth_rsi }}<br>
+    技术信号: {{ eth_signal }}
+</div>
 
-    # 渲染 HTML
-    rendered_html = template.render(**data)
+<h2>📅【宏观事件提醒】</h2>
+<div class="section">
+    {{ macro_events }}
+</div>
 
-    # 写入 HTML 文件
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(rendered_html)
+<h2>📊 恐惧与贪婪指数（{{ fear_date }}）</h2>
+<div class="section">
+    当前值: {{ fear_index }}（{{ fear_level }}）
+</div>
 
-    print("✅ 成功生成 index.html")
+<hr>
+<p class="footer">⏱️ 最后更新：{{ last_updated }}</p>
 
-if __name__ == "__main__":
-    generate_html()
+</body>
+</html>
