@@ -3,26 +3,31 @@ from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
 from utils.fetch_macro import get_macro_events
 from utils.fetch_sentiment import get_sentiment_summary
-from utils.plot_generator import generate_price_plot
-from utils.telegram_sender import send_telegram_message
+from utils.telegram_bot import send_telegram_message
 
+# 获取所有模块数据
+btc_message = get_btc_analysis()
+eth_message = get_eth_analysis()
+macro_message = get_macro_events()
+sentiment_summary = get_sentiment_summary()
 
-def main():
-    # 获取 BTC 分析
-    btc_message = get_btc_analysis()
+# 组合最终推送内容
+final_message = f"""
+📊 BTC/ETH 每日策略简报（带图推送）
 
-    # 获取 ETH 分析
-    eth_message = get_eth_analysis()
+{btc_message}
 
-    # 获取宏观事件提醒
-    macro_message = get_macro_events()
+{eth_message}
 
-    # 获取市场情绪摘要（可选）
-    sentiment = get_sentiment_summary()
+🧠 市场情绪与仓位建议：
+{sentiment_summary}
 
-    # 生成图表
-    chart_path = generate_price_plot()
+📅 宏观事件提醒：
+{macro_message}
+"""
 
-    # 合并消息内容
-    final_message = f"""
-    
+# 输出到控制台
+print(final_message)
+
+# 推送到 Telegram
+send_telegram_message(final_message)
