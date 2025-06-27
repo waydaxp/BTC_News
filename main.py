@@ -6,15 +6,15 @@ from utils.fetch_sentiment import get_sentiment_summary
 from utils.plot_generator import generate_plot
 
 def main():
-    print("📊 正在生成加密货币分析报告...")
+    print("🚀 正在执行每日分析任务...")
 
-    # 获取分析内容
+    # 获取各项分析数据
     btc_msg = get_btc_analysis()
     eth_msg = get_eth_analysis()
     macro_msg = get_macro_events()
     sentiment_msg = get_sentiment_summary()
-    
-    # 组合消息
+
+    # 组合完整消息
     final_message = (
         f"📈 <b>BTC & ETH 每日策略简报</b>\n\n"
         f"{btc_msg}\n"
@@ -23,13 +23,14 @@ def main():
         f"{sentiment_msg}"
     )
 
-    # 发送文字报告
+    # 发送 Telegram 推送
+    send_telegram_message("✅ GitHub 每5分钟任务触发成功")  # 每次运行成功提示
     send_telegram_message(final_message)
 
-    # 生成图像（图像推送功能可扩展支持 sendPhoto）
+    # 生成并保存图表（如需后续拓展自动推图功能）
     img_path = generate_plot()
     if img_path:
-        print(f"📷 图表已保存至: {img_path}")
+        print(f"📷 图表已保存：{img_path}")
 
 if __name__ == "__main__":
     main()
