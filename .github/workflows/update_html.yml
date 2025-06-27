@@ -2,15 +2,16 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '*/5 * * * *'  # 每5分钟运行
+  workflow_dispatch:        # 允许手动运行
 
 permissions:
-  contents: write  # 👈 允许写入权限
+  contents: write
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -23,13 +24,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run HTML generator
+      - name: Generate index.html
         run: python generate_html.py
 
-      - name: Commit and push changes
+      - name: Commit and push index.html
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git add index.html
-          git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
+          git add index.html || echo "No changes to commit"
+          git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')" || echo "Nothing to commit"
           git push origin main
