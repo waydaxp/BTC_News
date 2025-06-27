@@ -11,23 +11,17 @@ def get_all_analysis():
     macro = get_macro_event_summary()
     fear_data = get_fear_and_greed_index()
 
-    # 判断策略方向
-    direction = "long" if "做多" in btc.get("signal", "") else "short"
-
-    if direction == "long":
-        btc_strategy_text = (
-            "✅ 做多策略说明：买入 → 涨\n"
-            "止损：跌 1.5%\n"
-            "止盈：涨 3%"
-        )
-    elif direction == "short":
-        btc_strategy_text = (
-            "🔻 做空策略说明：卖出 → 跌\n"
-            "止损：涨 1.5%\n"
-            "止盈：跌 3%"
-        )
-    else:
-        btc_strategy_text = "⏸ 当前为中性信号，建议观望"
+    # 构建双向策略说明（多/空均展示）
+    btc_long_strategy = (
+        "✅ 做多策略说明：买入 → 涨\n"
+        "止损：跌 1.5%\n"
+        "止盈：涨 3%"
+    )
+    btc_short_strategy = (
+        "🔻 做空策略说明：卖出 → 跌\n"
+        "止损：涨 1.5%\n"
+        "止盈：跌 3%"
+    )
 
     # 更新时间（北京时间）
     now_bj = datetime.utcnow() + timedelta(hours=8)
@@ -45,7 +39,8 @@ def get_all_analysis():
         "btc_target": btc.get("take_profit", "N/A"),
         "btc_risk": btc.get("max_loss", "N/A"),
         "btc_position": btc.get("per_trade_position", "N/A"),
-        "btc_strategy_text": btc_strategy_text,
+        "btc_long_strategy": btc_long_strategy,
+        "btc_short_strategy": btc_short_strategy,
 
         # ETH 数据
         "eth_price": eth.get("price", "N/A"),
