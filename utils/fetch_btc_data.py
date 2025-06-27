@@ -7,16 +7,16 @@ def get_btc_analysis():
 
     if data.empty or len(data) < 20:
         return {
-            "price": "N/A",
-            "ma20": "N/A",
-            "rsi": "N/A",
-            "signal": "⚠️ 数据不足",
-            "entry": "N/A",
-            "stop": "N/A",
-            "target": "N/A",
-            "risk": "N/A",
-            "position": "N/A",
-        }
+        "price": price,
+        "ma20": ma20,
+        "rsi": rsi,
+        "signal": signal_text,
+        "entry_price": entry,
+        "stop_loss": stop,
+        "take_profit": target,
+        "max_loss": loss_amount,
+        "per_trade_position": position,
+    }
 
     # 技术指标计算
     data["MA20"] = data["Close"].rolling(window=20).mean()
