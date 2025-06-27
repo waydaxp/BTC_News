@@ -24,6 +24,9 @@ output = template.format(
     btc_risk=analysis["btc_risk"],
     btc_position=analysis["btc_position"],
 
+    btc_long_strategy=analysis.get("btc_long_strategy", ""),
+    btc_short_strategy=analysis.get("btc_short_strategy", ""),
+
     eth_price=analysis["eth_price"],
     eth_ma20=analysis["eth_ma20"],
     eth_rsi=analysis["eth_rsi"],
@@ -33,9 +36,7 @@ output = template.format(
     fear_index=analysis["fear_index"],
     fear_level=analysis["fear_level"],
     fear_date=analysis["fear_date"],
-    updated_time=timestamp_str,
-
-    btc_strategy_text=analysis.get("btc_strategy_text", "")
+    updated_time=timestamp_str
 )
 
 # 输出为 index.html
