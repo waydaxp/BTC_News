@@ -1,90 +1,68 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <title>BTC 技术分析报告</title>
-    <style>
-        body {{
-            font-family: "Helvetica Neue", sans-serif;
-            background: #f7f7f7;
-            padding: 20px;
-            line-height: 1.6;
-        }}
-        h2 {{
-            background: #ffffff;
-            padding: 10px;
-            border-left: 5px solid #4CAF50;
-            font-size: 20px;
-        }}
-        .section {{
-            background: #ffffff;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-left: 3px solid #4CAF50;
-        }}
-        .footer {{
-            font-size: 14px;
-            color: gray;
-            text-align: right;
-        }}
-    </style>
+  <meta charset="UTF-8">
+  <title>BTC 技术分析报告</title>
+  <style>
+    body {{ font-family:"Helvetica Neue",sans-serif;background:#f7f7f7;padding:20px;line-height:1.6; }}
+    h2  {{ background:#fff;padding:10px;border-left:5px solid #4CAF50;font-size:20px; }}
+    .section {{ background:#fff;margin-bottom:20px;padding:15px;border-left:3px solid #4CAF50; }}
+    .footer  {{ font-size:14px;color:gray;text-align:right; }}
+  </style>
 </head>
 <body>
 
 <h2>📉【BTC 技术分析】</h2>
 <div class="section">
-    当前价格: {btc_price}<br>
-    MA20: {btc_ma20}<br>
-    RSI: {btc_rsi}<br>
-    技术信号: {btc_signal}
+  当前价格: {btc_price}<br>
+  MA20: {btc_ma20}<br>
+  RSI: {btc_rsi}<br>
+  技术信号: {btc_signal}
 </div>
 
+{long_block_start}
 <h2>📈 做多操作建议</h2>
 <div class="section">
-    - 💰 建议单笔风险金额: {btc_long_risk}<br>
-    - 🛠 杠杆后下单量: {btc_long_position}<br>
-    - 📌 建议建仓价: {btc_long_entry}<br>
-    - 🛑 止损设定: {btc_long_stop}<br>
-    - 🎯 止盈目标: {btc_long_target}
+  - 💰 风险金额: {risk}<br>
+  - 🛠 杠杆后下单量: {position}<br>
+  - 📌 建仓价: {entry}<br>
+  - 🛑 止损: {stop}<br>
+  - 🎯 止盈: {target}
 </div>
+{long_block_end}
 
+{short_block_start}
 <h2>📉 做空操作建议</h2>
 <div class="section">
-    - 💰 建议单笔风险金额: {btc_short_risk}<br>
-    - 🛠 杠杆后下单量: {btc_short_position}<br>
-    - 📌 建议建仓价: {btc_short_entry}<br>
-    - 🛑 止损设定: {btc_short_stop}<br>
-    - 🎯 止盈目标: {btc_short_target}
+  - 💰 风险金额: {risk}<br>
+  - 🛠 杠杆后下单量: {position}<br>
+  - 📌 建仓价: {entry}<br>
+  - 🛑 止损: {stop}<br>
+  - 🎯 止盈: {target}
 </div>
+{short_block_end}
 
-<h2>📌 策略说明（双向）</h2>
-<div class="section">
-    <strong>✅ 做多策略说明：</strong><br>
-    {btc_long_strategy}<br><br>
-    <strong>🔻 做空策略说明：</strong><br>
-    {btc_short_strategy}
-</div>
+<h2>📌 策略说明</h2>
+<div class="section">{strategy.replace('\n','<br>')}</div>
 
 <h2>📉【ETH 技术分析】</h2>
 <div class="section">
-    当前价格: {eth_price}<br>
-    MA20: {eth_ma20}<br>
-    RSI: {eth_rsi}<br>
-    技术信号: {eth_signal}
+  当前价格: {eth_price}<br>
+  MA20: {eth_ma20}<br>
+  RSI: {eth_rsi}<br>
+  技术信号: {eth_signal}
 </div>
 
 <h2>📅【宏观事件提醒】</h2>
-<div class="section">
-    {macro_events}
-</div>
+<div class="section">{macro_events}</div>
 
 <h2>📊 恐惧与贪婪指数（{fear_date}）</h2>
-<div class="section">
-    当前值: {fear_index}（{fear_level}）
-</div>
+<div class="section">当前值: {fear_index}（{fear_level}）</div>
 
 <hr>
-<p class="footer">更新时间（北京时间）：{updated_time}</p>
+<div class="footer">
+  最后更新时间: {updated_time}
+</div>
 
 </body>
 </html>
