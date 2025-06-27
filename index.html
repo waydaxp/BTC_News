@@ -1,9 +1,94 @@
 <!DOCTYPE html>
-<html>
-<head><title>BTC 实时价格</title></head>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 BTC & ETH 每日策略简报</title>
+  <style>
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #222;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 0.5rem;
+    }
+    h2 {
+      color: #444;
+      margin-top: 2rem;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    pre {
+      background: #fff;
+      border-left: 4px solid #4caf50;
+      padding: 1rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .footer {
+      font-size: 0.9em;
+      color: #888;
+      text-align: center;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
 <body>
-  <h1>📈 BTC 实时价格：$107234.59</h1>
-  <h2>💹 ETH 实时价格：$2439.52</h2>
-  <p>⏱ 更新于：2025-06-27 15:47:58</p>
+  <h1>📈 BTC & ETH 每日策略简报</h1>
+
+  <div class="section">
+    <h2>📈【BTC 技术分析】</h2>
+    <pre>
+当前价格: {{ btc_price }}
+MA20: {{ btc_ma20 }}
+RSI: {{ btc_rsi }}
+技术信号: {{ btc_signal }}
+    </pre>
+
+    <h3>📊 操作建议：</h3>
+    <pre>
+- 💰 建议单笔风险金额: {{ btc_risk }}
+- 🔧 杠杆后下单量: {{ btc_position }}
+- 📌 建议建仓价: {{ btc_entry }}
+- 🛑 止损设定: {{ btc_stop }}
+- 🎯 止盈目标: {{ btc_target }}
+    </pre>
+  </div>
+
+  <div class="section">
+    <h2>📉【ETH 技术分析】</h2>
+    <pre>
+当前价格: {{ eth_price }}
+MA20: {{ eth_ma20 }}
+RSI: {{ eth_rsi }}
+技术信号: {{ eth_signal }}
+    </pre>
+  </div>
+
+  <div class="section">
+    <h2>📅【宏观事件提醒】</h2>
+    <pre>
+{{ macro_events }}
+    </pre>
+  </div>
+
+  <div class="section">
+    <h2>📊 恐惧与贪婪指数（{{ fear_date }}）</h2>
+    <pre>
+当前值: {{ fear_index }}（{{ fear_level }}）
+    </pre>
+  </div>
+
+  <div class="footer">
+    由 GitHub Actions 自动生成 · 最后更新：{{ updated_at }}
+  </div>
 </body>
 </html>
