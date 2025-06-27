@@ -1,19 +1,12 @@
 # utils/fetch_sentiment.py
 import requests
 
-def get_sentiment_data():
+def get_sentiment():
     try:
-        response = requests.get("https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1")
-        data = response.json()[0]
-        long_ratio = float(data['longAccount']) * 100
-        short_ratio = float(data['shortAccount']) * 100
-        msg = f"\n📊【市场情绪】\n多头占比: {long_ratio:.2f}%\n空头占比: {short_ratio:.2f}%"
-        if long_ratio > 60:
-            msg += "\n⚠️ 多头过热，谨防回调"
-        elif short_ratio > 60:
-            msg += "\n✅ 空头集中，或有反弹机会"
-        else:
-            msg += "\n⏸ 市场情绪均衡"
-        return msg
+        response = requests.get("https://api.alternative.me/fng/?limit=1")
+        data = response.json()
+        value = data['data'][0]['value']
+        value_text = data['data'][0]['value_classification']
+        return f"🧠【情绪指数】今日恐惧&贪婪指数为 {value}（{value_text}）"
     except Exception as e:
-        return f"\n⚠️ 无法获取情绪数据: {e}"
+        return "⚠️ 获取情绪指数失败"
