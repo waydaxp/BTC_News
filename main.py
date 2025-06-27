@@ -9,7 +9,7 @@ ENABLE_TELEGRAM = True  # 是否启用推送
 
 # 建议使用环境变量：适用于本地运行或 GitHub Actions
 BOT_TOKEN = os.environ.get("8149475252:AAEkYJRGJSQje6w1i57gjPOFhXRiZ2Ghf-0")
-CHAT_ID = os.environ.get("BTCYing_bot") 
+CHAT_ID = os.environ.get("5264947511") 
 
 def send_telegram_message(message):
     if not ENABLE_TELEGRAM:
