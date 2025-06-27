@@ -30,3 +30,5 @@ pybit>=5.3.0
 
 matplotlib
 
+jinja2
+
