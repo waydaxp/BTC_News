@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>BTC & ETH 每日分析报告</title>
+  <title>BTC & ETH 每日策略简报</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -37,66 +37,68 @@
       color: #999;
       margin-top: 2em;
     }
+    pre {
+      background: #f0f0f0;
+      padding: 1em;
+      border-radius: 5px;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📊 BTC & ETH 每日分析报告</h1>
+    <h1>📈 BTC & ETH 每日策略简报</h1>
 
     <div class="section">
-      <h2>📈 BTC 技术分析</h2>
-      <p>当前价格：$<span id="btc-price">...</span></p>
-      <p>MA20：$<span id="btc-ma">...</span></p>
-      <p>RSI：<span id="btc-rsi">...</span></p>
-      <p><strong>建议：</strong><span id="btc-signal">正在加载...</span></p>
+      <h2>📈【BTC 技术分析】</h2>
+      <pre>
+当前价格: $106562.21
+MA20: $107081.68
+RSI: 35.93
+技术信号: 🔻 做空信号：跌破 MA20 且 RSI 弱势
+      </pre>
     </div>
 
     <div class="section">
-      <h2>💹 ETH 技术分析</h2>
-      <p>当前价格：$<span id="eth-price">...</span></p>
-      <p>MA20：$<span id="eth-ma">...</span></p>
-      <p>RSI：<span id="eth-rsi">...</span></p>
-      <p><strong>建议：</strong><span id="eth-signal">正在加载...</span></p>
+      <h2>📊 操作建议</h2>
+      <pre>
+- 💰 建议单笔风险金额: $20.00（账户总额的2%）
+- 🔧 杠杆后下单量: $400.00
+- 📌 建议建仓价: $106562.21
+- 🛑 止损设定: $104963.78
+- 🎯 止盈目标: $109759.08
+      </pre>
     </div>
 
     <div class="section">
-      <h2>📰 宏观事件提醒</h2>
-      <ul id="macro-events">
-        <li>加载中...</li>
-      </ul>
+      <h2>📉【ETH 技术分析】</h2>
+      <pre>
+当前价格: $2422.68
+MA20: $2435.15
+RSI: 47.62
+技术信号: 🔻 做空信号
+      </pre>
     </div>
 
     <div class="section">
-      <h2>🧠 市场情绪与策略建议</h2>
-      <p id="sentiment">加载中...</p>
+      <h2>📅【宏观事件提醒】</h2>
+      <pre>
+- 美国CPI公布（2025-06-28，1天后）：若超预期，BTC或承压
+- FOMC利率会议（2025-07-03，6天后）：加息可能引发波动
+- SEC审查比特币ETF（2025-07-10，13天后）：若通过，或引发大涨
+      </pre>
+    </div>
+
+    <div class="section">
+      <h2>📊 恐惧与贪婪指数（2025-06-27 00:00）</h2>
+      <pre>
+当前值: 65（Greed）
+      </pre>
     </div>
 
     <div class="footer">
-      更新于：<span id="update-time">...</span>
+      更新时间：<script>document.write(new Date().toLocaleString())</script>
     </div>
   </div>
-
-  <script>
-    // 模拟数据（你可以用 Python 模板引擎或前端框架动态填充）
-    document.getElementById("btc-price").textContent = "64,200.35";
-    document.getElementById("btc-ma").textContent = "63,890.10";
-    document.getElementById("btc-rsi").textContent = "58.2";
-    document.getElementById("btc-signal").textContent = "观望信号：震荡区间无明确信号";
-
-    document.getElementById("eth-price").textContent = "3,480.55";
-    document.getElementById("eth-ma").textContent = "3,450.20";
-    document.getElementById("eth-rsi").textContent = "61.5";
-    document.getElementById("eth-signal").textContent = "轻仓多单，突破确认前不加仓";
-
-    document.getElementById("macro-events").innerHTML = `
-      <li>美国CPI公布（2025-06-28，1天后）：若超预期，BTC或承压</li>
-      <li>FOMC利率会议（2025-07-03，6天后）：加息可能引发波动</li>
-      <li>SEC审查比特币ETF（2025-07-10，13天后）：若通过，或引发大涨</li>
-    `;
-
-    document.getElementById("sentiment").textContent = "当前恐惧与贪婪指数为 58，市场情绪偏乐观，建议合理控制仓位。1000 美元本金建议单笔控制风险不超过 $20，每次交易限于 1-2 单。";
-
-    document.getElementById("update-time").textContent = new Date().toLocaleString();
-  </script>
 </body>
 </html>
