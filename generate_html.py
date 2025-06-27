@@ -16,7 +16,7 @@ def generate_html():
     # 渲染 HTML 并写入文件
     rendered = template.render(**data, update_time=beijing_time)
     with open("output.html", "w", encoding="utf-8") as f:
-    f.write(rendered)  # ✅ 正确的变量名
+        f.write(rendered)  # ✅ 正确的变量名
 
 if __name__ == "__main__":
     generate_html()
