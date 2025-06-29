@@ -11,7 +11,12 @@ PAIR = "ETH-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    df.columns = df.columns.str.title()
+
+    # 如果是多重索引，重新设置列名
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
+    df.columns = df.columns.str.title()  # 标准化列名
     df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
