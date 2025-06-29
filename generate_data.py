@@ -5,13 +5,17 @@ from utils.fetch_eth_data      import get_eth_analysis
 from utils.fetch_fear_greed    import get_fear_and_greed
 from utils.fetch_macro_events  import get_macro_event_summary
 from datetime                  import datetime
+import pytz  # 用于设置北京时间
 
 def get_all_analysis() -> dict:
     btc = get_btc_analysis()
     eth = get_eth_analysis()
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
     macro = get_macro_event_summary()
-    page_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 设置北京时间
+    beijing_now = datetime.now(pytz.timezone("Asia/Shanghai"))
+    page_update = beijing_now.strftime("%Y-%m-%d %H:%M:%S")
 
     return {
         # BTC
