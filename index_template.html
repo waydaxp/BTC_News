@@ -58,16 +58,15 @@
     </div>
   </div>
 
-  <!-- ===== ④ 恐惧与贪婪 ===== -->
+  <!-- 😨/😊 恐惧与贪婪指数 -->
   <div class="card">
-    <div class="title">😨/😊 恐惧与贪婪指数（{{ fear_greed_id }}）</div>
-    <div class="metric">当前值: {{ fear_greed_val }}</div>
+    <div class="title">😨/😊 恐惧与贪婪指数（{{ fg_index }}）</div>
+    <div class="metric">当前值: {{ fg_text }}</div>
   </div>
 
-  <!-- ===== ⑤ 更新时间 ===== -->
-  <div class="card">
-    <p class="ts">更新时间：{{ updated }}</p>
+  <!-- ⏰ 更新时间 -->
+  <div class="card" style="text-align:right">
+    <span class="metric">更新时间: {{ update_time }}</span>
   </div>
-
 </body>
 </html>
