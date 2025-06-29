@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from binance.spot import Spot as Client
 
 from core.signal import make_signal
-from indicators import add_basic_indicators
+from core.indicators import add_basic_indicators, calc_atr, calc_rsi
 
 BINANCE = Client()
 
