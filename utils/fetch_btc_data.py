@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
+from pytz import timezone
 from core.indicators import add_basic_indicators
 from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
@@ -20,6 +21,7 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
             raise ValueError("[错误] 未识别的 MultiIndex 结构")
 
     df = df.rename(columns=str.title)
+
     expected_cols = ["Open", "High", "Low", "Close", "Volume"]
     missing = [col for col in expected_cols if col not in df.columns]
     if missing:
@@ -29,27 +31,30 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = add_basic_indicators(df)
     return df.dropna()
 
-def _judge_signal(df: pd.DataFrame) -> str:
+def _judge_signal(df: pd.DataFrame, interval_label="") -> str:
     last = df.iloc[-1]
     ma5 = df['Close'].rolling(5).mean()
-
     recent = df['Close'].tail(5) > df['MA20'].tail(5)
     above_ma20 = recent.sum() >= 3
     below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
 
-    rsi = last['RSI']
-    close = last['Close']
-    ma20 = last['MA20']
-    ma5_val = ma5.iloc[-1]
+    signal = "⏸ 中性信号"
 
-    if close > ma20 and above_ma20 and 45 < rsi < 70 and close > ma5_val:
-        return "🟢 做多信号"
-    elif close < ma20 and below_ma20 and 30 < rsi < 55 and close < ma5_val:
-        return "🔻 做空信号"
-    elif abs(rsi - 50) < 5:
-        return "⏸ 震荡中性"
-    else:
-        return "⏸ 中性信号"
+    if last['RSI'] < 40 or last['RSI'] > 70:
+        signal = "⚠ 背离信号"
+    elif abs(last['Close'] - last['MA20']) / last['MA20'] < 0.005:
+        signal = "⏸ 震荡中性"
+    elif last['Close'] > last['MA20'] and above_ma20 and 45 < last['RSI'] < 70 and last['Close'] > ma5.iloc[-1]:
+        signal = "🟢 做多信号"
+    elif last['Close'] < last['MA20'] and below_ma20 and 30 < last['RSI'] < 55 and last['Close'] < ma5.iloc[-1]:
+        signal = "🔻 做空信号"
+    elif last['Close'] > last['MA20'] * 1.02 and last['RSI'] > 60:
+        signal = "🟢 趋势偏强"
+    elif last['Close'] < last['MA20'] * 0.98 and last['RSI'] < 40:
+        signal = "🔻 趋势偏弱"
+
+    print(f"[DEBUG] BTC-{interval_label}: Signal={signal}, RSI={last['RSI']:.2f}, Close={last['Close']:.2f}, MA20={last['MA20']:.2f}")
+    return signal
 
 def _calc_trade(price: float, atr: float, signal: str) -> tuple:
     if "多" in signal:
@@ -69,9 +74,9 @@ def get_btc_analysis() -> dict:
     df1h = _download_tf("1h", "7d")
     df4h = _download_tf("4h", "30d")
 
-    signal15 = _judge_signal(df15)
-    signal1h = _judge_signal(df1h)
-    signal4h = _judge_signal(df4h)
+    signal15 = _judge_signal(df15, "15m")
+    signal1h = _judge_signal(df1h, "1h")
+    signal4h = _judge_signal(df4h, "4h")
 
     last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
     price15, price1h, price4h = float(last15['Close']), float(last1h['Close']), float(last4h['Close'])
@@ -81,9 +86,7 @@ def get_btc_analysis() -> dict:
     sl1h, tp1h, qty1h = _calc_trade(price1h, atr1h, signal1h)
     sl4h, tp4h, qty4h = _calc_trade(price4h, atr4h, signal4h)
 
-    # 设置为北京时间（UTC+8）
-    beijing_time = datetime.utcnow() + timedelta(hours=8)
-    update_time = beijing_time.strftime("%Y-%m-%d %H:%M:%S")
+    update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
         "price": price1h,
@@ -92,9 +95,9 @@ def get_btc_analysis() -> dict:
         "atr": atr1h,
         "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
 
-        "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
-        "entry_1h": price1h, "sl_1h": sl1h, "tp_1h": tp1h, "qty_1h": qty1h,
-        "entry_4h": price4h, "sl_4h": sl4h, "tp_4h": tp4h, "qty_4h": qty4h,
+        "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15, "entry_15m": price15,
+        "sl_1h": sl1h, "tp_1h": tp1h, "qty_1h": qty1h, "entry_1h": price1h,
+        "sl_4h": sl4h, "tp_4h": tp4h, "qty_4h": qty4h, "entry_4h": price4h,
 
         "risk_usd": RISK_USD,
         "update_time": update_time
