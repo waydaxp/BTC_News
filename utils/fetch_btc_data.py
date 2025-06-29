@@ -7,45 +7,22 @@ from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
 PAIR = "BTC-USD"
 
-def get_btc_analysis() -> dict:
-    df15 = _download_tf("15m", "3d")
-    df1h = _download_tf("1h", "7d")
-    df4h = _download_tf("4h", "30d")
-
-    signal15, reason15 = _judge_signal(df15, "15m")
-    signal1h, reason1h = _judge_signal(df1h, "1h")
-    signal4h, reason4h = _judge_signal(df4h, "4h")
-
-    last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
-    price15, price1h, price4h = float(last15['Close']), float(last1h['Close']), float(last4h['Close'])
-    atr15, atr1h, atr4h = float(last15['ATR']), float(last1h['ATR']), float(last4h['ATR'])
-
-    sl15, tp15, qty15 = _calc_trade(price15, atr15, signal15)
-    sl1h, tp1h, qty1h = _calc_trade(price1h, atr1h, signal1h)
-    sl4h, tp4h, qty4h = _calc_trade(price4h, atr4h, signal4h)
-
-    update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
-
-    return {
-        "price": price1h,
-        "ma20": float(last1h['MA20']),
-        "rsi": float(last1h['RSI']),
-        "atr": atr1h,
-        "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
-
-        "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
-        "entry_1h":  price1h, "sl_1h":  sl1h, "tp_1h":  tp1h,  "qty_1h":  qty1h,
-        "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
-
-        "risk_usd": RISK_USD,
-        "update_time": update_time,
-
-        "win_rate": round(df1h['signal_result'].mean() * 100, 1) if 'signal_result' in df1h else None,
-
-        "reason_15m": reason15,
-        "reason_1h": reason1h,
-        "reason_4h": reason4h,
-    }
+def _download_tf(interval: str, period: str) -> pd.DataFrame:
+    df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
+    if isinstance(df.columns, pd.MultiIndex):
+        if "Ticker" in df.columns.names and "Price" in df.columns.names:
+            df = df.xs(PAIR, level="Ticker", axis=1)
+        else:
+            raise ValueError("[错误] 未识别的 MultiIndex 结构")
+    df = df.rename(columns=str.title)
+    expected_cols = ["Open", "High", "Low", "Close", "Volume"]
+    missing = [col for col in expected_cols if col not in df.columns]
+    if missing:
+        raise ValueError(f"[错误] 缺失所需列: {missing}, 当前列为: {df.columns.tolist()}")
+    df.index = df.index.tz_localize(None)
+    df = add_basic_indicators(df)
+    df = add_macd_boll_kdj(df)
+    return df.dropna()
 
 def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     last = df.iloc[-1]
@@ -144,5 +121,9 @@ def get_btc_analysis() -> dict:
         "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
 
         "risk_usd": RISK_USD,
-        "update_time": update_time
+        "update_time": update_time,
+
+        "reason_15m": l15,
+        "reason_1h": l1h,
+        "reason_4h": l4h,
     }
