@@ -1,101 +1,90 @@
 # utils/fetch_btc_data.py
-"""
-下载 BTC 多周期 K 线 → 计算指标 → 输出一个 dict
-"""
-from __future__ import annotations
-
-from datetime import datetime, timezone, timedelta
-from typing import Literal
-
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
+from datetime import datetime
+from core.indicators  import add_basic_indicators
+from core.risk        import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 
-from core.indicators import add_basic_indicators
-from core.signal      import make_signal          # 技术方向
-from core.risk        import (
-    calc_position_size,
-    ATR_MULT_SL,
-    ATR_MULT_TP,
-    RISK_USD,
-)
+PAIR = "BTC-USD"
+TZ   = "Asia/Shanghai"
 
-PAIR       = "BTC-USD"
-TZ         = timezone(timedelta(hours=8))   # 北京时间
-TREND_LEN  = 4                              # 1h 连续 N 根
-INTERVALS: dict[str, dict[str, str]] = {
-    "1h" : dict(interval="1h",  period="90d"),
-    "4h" : dict(interval="1h",  period="180d"),   # 先 1h 拉长，再 resample
-    "15m": dict(interval="15m", period="30d"),
+# 各周期下载配置
+INTERVALS = {
+    "1h":  {"interval": "1h",  "period": "3d"},
+    "4h":  {"interval": "1h",  "period": "10d"},  # 先 1h 拉取再重采样
+    "15m": {"interval": "15m", "period": "1d"},
 }
 
-# --------------------------------------------------------------------------- #
-# 内部工具
-# --------------------------------------------------------------------------- #
+def _flatten_ohlc_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """扁平化 MultiIndex 列，然后首字母大写"""
+    if isinstance(df.columns, pd.MultiIndex):
+        # 只保留第一层名称
+        df.columns = df.columns.get_level_values(0).str.capitalize()
+    else:
+        df.columns = [str(c).capitalize() for c in df.columns]
+    return df
+
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
-    """拉指定周期，并附加指标"""
-    df: pd.DataFrame = yf.download(PAIR, interval=interval, period=period, progress=False)
-    df.index = df.index.tz_localize(None).tz_localize(TZ)   # 统一成北京时间
-    df.columns = [c.capitalize() for c in df.columns]       # 兼容 Pandas OHLC 列名
-    return add_basic_indicators(df).dropna()
+    """下载、扁平化、时区转换、指标计算并丢弃空值"""
+    df = yf.download(PAIR, interval=interval, period=period, progress=False)
+    df = _flatten_ohlc_columns(df)
+    # 时区：如果已经带 tz，则直接转；否则先标记 UTC 再转
+    idx = df.index
+    df.index = idx.tz_convert(TZ) if idx.tzinfo else idx.tz_localize("UTC").tz_convert(TZ)
+    df = add_basic_indicators(df).dropna()
+    return df
 
-
-# --------------------------------------------------------------------------- #
-# 核心接口
-# --------------------------------------------------------------------------- #
 def get_btc_analysis() -> dict:
-    # --- 1. 拉取多周期 K 线 -------------------------------------------------- #
-    dfs = {k: _download_tf(**cfg) for k, cfg in INTERVALS.items()}
+    """
+    返回键：
+      price, ma20, rsi, atr,
+      signal, sl, tp, qty, risk_usd,
+      update_time
+    """
+    # 拉取各周期
+    df1h  = _download_tf(**INTERVALS["1h"])
+    # 用 1h 数据重采样到 4h
+    ohlc = {"open":"first","high":"max","low":"min","close":"last","volume":"sum"}
+    df4h  = _flatten_ohlc_columns(df1h.resample("4h", closed="right", label="right").agg(ohlc))
+    df4h  = add_basic_indicators(df4h).dropna()
+    df15m = _download_tf(**INTERVALS["15m"])
 
-    # 4h 由 1h resample 而来（聚合 OHLC）
-    df_1h = dfs["1h"]
-    ohlc  = {
-        "Open":  "first",
-        "High":  "max",
-        "Low":   "min",
-        "Close": "last",
-        "Volume":"sum",
-        "MA20":  "last",
-        "RSI":   "last",
-        "ATR":   "last",
+    # 最新值
+    last1h = df1h.iloc[-1]
+    last4h = df4h.iloc[-1]
+
+    price = float(last1h["Close"])
+    ma20  = float(last1h["Ma20"])
+    rsi   = float(last1h["Rsi"])
+    atr   = float(last1h["Atr"])
+
+    # 趋势与短周期确认
+    trend_up    = last4h["Close"] > last4h["Ma20"]
+    short_up    = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
+
+    # 信号逻辑
+    if price > ma20 and 30 < rsi < 70 and trend_up and short_up:
+        signal = "✅ 做多"
+    else:
+        signal = "⏸ 观望"
+
+    # 止损/止盈
+    sl = price - ATR_MULT_SL  * atr
+    tp = price + ATR_MULT_TP  * atr
+
+    # 按固定美元风险计算仓位
+    risk_usd = RISK_USD
+    qty      = calc_position_size(risk_usd, price, sl)
+
+    return {
+        "price"      : price,
+        "ma20"       : ma20,
+        "rsi"        : rsi,
+        "atr"        : atr,
+        "signal"     : signal,
+        "sl"         : round(sl, 2),
+        "tp"         : round(tp, 2),
+        "qty"        : round(qty, 4),
+        "risk_usd"   : risk_usd,
+        "update_time": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M"),
     }
-    dfs["4h"] = df_1h.resample("4H", label="right", closed="right").agg(ohlc).dropna()
-
-    df_4h  = dfs["4h"]
-    df_15m = dfs["15m"]
-
-    # --- 2. 最近行情快照 ------------------------------------------------------ #
-    last_1h  = df_1h.iloc[-1]
-    price    = float(last_1h["Close"])
-    ma20     = float(last_1h["MA20"])
-    rsi      = float(last_1h["RSI"])
-    atr      = float(last_1h["ATR"])
-
-    # --- 3. 技术方向 & 建仓区 --------------------------------------------------- #
-    signal, trend_up = make_signal(df_1h, df_4h, df_15m, trend_len=TREND_LEN)
-
-    # --- 4. 风控计算 ---------------------------------------------------------- #
-    if signal in ("多", "空"):
-        side: Literal["long", "short"] = "long" if signal == "多" else "short"
-        qty   = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
-        entry = price
-        sl    = price - ATR_MULT_SL * atr if side == "long" else price + ATR_MULT_SL * atr
-        tp    = price + ATR_MULT_TP * atr if side == "long" else price - ATR_MULT_TP * atr
-    else:  # 观望
-        qty = entry = sl = tp = None
-
-    # --- 5. 打包输出 ---------------------------------------------------------- #
-    return dict(
-        price        = round(price, 2),
-        ma20         = round(ma20, 2),
-        rsi          = round(rsi, 2),
-        atr          = round(atr, 2),
-        signal       = ("✅ 做多信号" if signal == "多"
-                        else "🔻 做空信号" if signal == "空"
-                        else "⏸ 中性信号：观望为主"),
-        qty          = round(qty,   3) if qty   else "N/A",
-        entry        = round(entry, 2) if entry else "N/A",
-        sl           = round(sl,    2) if sl    else "N/A",
-        tp           = round(tp,    2) if tp    else "N/A",
-        risk_usd     = RISK_USD,
-        update_time  = datetime.now(TZ).strftime("%Y-%m-%d %H:%M"),  # ★ 北京时间
-    )
