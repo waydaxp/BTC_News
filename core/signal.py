@@ -1,58 +1,97 @@
+# -*- coding: utf-8 -*-
 """
-信号判定核心模块
-----------------
-- 计算常用技术指标（MA / RSI / ADX / ATR）
-- 根据 1h 图 + 4h 图给出做多 / 做空 / 观望 信号
+生成方向 & 风控参数
+-------------------------------------------------
+规则（可在 CONFIG 调整）：
+1. 1h 价格 > MA20 & RSI>50 且连续 N 根满足才给多
+2. 4h、1d 均在 MA20 之上 → 共振确认
+3. 15m 必须再度站上 MA20 → 二次确认
+4. 多头： SL = price - ATR,  TP = price + ATR * RR
+   空头： SL = price + ATR,  TP = price - ATR * RR
+5. 若高频回落：最新 3 根 K 总跌幅 > ATR * 2 直接 neutral
 """
+
+from __future__ import annotations
 
 import pandas as pd
-import numpy  as np
-import talib
+from datetime import datetime
 
-# ====== ★ 全局参数（其他文件只需要 import 即可） ===================== #
-TREND_LEN  = 3     # 连续 N 根 K 线确认
-ADX_TH     = 20    # ADX > 20 说明存在趋势
-ATR_WIN    = 14
-# ======================================================================= #
+from indicators import add_basic_indicators, calc_atr, calc_rsi
 
-
-def _add_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """给 DataFrame 添加常用指标列（就地修改后返回）"""
-    df["MA20"] = df["close"].rolling(20).mean()
-    df["RSI"]  = talib.RSI(df["close"], timeperiod=14)
-    df["ADX"]  = talib.ADX(df["high"], df["low"], df["close"], timeperiod=14)
-    df["ATR"]  = talib.ATR(df["high"], df["low"], df["close"], timeperiod=ATR_WIN)
-    return df
+# ========= CONFIG ========= #
+TREND_LEN = 3       # 连续 K 数
+CONFIRM_PERIODS = ["4h", "1d"]
+RR = 1.5            # risk-reward，TP = ATR * RR
+FAST_CANDLE_WINDOW = 3      # 回落检测用
+FAST_CANDLE_FACTOR = 2      # 跌幅 > 2×ATR 过滤
+# ========================== #
 
 
-def make_signal(df_1h: pd.DataFrame, df_4h: pd.DataFrame) -> str:
+def _price_above_ma(df: pd.DataFrame, n: int = TREND_LEN) -> bool:
+    """最近 n 根收盘价均 > MA20"""
+    recent = df.tail(n)
+    return (recent["close"] > recent["MA20"]).all()
+
+
+def _rsi_strong(df: pd.DataFrame, n: int = TREND_LEN) -> bool:
+    """最近 n 根 RSI > 50"""
+    return (df.tail(n)["RSI"] > 50).all()
+
+
+def make_signal(df_1h: pd.DataFrame,
+                df_4h: pd.DataFrame,
+                df_1d: pd.DataFrame,
+                df_15m: pd.DataFrame) -> dict:
     """
-    综合 1h 与 4h 数据判断方向
-    ------------------------------------
-    return: {"long" | "short" | "neutral"}
+    返回：
+    {
+        "direction":  "long" | "short" | "neutral",
+        "sl":         float | None,
+        "tp":         float | None,
+        "atr":        float
+    }
     """
-    if df_1h.empty or df_4h.empty:
-        return "neutral"
-
-    df_1h = _add_indicators(df_1h.copy())
-    df_4h = _add_indicators(df_4h.copy())
+    # ░░ 预处理 ░░
+    for df in (df_1h, df_4h, df_1d, df_15m):
+        add_basic_indicators(df)
 
     last_1h = df_1h.iloc[-1]
-    last_4h = df_4h.iloc[-1]
+    atr = calc_atr(df_1h).iloc[-1]
+    price = last_1h["close"]
 
-    # 1⃣️  高周期方向确认
-    up_4h   = last_4h["close"] > last_4h["MA20"]
-    down_4h = last_4h["close"] < last_4h["MA20"]
+    # ░░ 高频快速回落 ░░
+    drop_3 = (df_1h.tail(FAST_CANDLE_WINDOW)["close"].iloc[-1]
+              - df_1h.tail(FAST_CANDLE_WINDOW)["open"].iloc[0])
+    if abs(drop_3) > atr * FAST_CANDLE_FACTOR:
+        return {"direction": "neutral", "sl": None, "tp": None, "atr": atr}
 
-    # 2⃣️  连续 N 根 K 线同向
-    long_ok  = (df_1h["close"] > df_1h["MA20"]).tail(TREND_LEN).all()
-    short_ok = (df_1h["close"] < df_1h["MA20"]).tail(TREND_LEN).all()
+    # ░░ 多头条件 ░░
+    long_ok = (
+        _price_above_ma(df_1h) and _rsi_strong(df_1h)
+        and all(df.tail(1)["close"].iat[0] > df.tail(1)["MA20"].iat[0]
+                for df in (df_4h, df_1d))  # 共振
+        and df_15m.iloc[-1]["close"] > df_15m.iloc[-1]["MA20"]  # 二次确认
+    )
 
-    # 3⃣️  趋势强度过滤
-    has_trend = last_1h["ADX"] > ADX_TH
+    # ░░ 空头条件 ░░
+    short_ok = (
+        _price_above_ma(df_1h, n=1) is False  # 刚跌破 MA20
+        and last_1h["close"] < last_1h["MA20"]
+    )
 
-    if long_ok and up_4h and has_trend and 30 < last_1h["RSI"] < 70:
-        return "long"
-    if short_ok and down_4h and has_trend and 30 < last_1h["RSI"] < 70:
-        return "short"
-    return "neutral"
+    if long_ok:
+        return {
+            "direction": "long",
+            "sl": round(price - atr, 2),
+            "tp": round(price + atr * RR, 2),
+            "atr": atr
+        }
+    if short_ok:
+        return {
+            "direction": "short",
+            "sl": round(price + atr, 2),
+            "tp": round(price - atr * RR, 2),
+            "atr": atr
+        }
+
+    return {"direction": "neutral", "sl": None, "tp": None, "atr": atr}
