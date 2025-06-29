@@ -2,7 +2,7 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: '*/5 * * * *'      # 每 5 分钟运行
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -13,29 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ 拉取仓库
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # 2️⃣ 安装 Python 3.9  (与 ta-lib-binary wheel 兼容)
     - name: Set up Python 3.9
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    # 3️⃣ 安装依赖
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        # requirements.txt 里使用:
-        # ta-lib-binary>=0.4.28
+        pip install -r requirements.txt          # ← ta-lib==0.4.26
 
-    # 4️⃣ 生成 HTML
     - name: Generate index.html
       run: python generate_html.py
 
-    # 5️⃣ 如有变化则推送
     - name: Commit & push index.html
       run: |
         git config --global user.email "action@github.com"
