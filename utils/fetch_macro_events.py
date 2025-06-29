@@ -1,59 +1,40 @@
+# utils/fetch_macro_events.py
 """
-utils.fetch_macro_events
-------------------------
-返回未来的宏观事件列表。
-
-★ 保证函数签名: get_macro_events(limit: int | None = None) → list[str]
-★ generate_data.py 会调用:
-    "<br>".join(get_macro_events(limit=5))
+返回未来 N 条重要宏观事件列表（已按时间升序）。
+本例仍用静态示范数据，你可以替换为自己的爬虫或 API 调用。
 """
+from datetime import datetime
+from typing import List
 
-from datetime import datetime, date
-from typing import List, Dict
-
-# ------------------------------------------------------------
-# ❶ 示例静态数据 —— 实际可替换为实时 API 抓取
-_RAW_EVENTS: List[Dict[str, str]] = [
-    {"name": "美国 CPI 公布",     "date": "2025-06-28", "impact": "若超预期，BTC 或承压"},
-    {"name": "FOMC 利率决议",     "date": "2025-07-03", "impact": "加息可能引发波动"},
+# —— 示例静态事件 —— #
+_RAW_EVENTS = [
+    {"name": "美国CPI公布",      "date": "2025-06-28", "impact": "若超预期，BTC 或承压"},
+    {"name": "FOMC 利率会议",   "date": "2025-07-03", "impact": "加息可能引发波动"},
     {"name": "SEC 审查比特币 ETF", "date": "2025-07-10", "impact": "若通过，或引发大涨"},
-    {"name": "非农就业报告",      "date": "2025-07-05", "impact": "就业强劲或加大加息预期"},
+    {"name": "欧洲央行利率决议", "date": "2025-07-18", "impact": "欧元波动或外溢至加密"},
+    {"name": "美国 PCE 物价指数", "date": "2025-07-26", "impact": "通胀高企或利空风险资产"},
 ]
+# ———————————— #
 
-# ------------------------------------------------------------
-def get_macro_events(limit: int | None = None) -> list[str]:
+def get_macro_events(n_future: int = 5) -> List[str]:
     """
-    返回按日期升序的未来事件描述列表。
-    
-    Parameters
-    ----------
-    limit : int | None
-        返回的条目数上限；None = 全部。
+    返回未来 n_future 条事件，格式已排好：
+        “美国CPI公布（2025-06-28，2天后）：若超预期，BTC 或承压”
     """
-    today: date = datetime.utcnow().date()
+    today = datetime.utcnow().date()
 
-    # 过滤未来事件
-    upcoming = [
-        ev for ev in _RAW_EVENTS
-        if datetime.strptime(ev["date"], "%Y-%m-%d").date() >= today
-    ]
+    events_sorted = sorted(_RAW_EVENTS, key=lambda e: e["date"])
+    results = []
 
-    # 按日期排序
-    upcoming.sort(key=lambda ev: ev["date"])
+    for ev in events_sorted:
+        if len(results) >= n_future:
+            break
 
-    if limit is not None:
-        upcoming = upcoming[:limit]
-
-    rows: list[str] = []
-    for ev in upcoming:
         ev_date = datetime.strptime(ev["date"], "%Y-%m-%d").date()
-        dleft   = (ev_date - today).days
-        rows.append(f"- {ev['name']}（{ev['date']}，{dleft} 天后）：{ev['impact']}")
+        delta   = (ev_date - today).days
+        # 只保留今天及未来的事件
+        if delta >= 0:
+            line = f"{ev['name']}（{ev['date']}，{delta}天后）：{ev['impact']}"
+            results.append(line)
 
-    return rows
-
-
-# ------------------------------------------------------------
-# 快速自测：直接运行文件打印效果
-if __name__ == "__main__":
-    print("\n".join(get_macro_events(limit=5)))
+    return results
