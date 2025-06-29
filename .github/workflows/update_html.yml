@@ -2,34 +2,36 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/5 * * * *"      # 每 5 分钟
+    - cron: "*/2 * * * *"   # 每 2 分钟跑一次
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build:
+  update-html:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
 
-      - name: Install deps
-        run: |
-          python -m pip install -U pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install -U pip
+        pip install numpy==1.26.4 pandas==2.2.2 yfinance>=0.2.64 Jinja2>=3.1
 
-      - name: Generate index.html
-        run: python generate_html.py
+    - name: Generate index.html
+      run: python generate_html.py
 
-      - name: Commit & push if changed
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name  "GitHub Action"
-          git add index.html
-          git diff --cached --quiet || git commit -m "auto: update $(date -u +'%F %T')"
-          git push
+    - name: Commit & push
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name  "GitHub Action"
+        git add index.html
+        if ! git diff --cached --quiet; then
+          git commit -m "🔄 Auto update $(date -u '+%Y-%m-%d %H:%M')"
+          git push origin main
+        else
+          echo "No changes"
