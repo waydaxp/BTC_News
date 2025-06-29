@@ -1,5 +1,4 @@
 # core/risk.py
-
 from typing import Literal
 
 ACCOUNT_SIZE_USD = 10_000
