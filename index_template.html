@@ -10,6 +10,15 @@
     .title { font-size:20px;font-weight:700;margin-bottom:4px; }
     .metric { line-height:1.6; }
     .sub { font-size:12px;color:#888;margin-top:4px; }
+
+    .section-divider {
+      border-top: 2px dashed #ccc;
+      margin: 32px 12px 20px;
+    }
+
+    .title.eth {
+      color: #2962FF;
+    }
   </style>
 </head>
 <body>
@@ -24,6 +33,7 @@
     <div class="metric">技术信号: {{ btc_signal }}</div>
   </div>
 
+  <!-- BTC 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: {{ btc_risk }}</div>
@@ -58,10 +68,12 @@
     <div class="metric">🛠 下单量: {{ btc_qty }}</div>
   </div>
 
+  <!-- ETH 分隔线 -->
+  <hr class="section-divider">
 
   <!-- ETH 技术分析 -->
   <div class="card">
-    <div class="title">📉 ETH 技术分析</div>
+    <div class="title eth">📉 ETH 技术分析</div>
     <div class="metric">当前价格: {{ eth_price }}</div>
     <div class="metric">MA20: {{ eth_ma20 }}</div>
     <div class="metric">RSI: {{ eth_rsi }}</div>
@@ -69,6 +81,7 @@
     <div class="metric">技术信号: {{ eth_signal }}</div>
   </div>
 
+  <!-- ETH 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: {{ eth_risk }}</div>
@@ -103,17 +116,19 @@
     <div class="metric">🛠 下单量: {{ eth_qty }}</div>
   </div>
 
-  <!-- 宏观 & 指数 -->
+  <!-- 宏观事件 -->
   <div class="card">
     <div class="title">📅 宏观事件提醒</div>
     <pre class="metric">{{ macro_events }}</pre>
   </div>
 
+  <!-- 恐惧与贪婪 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
     <div class="metric">当前值: {{ fg_idx }} ({{ fg_txt }}) {{ fg_emoji }}</div>
   </div>
 
+  <!-- 更新时间 -->
   <div class="card">
     <div class="title">⏰ 页面更新时间</div>
     <div class="metric">{{ page_update }}（北京时间）</div>
