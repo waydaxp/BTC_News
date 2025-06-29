@@ -2,58 +2,42 @@
 
 from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
-from utils.fetch_fear_greed import get_fear_and_greed
-from utils.fetch_macro_events import get_macro_event_summary
-from datetime import datetime
+from utils.fetch_macro import get_macro_events
+from utils.fetch_fg_index import get_fg_index
 
-
-def get_all_analysis() -> dict:
+def get_all_analysis():
     btc = get_btc_analysis()
     eth = get_eth_analysis()
-    fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
-    macro = get_macro_event_summary()
-    page_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    macro = get_macro_events()
+    fg_data = get_fg_index()
 
     return {
-        # BTC
-        "btc_price": btc["price"],
-        "btc_ma20": btc["ma20"],
-        "btc_rsi": btc["rsi"],
-        "btc_atr": btc["atr"],
+        # BTC 信息
+        "btc_price": round(btc["price"], 2),
+        "btc_ma20": round(btc["ma20"], 2),
+        "btc_rsi": round(btc["rsi"], 2),
+        "btc_atr": round(btc["atr"], 2),
         "btc_signal": btc["signal"],
-        "btc_sl": btc["sl"],
-        "btc_tp": btc["tp"],
-        "btc_qty": btc["qty"],
         "btc_risk": btc["risk_usd"],
-        "btc_update_time": btc["update_time"],
+        "btc_qty": round(btc["qty"], 6),
+        "btc_sl": round(btc["sl"], 2) if btc["sl"] else "None",
+        "btc_tp": round(btc["tp"], 2) if btc["tp"] else "None",
 
-        # ETH
-        "eth_price": eth["price"],
-        "eth_ma20": eth["ma20"],
-        "eth_rsi": eth["rsi"],
-        "eth_atr": eth["atr"],
+        # ETH 信息
+        "eth_price": round(eth["price"], 2),
+        "eth_ma20": round(eth["ma20"], 2),
+        "eth_rsi": round(eth["rsi"], 2),
+        "eth_atr": round(eth["atr"], 2),
         "eth_signal": eth["signal"],
-        "eth_sl": eth["sl"],
-        "eth_tp": eth["tp"],
-        "eth_qty": eth["qty"],
         "eth_risk": eth["risk_usd"],
-        "eth_update_time": eth["update_time"],
+        "eth_qty": round(eth["qty"], 6),
+        "eth_sl": round(eth["sl"], 2) if eth["sl"] else "None",
+        "eth_tp": round(eth["tp"], 2) if eth["tp"] else "None",
 
-        # 恐惧与贪婪
-        "fg_idx": fg_idx,
-        "fg_txt": fg_txt,
-        "fg_emoji": fg_emoji,
-        "fg_ts": fg_ts,
-
-        # 宏观事件
+        # 宏观与贪婪指数
         "macro_events": macro,
-
-        # 页面更新时间（北京时间）
-        "page_update": page_update,
+        "fg_idx": fg_data["value"],
+        "fg_txt": fg_data["text"],
+        "fg_emoji": fg_data["emoji"],
+        "page_update": btc["update_time"]  # 页面统一用 BTC 更新时间
     }
-
-
-if __name__ == "__main__":
-    import pprint
-    import json
-    pprint.pp(json.dumps(get_all_analysis(), indent=2, ensure_ascii=False))
