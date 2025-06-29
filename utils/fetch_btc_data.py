@@ -41,53 +41,61 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> str:
     vol = last['Volume']
     avg_vol = df['Volume'].rolling(10).mean().iloc[-1]
 
-    recent = df['Close'].tail(5) > df['MA20'].tail(5)
-    above_ma20 = recent.sum() >= 3
-    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
+    # 比较周期从 5 降为 3，增强灵敏度
+    recent = df['Close'].tail(3) > df['MA20'].tail(3)
+    above_ma20 = recent.sum() >= 2
+    below_ma20 = (df['Close'].tail(3) < df['MA20'].tail(3)).sum() >= 2
 
     prev_candle = df.iloc[-2]
 
     signal = "⏸ 中性信号"
 
-    # 强趋势多头
-    if close > ma20 and above_ma20 and 45 < rsi < 70 and close > ma5_val:
+    # ✅ 新增反转判断逻辑
+    if rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
+        signal = "🟢 底部反转（可尝试做多）"
+
+    elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
+        signal = "🔻 顶部反转（可尝试做空）"
+
+    # ✅ 强趋势多头（放宽 RSI 区间，MA20 近3日）
+    elif close > ma20 and above_ma20 and 42 < rsi < 72 and close > ma5_val:
         signal = "🟢 做多信号"
 
-    # 趋势偏强
+    # ✅ 趋势偏强
     elif close > ma20 * 1.02 and rsi > 60:
         signal = "🟢 趋势偏强"
 
-    # 超跌反弹
+    # ✅ 超跌反弹
     elif rsi < 35 and close > prev_candle['Open'] and close > ma5_val and close > ma20:
         signal = "🟢 超跌反弹"
 
-    # 底部反转结构 + 放量
+    # ✅ 底部反转结构 + 放量（放量条件放宽至 avg_vol * 1.0）
     elif (
         rsi > 40 and rsi - df['RSI'].iloc[-5] > 10 and
         close > ma5_val and
         last['Close'] > last['Open'] and
         prev_candle['Low'] < prev_candle['Close'] and
-        vol > avg_vol
+        vol > avg_vol * 1.0
     ):
         signal = "🟢 反转信号"
 
-    # 做空信号
-    elif close < ma20 and below_ma20 and 30 < rsi < 55 and close < ma5_val:
+    # ✅ 做空信号（放宽 RSI 区间，减少 MA20 比较期）
+    elif close < ma20 and below_ma20 and 32 < rsi < 58 and close < ma5_val:
         signal = "🔻 做空信号"
 
-    # 趋势偏弱
+    # ✅ 趋势偏弱
     elif close < ma20 * 0.98 and rsi < 40:
         signal = "🔻 趋势偏弱"
 
-    # 背离信号
-    elif rsi < 40 or rsi > 70:
+    # ✅ 背离信号
+    elif rsi < 30 or rsi > 75:
         signal = "⚠ 背离信号"
 
-    # MA20 附近震荡
+    # ✅ MA20 附近震荡
     elif abs(close - ma20) / ma20 < 0.005:
         signal = "⏸ 震荡中性"
 
-    print(f"[DEBUG] ETH-{interval_label}: Signal={signal}, RSI={rsi:.2f}, Close={close:.2f}, MA20={ma20:.2f}, Vol={vol:.2f}, AvgVol={avg_vol:.2f}")
+    print(f"[DEBUG] Signal={signal}, RSI={rsi:.2f}, Close={close:.2f}, MA20={ma20:.2f}, Vol={vol:.2f}, AvgVol={avg_vol:.2f}")
     return signal
 
 def _calc_trade(price: float, atr: float, signal: str) -> tuple:
