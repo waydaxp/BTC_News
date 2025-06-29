@@ -1,10 +1,11 @@
 import yfinance as yf
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from core.indicators import add_basic_indicators
 from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
 PAIR = "ETH-USD"
+
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
@@ -31,6 +32,7 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = add_basic_indicators(df)
     return df.dropna()
 
+
 def _judge_signal(df: pd.DataFrame) -> str:
     last = df.iloc[-1]
     ma5 = df['Close'].rolling(5).mean()
@@ -50,6 +52,7 @@ def _judge_signal(df: pd.DataFrame) -> str:
     else:
         return "⏸ 中性信号"
 
+
 def _calc_trade(price: float, atr: float, signal: str) -> tuple:
     if "多" in signal:
         sl = price - ATR_MULT_SL * atr
@@ -62,6 +65,7 @@ def _calc_trade(price: float, atr: float, signal: str) -> tuple:
     else:
         sl, tp, qty = None, None, 0.0
     return sl, tp, qty
+
 
 def get_eth_analysis() -> dict:
     df15 = _download_tf("15m", "3d")
@@ -80,7 +84,7 @@ def get_eth_analysis() -> dict:
     sl1h, tp1h, qty1h = _calc_trade(price1h, atr1h, signal1h)
     sl4h, tp4h, qty4h = _calc_trade(price4h, atr4h, signal4h)
 
-    update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    update_time = (datetime.utcnow() + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
         "price": price1h,
@@ -90,8 +94,8 @@ def get_eth_analysis() -> dict:
         "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
 
         "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
-        "entry_1h":  price1h, "sl_1h":  sl1h, "tp_1h":  tp1h,  "qty_1h":  qty1h,
-        "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
+        "entry_1h": price1h, "sl_1h": sl1h, "tp_1h": tp1h, "qty_1h": qty1h,
+        "entry_4h": price4h, "sl_4h": sl4h, "tp_4h": tp4h, "qty_4h": qty4h,
 
         "risk_usd": RISK_USD,
         "update_time": update_time
