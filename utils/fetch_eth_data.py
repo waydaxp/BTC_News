@@ -1,5 +1,3 @@
-# utils/fetch_eth_data.py
-
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
@@ -11,15 +9,18 @@ PAIR = "ETH-USD"
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=True)
 
-    expected_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
-    actual_cols = list(df.columns)
+    # 修复多重列索引（MultiIndex）问题
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
 
-    if not all(col in actual_cols for col in expected_cols):
+    required = ['Open', 'High', 'Low', 'Close', 'Volume']
+    if not all(col in df.columns for col in required):
         raise KeyError(
-            f"[ETH] 缺少必要列：期望 {expected_cols}，实际为 {actual_cols}，interval={interval}, period={period}"
+            f"[{PAIR}] 缺少必要列：期望 {required}，实际为 {list(df.columns)}，"
+            f"interval={interval}, period={period}"
         )
 
-    df = df[expected_cols].copy()
+    df = df[required].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
@@ -41,13 +42,13 @@ def get_eth_analysis() -> dict:
     last1 = df1h.iloc[-1]
     last4 = df4h.iloc[-1]
 
-    price = float(last1['Close'])
-    ma20 = float(last1['MA20'])
-    rsi = float(last1['RSI'])
-    atr = float(last1['ATR'])
+    price = float(last1["Close"])
+    ma20 = float(last1["MA20"])
+    rsi = float(last1["RSI"])
+    atr = float(last1["ATR"])
 
-    trend_up = (last4['Close'] > last4['MA20']) and (df15['Close'].tail(12) > df15['MA20'].tail(12)).all()
-    trend_down = (last4['Close'] < last4['MA20']) and (df15['Close'].tail(12) < df15['MA20'].tail(12)).all()
+    trend_up = (last4["Close"] > last4["MA20"]) and (df15["Close"].tail(12) > df15["MA20"].tail(12)).all()
+    trend_down = (last4["Close"] < last4["MA20"]) and (df15["Close"].tail(12) < df15["MA20"].tail(12)).all()
 
     if trend_up and 30 < rsi < 70:
         signal = "✅ 做多信号"
@@ -55,7 +56,7 @@ def get_eth_analysis() -> dict:
         tp = price + ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "long")
     elif trend_down and 30 < rsi < 70:
-        signal = "⚠️ 做空信号"
+        signal = "❌ 做空信号"
         sl = price + ATR_MULT_SL * atr
         tp = price - ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "short")
