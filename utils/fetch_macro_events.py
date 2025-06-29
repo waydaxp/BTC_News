@@ -1,33 +1,56 @@
 # utils/fetch_macro_events.py
-from datetime import datetime
+"""
+返回未来的宏观事件（示例数据，可替换为实时 API）。
+调用：
+    from utils.fetch_macro_events import get_macro_events
+    rows = get_macro_events(limit=5)   # 返回列表[str]
+"""
 
-_RAW_EVENTS = [
-    # ……这里放你真正的事件抓取 / API 结果……
+from datetime import datetime, date
+from typing import List, Dict
+
+# ---- ① 这里用静态示例；实际生产可以在这里调用金十 / TradingEconomics 等 API ----
+_RAW_EVENTS: List[Dict[str, str]] = [
+    {"name": "美国CPI公布",      "date": "2025-06-28", "impact": "若超预期，BTC 或承压"},
+    {"name": "FOMC 利率决议",    "date": "2025-07-03", "impact": "加息可能引发波动"},
+    {"name": "SEC 审查比特币 ETF", "date": "2025-07-10", "impact": "若通过，或引发大涨"},
+    {"name": "非农就业数据",     "date": "2025-07-05", "impact": "就业强劲或加大加息预期"},
 ]
 
+# -----------------------------------------------------------------------------
 def get_macro_events(limit: int | None = None) -> list[str]:
     """
-    返回未来宏观事件的字符串列表。
-    参数
-    ----
+    返回未来宏观事件的字符串列表（已按日期排序）。
+    
+    Parameters
+    ----------
     limit : int | None
-        限制返回条数；None 表示全部返回。
+        限制返回条数；None 表示返回全部。
     """
-    today = datetime.today().date()
-    future = [e for e in _RAW_EVENTS
-              if datetime.strptime(e["date"], "%Y-%m-%d").date() >= today]
+    today: date = datetime.utcnow().date()
 
-    # 按日期排序
-    future.sort(key=lambda x: x["date"])
+    # 过滤掉已过去的
+    future = [
+        ev for ev in _RAW_EVENTS
+        if datetime.strptime(ev["date"], "%Y-%m-%d").date() >= today
+    ]
 
-    # 仅保留前 limit 条
+    # 按日期升序
+    future.sort(key=lambda ev: ev["date"])
+
     if limit is not None:
         future = future[:limit]
 
-    # 组装为人类可读行
-    rows = []
+    rows: list[str] = []
     for ev in future:
-        d = datetime.strptime(ev["date"], "%Y-%m-%d").date()
-        left = (d - today).days
+        ev_date = datetime.strptime(ev["date"], "%Y-%m-%d").date()
+        left = (ev_date - today).days
         rows.append(f"- {ev['name']}（{ev['date']}，{left} 天后）：{ev['impact']}")
+
     return rows
+
+
+# ---- 快速自测 --------------------------------------------------------------
+if __name__ == "__main__":
+    for line in get_macro_events(limit=5):
+        print(line)
