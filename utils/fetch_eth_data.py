@@ -14,7 +14,6 @@ CFG = {
     "15m": {"interval": "15m", "period": "1d"},
 }
 
-
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(
         PAIR,
@@ -24,10 +23,10 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
         auto_adjust=False,
     )
     if df is None or df.empty:
-        raise RuntimeError(f"yf.download 返回空数据: pair={PAIR}, interval={interval}, period={period}")
+        raise RuntimeError(f"yf.download 返回空数据: {PAIR}, {interval}, {period}")
 
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(1)
+        df.columns = df.columns.get_level_values(-1)
     df.columns = [str(c).capitalize() for c in df.columns]
 
     if df.index.tz is None:
@@ -35,7 +34,6 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df.index = df.index.tz_convert(TZ)
 
     return add_basic_indicators(df).dropna()
-
 
 def get_eth_analysis() -> dict:
     dfs = {tf: _download_tf(**cfg) for tf, cfg in CFG.items()}
