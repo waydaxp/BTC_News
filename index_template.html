@@ -13,6 +13,8 @@
   </style>
 </head>
 <body>
+
+  <!-- BTC 技术分析 -->
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
     <div class="metric">当前价格: {{ btc_price }}</div>
@@ -25,22 +27,39 @@
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: {{ btc_risk }}</div>
-
-    <div class="metric">📌 建仓价 (短线): {{ btc_entry_15m }}</div>
-    <div class="metric">🛑 止损 (短线): {{ btc_sl_15m }}</div>
-    <div class="metric">🎯 止盈 (短线): {{ btc_tp_15m }}</div>
-
-    <div class="metric">📌 建仓价 (中期): {{ btc_entry_1h }}</div>
-    <div class="metric">🛑 止损 (中期): {{ btc_sl_1h }}</div>
-    <div class="metric">🎯 止盈 (中期): {{ btc_tp_1h }}</div>
-
-    <div class="metric">📌 建仓价 (长期): {{ btc_entry_4h }}</div>
-    <div class="metric">🛑 止损 (长期): {{ btc_sl_4h }}</div>
-    <div class="metric">🎯 止盈 (长期): {{ btc_tp_4h }}</div>
-
-    <div class="metric">🛠 杠杆后下单量: {{ btc_qty }}</div>
   </div>
 
+  <div class="card">
+    <div class="title">📍 短线建议（15分钟）</div>
+    <div class="metric">📌 建仓价: {{ btc_entry_15m }}</div>
+    <div class="metric">🛑 止损: {{ btc_sl_15m }}</div>
+    <div class="metric">🎯 止盈: {{ btc_tp_15m }}</div>
+    <div class="sub">👉 日内快速进出策略，适合高波动交易时段。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📍 中期建议（1小时）</div>
+    <div class="metric">📌 建仓价: {{ btc_entry_1h }}</div>
+    <div class="metric">🛑 止损: {{ btc_sl_1h }}</div>
+    <div class="metric">🎯 止盈: {{ btc_tp_1h }}</div>
+    <div class="sub">👉 适合趋势确认后的跟随操作，持仓时间中等。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📍 长期建议（4小时）</div>
+    <div class="metric">📌 建仓价: {{ btc_entry_4h }}</div>
+    <div class="metric">🛑 止损: {{ btc_sl_4h }}</div>
+    <div class="metric">🎯 止盈: {{ btc_tp_4h }}</div>
+    <div class="sub">👉 更适合趋势交易者和波段布局。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">🧮 杠杆后下单量（BTC）</div>
+    <div class="metric">🛠 下单量: {{ btc_qty }}</div>
+  </div>
+
+
+  <!-- ETH 技术分析 -->
   <div class="card">
     <div class="title">📉 ETH 技术分析</div>
     <div class="metric">当前价格: {{ eth_price }}</div>
@@ -53,22 +72,38 @@
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: {{ eth_risk }}</div>
-
-    <div class="metric">📌 建仓价 (短线): {{ eth_entry_15m }}</div>
-    <div class="metric">🛑 止损 (短线): {{ eth_sl_15m }}</div>
-    <div class="metric">🎯 止盈 (短线): {{ eth_tp_15m }}</div>
-
-    <div class="metric">📌 建仓价 (中期): {{ eth_entry_1h }}</div>
-    <div class="metric">🛑 止损 (中期): {{ eth_sl_1h }}</div>
-    <div class="metric">🎯 止盈 (中期): {{ eth_tp_1h }}</div>
-
-    <div class="metric">📌 建仓价 (长期): {{ eth_entry_4h }}</div>
-    <div class="metric">🛑 止损 (长期): {{ eth_sl_4h }}</div>
-    <div class="metric">🎯 止盈 (长期): {{ eth_tp_4h }}</div>
-
-    <div class="metric">🛠 杠杆后下单量: {{ eth_qty }}</div>
   </div>
 
+  <div class="card">
+    <div class="title">📍 短线建议（15分钟）</div>
+    <div class="metric">📌 建仓价: {{ eth_entry_15m }}</div>
+    <div class="metric">🛑 止损: {{ eth_sl_15m }}</div>
+    <div class="metric">🎯 止盈: {{ eth_tp_15m }}</div>
+    <div class="sub">👉 快节奏交易策略，建议结合成交量和波动率使用。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📍 中期建议（1小时）</div>
+    <div class="metric">📌 建仓价: {{ eth_entry_1h }}</div>
+    <div class="metric">🛑 止损: {{ eth_sl_1h }}</div>
+    <div class="metric">🎯 止盈: {{ eth_tp_1h }}</div>
+    <div class="sub">👉 可作为趋势初期布局参考，适合日内持仓者。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📍 长期建议（4小时）</div>
+    <div class="metric">📌 建仓价: {{ eth_entry_4h }}</div>
+    <div class="metric">🛑 止损: {{ eth_sl_4h }}</div>
+    <div class="metric">🎯 止盈: {{ eth_tp_4h }}</div>
+    <div class="sub">👉 适合关注趋势大方向的投资者，建议搭配宏观面参考。</div>
+  </div>
+
+  <div class="card">
+    <div class="title">🧮 杠杆后下单量（ETH）</div>
+    <div class="metric">🛠 下单量: {{ eth_qty }}</div>
+  </div>
+
+  <!-- 宏观 & 指数 -->
   <div class="card">
     <div class="title">📅 宏观事件提醒</div>
     <pre class="metric">{{ macro_events }}</pre>
@@ -83,5 +118,6 @@
     <div class="title">⏰ 页面更新时间</div>
     <div class="metric">{{ page_update }}（北京时间）</div>
   </div>
+
 </body>
 </html>
