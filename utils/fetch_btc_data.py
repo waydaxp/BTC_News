@@ -10,10 +10,8 @@ PAIR = "BTC-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.droplevel(1)  # 修复多层列名
-    df.columns = df.columns.str.title()
-    df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
+    df.columns = df.columns.str.title()  # 修复多层列名
+    df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
