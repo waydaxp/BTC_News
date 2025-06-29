@@ -1,74 +1,54 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <title>Crypto Tech Dashboard</title>
-  <style>
-    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; margin:0;padding:0;background:#fafafa;color:#222; }
-    h2 { margin:0 0 8px;padding:0; }
-    .card { background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06); }
-    .title { font-size:20px;font-weight:700;margin-bottom:4px; }
-    .metric { line-height:1.6; }
-    .sub { font-size:12px;color:#888;margin-top:4px; }
-  </style>
-</head>
-<body>
-  <!-- BTC 技术分析 -->
-  <div class="card">
-    <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格: {{ btc_price }}</div>
-    <div class="metric">MA20: {{ btc_ma20 }}</div>
-    <div class="metric">RSI: {{ btc_rsi }}</div>
-    <div class="metric">ATR: {{ btc_atr }}</div>
-    <div class="metric">技术信号: {{ btc_signal }}</div>
-  </div>
+from utils.fetch_btc_data import get_btc_analysis
+from utils.fetch_eth_data import get_eth_analysis
+from utils.fetch_fear_greed import get_fear_and_greed
+from utils.fetch_macro_events import get_macro_event_summary
+from datetime import datetime
 
-  <!-- BTC 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（BTC, 以中期为主）</div>
-    <div class="metric">💰 风险金额: {{ btc_risk }}</div>
-    <div class="metric">🛠 杠杆后下单量: {{ btc_qty }}</div>
-    <div class="metric">📌 建仓价: {{ btc_price }}</div>
-    <div class="metric">🛑 止损: {{ btc_sl }}</div>
-    <div class="metric">🎯 止盈: {{ btc_tp }}</div>
-  </div>
+def get_all_analysis() -> dict:
+    btc = get_btc_analysis()
+    eth = get_eth_analysis()
+    fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
+    macro = get_macro_event_summary()
+    page_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-  <!-- ETH 技术分析 -->
-  <div class="card">
-    <div class="title">📉 ETH 技术分析</div>
-    <div class="metric">当前价格: {{ eth_price }}</div>
-    <div class="metric">MA20: {{ eth_ma20 }}</div>
-    <div class="metric">RSI: {{ eth_rsi }}</div>
-    <div class="metric">ATR: {{ eth_atr }}</div>
-    <div class="metric">技术信号: {{ eth_signal }}</div>
-  </div>
+    return {
+        # BTC
+        "btc_price":        btc["price"],
+        "btc_ma20":         btc["ma20"],
+        "btc_rsi":          btc["rsi"],
+        "btc_atr":          btc["atr"],
+        "btc_signal":       btc["signal"],
+        "btc_sl":           btc["sl"],
+        "btc_tp":           btc["tp"],
+        "btc_qty":          btc["qty"],
+        "btc_risk":         btc["risk_usd"],
+        "btc_update_time":  btc["update_time"],
 
-  <!-- ETH 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（ETH, 以中期为主）</div>
-    <div class="metric">💰 风险金额: {{ eth_risk }}</div>
-    <div class="metric">🛠 杠杆后下单量: {{ eth_qty }}</div>
-    <div class="metric">📌 建仓价: {{ eth_price }}</div>
-    <div class="metric">🛑 止损: {{ eth_sl }}</div>
-    <div class="metric">🎯 止盈: {{ eth_tp }}</div>
-  </div>
+        # ETH
+        "eth_price":        eth["price"],
+        "eth_ma20":         eth["ma20"],
+        "eth_rsi":          eth["rsi"],
+        "eth_atr":          eth["atr"],
+        "eth_signal":       eth["signal"],
+        "eth_sl":           eth["sl"],
+        "eth_tp":           eth["tp"],
+        "eth_qty":          eth["qty"],
+        "eth_risk":         eth["risk_usd"],
+        "eth_update_time":  eth["update_time"],
 
-  <!-- 宏观事件提醒 -->
-  <div class="card">
-    <div class="title">📅 宏观事件提醒</div>
-    <pre class="metric">{{ macro_events }}</pre>
-  </div>
+        # 恐惧与贪婪
+        "fg_idx":           fg_idx,
+        "fg_txt":           fg_txt,
+        "fg_emoji":         fg_emoji,
+        "fg_ts":            fg_ts,
 
-  <!-- 恐惧与贪婪指数 -->
-  <div class="card">
-    <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: {{ fg_idx }} ({{ fg_txt }}) {{ fg_emoji }}</div>
-  </div>
+        # 宏观事件
+        "macro_events":     macro,
 
-  <!-- 更新时间 -->
-  <div class="card">
-    <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">{{ page_update }}（北京时间）</div>
-  </div>
-</body>
-</html>
+        # 页面更新时间（北京时间）
+        "page_update":      page_update,
+    }
+
+if __name__ == "__main__":
+    import pprint, json
+    pprint.pp(json.dumps(get_all_analysis(), indent=2, ensure_ascii=False))
