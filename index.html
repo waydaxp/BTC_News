@@ -1,79 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<title>Crypto Tech Dashboard</title>
-<style>
- :root{--green:#2ecc71;--card:#fff;--bg:#fafafa;--txt:#222;--sub:#666}
- body{margin:0;background:var(--bg);color:var(--txt);
-       font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
- .card{background:var(--card);border-left:6px solid var(--green);
-       margin:12px;padding:14px 18px;border-radius:6px;
-       box-shadow:0 1px 4px rgba(0,0,0,.05)}
- .title{font-weight:700;font-size:18px;margin:0 0 6px}
- .metric{margin:0}
- .sub{color:var(--sub);font-size:13px}
- ul{margin:0;padding-left:18px}
-</style>
-</head><body>
+  <meta charset="utf-8">
+  <title>Crypto Tech Dashboard</title>
+  <style>
+    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; margin:0;padding:0;background:#fafafa;color:#222; }
+    h2 { margin:0 0 8px;padding:0; }
+    .card { background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .title { font-size:20px;font-weight:700;margin-bottom:4px; }
+    .metric { line-height:1.6; }
+    .sub { font-size:12px;color:#888;margin-top:4px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">📉 BTC 技术分析</div>
+    <div class="metric">当前价格: 107572.40625</div>
+    <div class="metric">MA20: 107676.434375</div>
+    <div class="metric">RSI: 54.99534064146659</div>
+    <div class="metric">ATR: 261.9291294642857</div>
+    <div class="metric">技术信号: ⏸ 中性信号：观望</div>
+    <p class="sub">数据更新时间: 2025-06-29 19:15:51（北京时间）</p>
+  </div>
 
-<!-- BTC 技术分析 -->
-<div class="card">
- <div class="title">📉【BTC 技术分析】</div>
- <p class="metric">当前价格: 107566.3359375</p>
- <p class="metric">MA20: 107659.285546875</p>
- <p class="metric">RSI: 56.29016514200906</p>
- <p class="metric">ATR: 246.39955357142858</p>
- <p class="metric">技术信号: ⏸ 中性信号：观望为主</p>
- <p class="sub">更新时间: 2025-06-29 18:07</p>
-</div>
+  <div class="card">
+    <div class="title">📊 操作建议（BTC）</div>
+    <div class="metric">💰 风险金额: 20.0</div>
+    <div class="metric">🛠 杠杆后下单量: 0.0</div>
+    <div class="metric">📌 建仓价: 107572.40625</div>
+    <div class="metric">🛑 止损: None</div>
+    <div class="metric">🎯 止盈: None</div>
+  </div>
 
-<!-- BTC 操作建议 -->
-<div class="card">
- <div class="title">📊 操作建议（BTC）</div>
- <p class="metric">💰 风险金额: 20.0</p>
- <p class="metric">🛠 杠杆后下单量: 0.081</p>
- <p class="metric">📌 建仓价: </p>
- <p class="metric">🛑 止损: 107319.93638392857</p>
- <p class="metric">🎯 止盈: 107935.93526785714</p>
-</div>
+  <div class="card">
+    <div class="title">📉 ETH 技术分析</div>
+    <div class="metric">当前价格: 2436.399169921875</div>
+    <div class="metric">MA20: 2441.2668701171874</div>
+    <div class="metric">RSI: 51.59388151097448</div>
+    <div class="metric">ATR: 8.066214425223214</div>
+    <div class="metric">技术信号: ⏸ 中性信号：观望</div>
+    <p class="sub">数据更新时间: 2025-06-29 19:15:52（北京时间）</p>
+  </div>
 
-<!-- ETH 技术分析 -->
-<div class="card">
- <div class="title">📉【ETH 技术分析】</div>
- <p class="metric">当前价格: 2438.7841796875</p>
- <p class="metric">MA20: 2441.2829711914064</p>
- <p class="metric">RSI: 56.913418375057695</p>
- <p class="metric">ATR: 7.818446568080357</p>
- <p class="metric">技术信号: ⏸ 中性信号：观望为主</p>
- <p class="sub">更新时间: 2025-06-29 18:07</p>
-</div>
+  <div class="card">
+    <div class="title">📊 操作建议（ETH）</div>
+    <div class="metric">💰 风险金额: 20.0</div>
+    <div class="metric">🛠 杠杆后下单量: 0.0</div>
+    <div class="metric">📌 建仓价: 2436.399169921875</div>
+    <div class="metric">🛑 止损: None</div>
+    <div class="metric">🎯 止盈: None</div>
+  </div>
 
-<!-- ETH 操作建议 -->
-<div class="card">
- <div class="title">📊 操作建议（ETH）</div>
- <p class="metric">💰 风险金额: 20.0</p>
- <p class="metric">🛠 杠杆后下单量: 2.558</p>
- <p class="metric">📌 建仓价: </p>
- <p class="metric">🛑 止损: 2430.96573311942</p>
- <p class="metric">🎯 止盈: 2450.5118495396205</p>
-</div>
+  <div class="card">
+    <div class="title">📅 宏观事件提醒</div>
+    <pre class="metric">- 美国 CPI（2025-06-28，-2 天后）：超预期则 BTC 承压
+- FOMC 利率会议（2025-07-03，3 天后）：或引发波动
+- SEC 比特币 ETF（2025-07-10，10 天后）：若通过大涨</pre>
+  </div>
 
-<!-- 宏观事件 -->
-<div class="card">
- <div class="title">📅 宏观事件提醒（未来 5 件）</div>
- <ul style='margin:0;padding-left:18px'><li>FOMC 利率会议（2025-07-03，4天后）：加息可能引发波动</li><li>SEC 审查比特币 ETF（2025-07-10，11天后）：若通过，或引发大涨</li><li>欧洲央行利率决议（2025-07-18，19天后）：欧元波动或外溢至加密</li><li>美国 PCE 物价指数（2025-07-26，27天后）：通胀高企或利空风险资产</li></ul>
-</div>
+  <div class="card">
+    <div class="title">😨/😊 恐惧与贪婪指数</div>
+    <div class="metric">当前值: 68 (Greed) 😊</div>
+    <p class="sub">更新时间: 2025-06-29 08:00:00（北京时间）</p>
+  </div>
 
-<!-- 恐惧与贪婪 -->
-<div class="card">
- <div class="title">😰/😊 恐惧与贪婪指数（2025-06-29 16:00）</div>
- <p class="metric">当前值: 68（Greed） 😊</p>
-</div>
-
-<!-- 页脚 -->
-<div class="card" style="background:#f4f4f4;text-align:right">
- <span class="sub">⏰ 页面更新于 2025-06-30 02:07 (北京时间)</span>
-</div>
-
-</body></html>
+  <div class="card">
+    <div class="title">⏰ 页面更新时间</div>
+    <div class="metric">2025-06-29 19:15:52（北京时间）</div>
+  </div>
+</body>
+</html>
