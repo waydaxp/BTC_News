@@ -1,4 +1,5 @@
 # utils/fetch_eth_data.py
+
 import pandas as pd
 import yfinance as yf
 from datetime import datetime
@@ -6,7 +7,7 @@ from core.indicators import add_basic_indicators
 from core.risk import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 
 PAIR = "ETH-USD"
-TZ = "Asia/Shanghai"
+TZ   = "Asia/Shanghai"
 
 INTERVALS = {
     "1h":  {"interval": "1h",  "period": "5d"},
@@ -27,8 +28,7 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
         df.index = df.index.tz_localize("UTC").tz_convert(TZ)
     else:
         df.index = df.index.tz_convert(TZ)
-    df = add_basic_indicators(df).dropna()
-    return df
+    return add_basic_indicators(df).dropna()
 
 def get_eth_analysis() -> dict:
     df1h  = _download_tf(**INTERVALS["1h"])
@@ -39,11 +39,10 @@ def get_eth_analysis() -> dict:
     df4h = add_basic_indicators(df4h).dropna()
 
     last1h = df1h.iloc[-1]
+    trend_up = False
     if not df4h.empty:
         last4h = df4h.iloc[-1]
         trend_up = last4h["Close"] > last4h["MA20"]
-    else:
-        trend_up = False
 
     price    = float(last1h["Close"])
     ma20     = float(last1h["MA20"])
@@ -51,23 +50,22 @@ def get_eth_analysis() -> dict:
     atr      = float(last1h["ATR"])
     short_up = (df15m["Close"].tail(12) > df15m["MA20"].tail(12)).all()
 
-    signal = "✅ 做多" if (price>ma20 and 30<rsi<70 and trend_up and short_up) else "⏸ 观望"
+    signal = "✅ 做多" if (price > ma20 and 30 < rsi < 70 and trend_up and short_up) else "⏸ 观望"
 
-    sl = price - ATR_MULT_SL*atr
-    tp = price + ATR_MULT_TP*atr
+    sl = price - ATR_MULT_SL * atr
+    tp = price + ATR_MULT_TP * atr
 
-    risk_usd = RISK_USD
-    qty      = calc_position_size(risk_usd, price, atr, "long")
+    qty = calc_position_size(RISK_USD, price, atr, "long")
 
     return {
-        "price"      : price,
-        "ma20"       : ma20,
-        "rsi"        : rsi,
-        "atr"        : atr,
+        "price"      : round(price, 2),
+        "ma20"       : round(ma20, 2),
+        "rsi"        : round(rsi, 2),
+        "atr"        : round(atr, 2),
         "signal"     : signal,
         "sl"         : round(sl, 2),
         "tp"         : round(tp, 2),
-        "qty"        : round(qty, 4),
-        "risk_usd"   : risk_usd,
+        "qty"        : round(qty, 6),
+        "risk_usd"   : RISK_USD,
         "update_time": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M"),
     }
