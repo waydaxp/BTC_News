@@ -1,10 +1,11 @@
 """
-BTC 技术分析 —— 统一给 generate_data.py 使用
+BTC 数据抓取 + 技术分析
 ------------------------------------------------
-1. 先取 1h / 4h K 线
-2. 若 DF 尚未有 MA20 / RSI ⇒ 立即计算
-3. 调用 core.signal.make_signal(df_1h, df_4h) 生成方向
-4. 输出字段与 ETH 保持一致
+输出字段：
+price / ma20 / rsi / signal
+entry_price / stop_loss / take_profit
+max_loss / per_trade_position
+strategy_text       ←★ 新增
 """
 
 import yfinance as yf
@@ -13,15 +14,14 @@ import pandas  as pd
 from core.signal import make_signal, TREND_LEN
 
 
-# ---------- 工具 ---------- #
+# ─────────── 工具 ─────────── #
 def _fetch_ohlc(interval: str, lookback: str) -> pd.DataFrame:
     df = yf.Ticker("BTC-USD").history(period=lookback, interval=interval)
-    df.rename(columns=str.lower, inplace=True)          # open/high/low/close
+    df.rename(columns=str.lower, inplace=True)
     return df
 
 
 def _ensure_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """如没有 MA20 / RSI 就现场计算——避免 KeyError。"""
     if "ma20" not in df:
         df["ma20"] = df["close"].rolling(20, min_periods=20).mean()
     if "rsi" not in df:
@@ -31,7 +31,7 @@ def _ensure_indicators(df: pd.DataFrame) -> pd.DataFrame:
         rs    = up / down
         df["rsi"] = 100 - 100 / (1 + rs)
     return df
-# -------------------------- #
+# ─────────────────────────── #
 
 
 def get_btc_analysis() -> dict:
@@ -40,12 +40,12 @@ def get_btc_analysis() -> dict:
     df_4h = _fetch_ohlc("4h", "40d")
 
     if df_1h.empty or df_4h.empty:
-        return {"signal": "⚠️ 数据不足"}
+        return {"signal": "⚠️ 数据不足", "strategy_text": "无"}
 
     df_1h = _ensure_indicators(df_1h)
     df_4h = _ensure_indicators(df_4h)
 
-    # === 方向判断 ===
+    # 方向
     direction = make_signal(df_1h, df_4h)
 
     last  = df_1h.iloc[-1]
@@ -53,7 +53,7 @@ def get_btc_analysis() -> dict:
     ma20  = float(last["ma20"])
     rsi   = float(last["rsi"])
 
-    # === 风控参数 ===
+    # 统一风控
     acct_usd = 1000
     leverage = 20
     max_loss = round(acct_usd * 0.02, 2)
@@ -61,16 +61,19 @@ def get_btc_analysis() -> dict:
 
     entry = price
     if direction == "long":
-        stop = round(price * 0.985, 2)
-        tp   = round(price  * 1.03, 2)
-        sig  = f"✅ 做多信号：连续{TREND_LEN}根站上 MA20"
+        stop  = round(price * 0.985, 2)
+        tp    = round(price * 1.03, 2)
+        sig   = f"✅ 做多信号：连续{TREND_LEN}根站上 MA20"
+        strat = "✅ 做多策略\n买入 → 涨\n跌 1.5% 止损\n涨 3% 止盈"
     elif direction == "short":
-        stop = round(price * 1.015, 2)
-        tp   = round(price * 0.97, 2)
-        sig  = f"🔻 做空信号：连续{TREND_LEN}根跌破 MA20"
+        stop  = round(price * 1.015, 2)
+        tp    = round(price * 0.97, 2)
+        sig   = f"🔻 做空信号：连续{TREND_LEN}根跌破 MA20"
+        strat = "🔻 做空策略\n卖出 → 跌\n涨 1.5% 止损\n跌 3% 止盈"
     else:
         stop = tp = "N/A"
         sig  = "⏸ 中性信号：观望为主"
+        strat = "⏸ 当前无明确方向，耐心等待机会"
 
     return {
         "price": price,
@@ -83,4 +86,6 @@ def get_btc_analysis() -> dict:
         "take_profit":  tp,
         "max_loss":     max_loss,
         "per_trade_position": pos_size,
+
+        "strategy_text": strat,   # ★ 已补充
     }
