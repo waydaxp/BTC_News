@@ -34,26 +34,60 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 def _judge_signal(df: pd.DataFrame, interval_label="") -> str:
     last = df.iloc[-1]
     ma5 = df['Close'].rolling(5).mean()
+    rsi = last['RSI']
+    close = last['Close']
+    ma20 = last['MA20']
+    ma5_val = ma5.iloc[-1]
+    vol = last['Volume']
+    avg_vol = df['Volume'].rolling(10).mean().iloc[-1]
+
     recent = df['Close'].tail(5) > df['MA20'].tail(5)
-    above_ma20 = recent.sum() >= 4
-    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 4
+    above_ma20 = recent.sum() >= 3
+    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
+
+    prev_candle = df.iloc[-2]
 
     signal = "⏸ 中性信号"
 
-    if last['RSI'] < 40 or last['RSI'] > 70:
-        signal = "⚠ 背离信号"
-    elif abs(last['Close'] - last['MA20']) / last['MA20'] < 0.005:
-        signal = "⏸ 震荡中性"
-    elif last['Close'] > last['MA20'] and above_ma20 and 45 < last['RSI'] < 65 and last['Close'] > ma5.iloc[-1]:
+    # 强趋势多头
+    if close > ma20 and above_ma20 and 45 < rsi < 70 and close > ma5_val:
         signal = "🟢 做多信号"
-    elif last['Close'] < last['MA20'] and below_ma20 and 35 < last['RSI'] < 55 and last['Close'] < ma5.iloc[-1]:
-        signal = "🔻 做空信号"
-    elif last['Close'] > last['MA20'] * 1.02 and last['RSI'] > 60:
+
+    # 趋势偏强
+    elif close > ma20 * 1.02 and rsi > 60:
         signal = "🟢 趋势偏强"
-    elif last['Close'] < last['MA20'] * 0.98 and last['RSI'] < 40:
+
+    # 超跌反弹
+    elif rsi < 35 and close > prev_candle['Open'] and close > ma5_val and close > ma20:
+        signal = "🟢 超跌反弹"
+
+    # 底部反转结构 + 放量
+    elif (
+        rsi > 40 and rsi - df['RSI'].iloc[-5] > 10 and
+        close > ma5_val and
+        last['Close'] > last['Open'] and
+        prev_candle['Low'] < prev_candle['Close'] and
+        vol > avg_vol
+    ):
+        signal = "🟢 反转信号"
+
+    # 做空信号
+    elif close < ma20 and below_ma20 and 30 < rsi < 55 and close < ma5_val:
+        signal = "🔻 做空信号"
+
+    # 趋势偏弱
+    elif close < ma20 * 0.98 and rsi < 40:
         signal = "🔻 趋势偏弱"
 
-    print(f"[DEBUG] ETH-{interval_label}: Signal={signal}, RSI={last['RSI']:.2f}, Close={last['Close']:.2f}, MA20={last['MA20']:.2f}")
+    # 背离信号
+    elif rsi < 40 or rsi > 70:
+        signal = "⚠ 背离信号"
+
+    # MA20 附近震荡
+    elif abs(close - ma20) / ma20 < 0.005:
+        signal = "⏸ 震荡中性"
+
+    print(f"[DEBUG] ETH-{interval_label}: Signal={signal}, RSI={rsi:.2f}, Close={close:.2f}, MA20={ma20:.2f}, Vol={vol:.2f}, AvgVol={avg_vol:.2f}")
     return signal
 
 def _calc_trade(price: float, atr: float, signal: str) -> tuple:
