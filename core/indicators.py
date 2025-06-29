@@ -1,5 +1,4 @@
 # core/indicators.py
-
 import pandas as pd
 
 MA_WINDOW = 20
@@ -26,11 +25,11 @@ def calc_atr(df: pd.DataFrame) -> pd.Series:
     return tr.rolling(ATR_WINDOW).mean()
 
 def add_basic_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    # 先把列名首字母大写，保证是 Open/High/Low/Close/Volume
+    # 规范列名首字母大写
     df = df.rename(columns=lambda c: c.capitalize())
-    # 只留这几列（去掉 auto_adjust 带来的 Adj Close）
+    # 只保留 OHLC + Volume
     df = df[["Open","High","Low","Close","Volume"]]
-    df["MA20"] = df["Close"].rolling(MA_WINDOW).mean()
-    df["RSI"]  = calc_rsi(df["Close"])
-    df["ATR"]  = calc_atr(df)
+    df["Ma20"] = df["Close"].rolling(MA_WINDOW).mean()
+    df["Rsi"]  = calc_rsi(df["Close"])
+    df["Atr"]  = calc_atr(df)
     return df
