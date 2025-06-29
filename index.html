@@ -4,46 +4,70 @@
   <meta charset="utf-8">
   <title>Crypto Tech Dashboard</title>
   <style>
-    body{font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;margin:0;padding:0;background:#fafafa;color:#222;}
-    h2{margin:0 0 8px;padding:0;}
-    .card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-    .title{font-size:20px;font-weight:700;margin-bottom:4px;}
-    .metric{line-height:1.6;}
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fafafa;margin:0;color:#222}
+    h2{margin:0 0 8px}
+    .card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .title{font-size:20px;font-weight:700;margin-bottom:4px}
+    .metric{line-height:1.6}
+    .ts{font-size:12px;color:#666;text-align:right;margin-top:4px}
   </style>
 </head>
 <body>
+
+  <!-- ===== ① BTC ===== -->
   <div class="card">
     <div class="title">📉【BTC 技术分析】</div>
-    <div class="metric">当前价格: 107539.6015625</div>
-    <div class="metric">MA20: 107650.619140625</div>
-    <div class="metric">RSI: 56.647115266685425</div>
+    <div class="metric">当前价格: 107408.1640625</div>
+    <div class="metric">MA20: 107644.047265625</div>
+    <div class="metric">RSI: 53.405976017031584</div>
     <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
   </div>
 
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 0.085</div>
+    <div class="metric">🛠 杠杆后下单量: 0.082</div>
     <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 107304.15959821429</div>
-    <div class="metric">🎯 止盈: 107892.76450892857</div>
+    <div class="metric">🛑 止损: 107163.9765625</div>
+    <div class="metric">🎯 止盈: 107774.4453125</div>
   </div>
 
+  <!-- ===== ② ETH ===== -->
   <div class="card">
     <div class="title">📉【ETH 技术分析】</div>
-    <div class="metric">当前价格: 2438.600341796875</div>
-    <div class="metric">MA20: 2441.3607666015623</div>
-    <div class="metric">RSI: 57.776514876705924</div>
+    <div class="metric">当前价格: 2436.841796875</div>
+    <div class="metric">MA20: 2441.272839355469</div>
+    <div class="metric">RSI: 56.14647348898786</div>
     <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
   </div>
 
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 2.607</div>
+    <div class="metric">🛠 杠杆后下单量: 2.564</div>
     <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 2430.9297223772323</div>
-    <div class="metric">🎯 止盈: 2450.106270926339</div>
+    <div class="metric">🛑 止损: 2429.0426897321427</div>
+    <div class="metric">🎯 止盈: 2448.540457589286</div>
   </div>
+
+  <!-- ===== ③ 宏观事件 ===== -->
+  <div class="card">
+    <div class="title">📅 宏观事件提醒</div>
+    <div class="metric">
+      - FOMC 利率决议（2025-07-03，4 天后）：加息可能引发波动<br>- 非农就业报告（2025-07-05，6 天后）：就业强劲或加大加息预期<br>- SEC 审查比特币 ETF（2025-07-10，11 天后）：若通过，或引发大涨          <!-- 这里通常是已用 <br> 拼接好的多行字符串 -->
+    </div>
+  </div>
+
+  <!-- ===== ④ 恐惧与贪婪 ===== -->
+  <div class="card">
+    <div class="title">😨/😊 恐惧与贪婪指数（）</div>
+    <div class="metric">当前值: </div>
+  </div>
+
+  <!-- ===== ⑤ 更新时间 ===== -->
+  <div class="card">
+    <p class="ts">更新时间：</p>
+  </div>
+
 </body>
 </html>
