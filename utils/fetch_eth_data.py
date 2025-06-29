@@ -24,7 +24,10 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
     df = _flatten_ohlc_columns(df)
     idx = df.index
-    df.index = idx.tz_convert(TZ) if idx.tzinfo else idx.tz_localize("UTC").tz_convert(TZ)
+    if idx.tz is None:
+        df.index = idx.tz_localize("UTC").tz_convert(TZ)
+    else:
+        df.index = idx.tz_convert(TZ)
     df = add_basic_indicators(df).dropna()
     return df
 
@@ -45,15 +48,15 @@ def get_eth_analysis() -> dict:
     last1h = df1h.iloc[-1]
     if not df4h.empty:
         last4h = df4h.iloc[-1]
-        trend_up = last4h["Close"] > last4h["Ma20"]
+        trend_up = last4h["Close"] > last4h["MA20"]
     else:
         trend_up = False
 
     price = float(last1h["Close"])
-    ma20  = float(last1h["Ma20"])
-    rsi   = float(last1h["Rsi"])
-    atr   = float(last1h["Atr"])
-    short_up = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
+    ma20  = float(last1h["MA20"])
+    rsi   = float(last1h["RSI"])
+    atr   = float(last1h["ATR"])
+    short_up = (df15m["Close"].tail(12) > df15m["MA20"].tail(12)).all()
 
     signal = "✅ 做多" if (price > ma20 and 30 < rsi < 70 and trend_up and short_up) else "⏸ 观望"
 
