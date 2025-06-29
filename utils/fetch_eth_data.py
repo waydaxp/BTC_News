@@ -11,67 +11,54 @@ PAIR = "ETH-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    df.columns = df.columns.str.title()  # 标准化列名
+    df.columns = df.columns.str.title()
     df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
 
 
-def _judge_signal(df: pd.DataFrame, window: int, rsi_low: int, rsi_high: int) -> str:
+def _judge_signal(df: pd.DataFrame, label: str = "") -> str:
     last = df.iloc[-1]
     ma5 = df['Close'].rolling(5).mean()
+    recent_close = df['Close'].tail(5)
+    recent_ma20 = df['MA20'].tail(5)
 
-    recent = df['Close'].tail(window) > df['MA20'].tail(window)
-    above_ma20 = recent.sum() >= int(window * 0.8)
+    above = (recent_close > recent_ma20).sum()
+    below = (recent_close < recent_ma20).sum()
 
-    below_recent = df['Close'].tail(window) < df['MA20'].tail(window)
-    below_ma20 = below_recent.sum() >= int(window * 0.8)
-
-    rsi = last['RSI']
-
-    # 背离预警
-    if (df['Close'].diff().tail(3).mean() > 0 and df['RSI'].diff().tail(3).mean() < 0) or \
-       (df['Close'].diff().tail(3).mean() < 0 and df['RSI'].diff().tail(3).mean() > 0):
-        return "⚠️ 背离预警"
-
-    # 无趋势：涨跌相等
-    last_10 = df['Close'].diff().tail(10)
-    ups = (last_10 > 0).sum()
-    downs = (last_10 < 0).sum()
-    if abs(ups - downs) <= 2:
-        return "😶 无趋势"
-
-    # 震荡中性
-    if 45 <= rsi <= 55:
-        return "📉 震荡中性"
-
-    if last['Close'] > last['MA20'] and above_ma20 and rsi_low < rsi < rsi_high and last['Close'] > ma5.iloc[-1]:
-        return "🟢 做多信号"
-    elif last['Close'] < last['MA20'] and below_ma20 and (rsi - 5) < 55 and last['Close'] < ma5.iloc[-1]:
-        return "🔻 做空信号"
+    if above >= 4 and last['Close'] > last['MA20'] and 45 < last['RSI'] < 65 and last['Close'] > ma5.iloc[-1]:
+        return f"🟢 做多信号"
+    elif below >= 4 and last['Close'] < last['MA20'] and 35 < last['RSI'] < 55 and last['Close'] < ma5.iloc[-1]:
+        return f"🔻 做空信号"
+    elif 40 < last['RSI'] < 60 and abs(last['Close'] - last['MA20']) / last['MA20'] < 0.01:
+        return f"🔘 震荡中性"
+    elif abs(last['RSI'] - 50) < 3 and abs(last['Close'] - last['MA20']) / last['MA20'] < 0.003:
+        return f"⚪ 无趋势"
+    elif (last['Close'] > last['MA20'] and last['RSI'] < 45) or (last['Close'] < last['MA20'] and last['RSI'] > 55):
+        return f"🌀 指标背离"
     else:
-        return "⏸ 中性信号"
+        return f"⏸ 中性信号"
 
 
 def get_eth_analysis() -> dict:
-    df15 = _download_tf("15m", "3d")    # 短线
-    df1h = _download_tf("1h", "7d")      # 中期
-    df4h = _download_tf("4h", "30d")     # 长期
+    df15 = _download_tf("15m", "3d")
+    df1h = _download_tf("1h", "7d")
+    df4h = _download_tf("4h", "30d")
 
-    signal15 = _judge_signal(df15, window=5, rsi_low=45, rsi_high=65)
-    signal1h = _judge_signal(df1h, window=10, rsi_low=45, rsi_high=65)
-    signal4h = _judge_signal(df4h, window=8, rsi_low=50, rsi_high=65)
+    signal15 = _judge_signal(df15)
+    signal1h = _judge_signal(df1h)
+    signal4h = _judge_signal(df4h)
 
     last = df1h.iloc[-1]  # 中期信号用于交易建议
     price = float(last['Close'])
     atr = float(last['ATR'])
 
-    if "多" in signal1h:
+    if "做多" in signal1h:
         sl = price - ATR_MULT_SL * atr
         tp = price + ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "long")
-    elif "空" in signal1h:
+    elif "做空" in signal1h:
         sl = price + ATR_MULT_SL * atr
         tp = price - ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "short")
@@ -82,13 +69,13 @@ def get_eth_analysis() -> dict:
 
     return {
         "price": price,
-        "ma20": float(last['MA20']),
-        "rsi": float(last['RSI']),
+        "ma20": float(last["MA20"]),
+        "rsi": float(last["RSI"]),
         "atr": atr,
         "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
         "sl": sl,
         "tp": tp,
         "qty": qty,
         "risk_usd": RISK_USD,
-        "update_time": update_time
+        "update_time": update_time,
     }
