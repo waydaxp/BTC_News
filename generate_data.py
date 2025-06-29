@@ -36,7 +36,10 @@ def get_all_analysis() -> dict:
         "btc_entry_4h":     btc["entry_4h"],
         "btc_sl_4h":        btc["sl_4h"],
         "btc_tp_4h":        btc["tp_4h"],
-        "btc_win_rate":     btc.get("win_rate", 0),   # ✅ 胜率支持
+        "btc_win_rate":     btc.get("win_rate", 0),  # ✅ 胜率支持
+        "btc_reason_15m":   btc.get("reason_15m", ""),
+        "btc_reason_1h":    btc.get("reason_1h", ""),
+        "btc_reason_4h":    btc.get("reason_4h", ""),
 
         # ETH 分析结果
         "eth_price":        eth["price"],
@@ -58,7 +61,10 @@ def get_all_analysis() -> dict:
         "eth_entry_4h":     eth["entry_4h"],
         "eth_sl_4h":        eth["sl_4h"],
         "eth_tp_4h":        eth["tp_4h"],
-        "eth_win_rate":     eth.get("win_rate", 0),   # ✅ 胜率支持
+        "eth_win_rate":     eth.get("win_rate", 0),
+        "eth_reason_15m":   eth.get("reason_15m", ""),
+        "eth_reason_1h":    eth.get("reason_1h", ""),
+        "eth_reason_4h":    eth.get("reason_4h", ""),
 
         # 恐惧与贪婪指数
         "fg_idx":           fg_idx,
