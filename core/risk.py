@@ -14,10 +14,9 @@ def calc_position_size(
     risk_usd: float,
     atr_mult_sl: float,
     atr_value: float,
-    side: Literal["long", "short"],
+    side: Literal["long","short"],
 ) -> float:
     sl_distance = atr_mult_sl * atr_value
     if sl_distance <= 0:
         raise ValueError("ATR must be positive")
-    qty = risk_usd / sl_distance
-    return qty
+    return risk_usd / sl_distance
