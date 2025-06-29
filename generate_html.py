@@ -1,23 +1,30 @@
-# generate_html.py
+# -*- coding: utf-8 -*-
 """
-拉取最新数据 → 用 Jinja2 渲染 HTML → 写入 index.html
+generate_html.py
+================
+• 读取 Jinja 样式的简单占位符模板（index_template.html）
+• 调用 generate_data.get_all_analysis() 取上下文
+• 渲染成 index.html
 """
 
+from pathlib import Path
 from generate_data import get_all_analysis
-from jinja2 import Template
 
-# 1. 获取 BTC / ETH / 宏观 / 情绪 等所有字段
-ctx = get_all_analysis()          # ctx == dict
+TEMPLATE_FILE = Path("index_template.html")
+OUTPUT_FILE   = Path("index.html")
 
-# 2. 读取 Jinja2 模板
-with open("index_template.html", encoding="utf-8") as f:
-    tpl = Template(f.read())
+def main() -> None:
+    ctx = get_all_analysis()                  # 返回字典
 
-# 3. 渲染
-html = tpl.render(**ctx)
+    # 读取模板
+    html_tpl = TEMPLATE_FILE.read_text(encoding="utf-8")
 
-# 4. 输出静态页面
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
+    # 简单 .format(**ctx) 渲染（若想用 Jinja2，可自行替换）
+    rendered = html_tpl.format(**ctx)
 
-print("✅ index.html 已生成 ——", ctx["update_time"])
+    # 写出 HTML
+    OUTPUT_FILE.write_text(rendered, encoding="utf-8")
+    print(f"✅ 已更新 {OUTPUT_FILE} —— {ctx['update_time']}")
+
+if __name__ == "__main__":
+    main()
