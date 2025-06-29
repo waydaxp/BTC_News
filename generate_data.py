@@ -5,12 +5,13 @@ from utils.fetch_macro_events import get_macro_event_summary
 from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
+    # 调用各模块分析
     btc = get_btc_analysis()
     eth = get_eth_analysis()
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
     macro = get_macro_event_summary()
 
-    # ✅ 设置为北京时间（UTC+8）
+    # ✅ 设置为北京时间
     beijing_tz = timezone(timedelta(hours=8))
     page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -35,6 +36,7 @@ def get_all_analysis() -> dict:
         "btc_entry_4h":     btc["entry_4h"],
         "btc_sl_4h":        btc["sl_4h"],
         "btc_tp_4h":        btc["tp_4h"],
+        "btc_win_rate":     btc.get("win_rate", 0),   # ✅ 胜率支持
 
         # ETH 分析结果
         "eth_price":        eth["price"],
@@ -56,6 +58,7 @@ def get_all_analysis() -> dict:
         "eth_entry_4h":     eth["entry_4h"],
         "eth_sl_4h":        eth["sl_4h"],
         "eth_tp_4h":        eth["tp_4h"],
+        "eth_win_rate":     eth.get("win_rate", 0),   # ✅ 胜率支持
 
         # 恐惧与贪婪指数
         "fg_idx":           fg_idx,
