@@ -2,15 +2,14 @@
 import pandas as pd
 import yfinance as yf
 from datetime import datetime
-from core.indicators  import add_basic_indicators
-from core.risk        import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
+from core.indicators import add_basic_indicators
+from core.risk import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 
 PAIR = "ETH-USD"
-TZ   = "Asia/Shanghai"
+TZ = "Asia/Shanghai"
 
 INTERVALS = {
     "1h":  {"interval": "1h",  "period": "3d"},
-    "4h":  {"interval": "1h",  "period": "10d"},
     "15m": {"interval": "15m", "period": "1d"},
 }
 
@@ -31,10 +30,17 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 
 def get_eth_analysis() -> dict:
     df1h  = _download_tf(**INTERVALS["1h"])
-    ohlc  = {"open":"first","high":"max","low":"min","close":"last","volume":"sum"}
-    df4h  = _flatten_ohlc_columns(df1h.resample("4h", closed="right", label="right").agg(ohlc))
-    df4h  = add_basic_indicators(df4h).dropna()
     df15m = _download_tf(**INTERVALS["15m"])
+
+    ohlc_map = {
+        "Open":   "first",
+        "High":   "max",
+        "Low":    "min",
+        "Close":  "last",
+        "Volume": "sum",
+    }
+    df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc_map)
+    df4h = add_basic_indicators(df4h).dropna()
 
     last1h = df1h.iloc[-1]
     last4h = df4h.iloc[-1]
@@ -47,13 +53,10 @@ def get_eth_analysis() -> dict:
     trend_up = last4h["Close"] > last4h["Ma20"]
     short_up = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
 
-    if price > ma20 and 30 < rsi < 70 and trend_up and short_up:
-        signal = "✅ 做多"
-    else:
-        signal = "⏸ 观望"
+    signal = "✅ 做多" if (price > ma20 and 30 < rsi < 70 and trend_up and short_up) else "⏸ 观望"
 
-    sl       = price - ATR_MULT_SL  * atr
-    tp       = price + ATR_MULT_TP  * atr
+    sl       = price - ATR_MULT_SL * atr
+    tp       = price + ATR_MULT_TP * atr
     risk_usd = RISK_USD
     qty      = calc_position_size(risk_usd, price, sl)
 
