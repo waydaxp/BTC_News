@@ -1,73 +1,56 @@
+# .github/workflows/update_html.yml
 name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/5 * * * *"        # 每 5 分钟
+    - cron:  "*/5 * * * *"     # 每 5 分钟
   workflow_dispatch:
 
 permissions:
-  contents: write                # 允许推送回 main
+  contents: write
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣  拉取仓库
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    # ──────────────────────────── 1. 取代码
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    # 2️⃣  安装 Python（3.11 示例，可改 3.10/3.9）
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-
-    # 3️⃣  编译并安装 TA-Lib C 库（单线程 make 避免并发 bug）
-    - name: Build & install TA-Lib C library
+    # ──────────────────────────── 2. 系统库（TA-Lib C 部分）
+    - name: Install TA-Lib runtime (apt)
       run: |
-        sudo apt-get update
+        sudo apt-get update -y
         sudo apt-get install -y --no-install-recommends \
-             build-essential wget autoconf automake libtool pkg-config
-        wget -q https://sourceforge.net/projects/ta-lib/files/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz
-        tar -xzf ta-lib-0.4.0-src.tar.gz
-        cd ta-lib
-        ./configure --prefix=/usr
-        make -j1                      # ⚠️ 必须单线程
-        sudo make install
-        sudo ldconfig                 # 刷新动态库缓存
+             libta-lib0 libta-lib0-dev
 
-    # 4️⃣  安装 Python 依赖
-    #     顺序：NumPy → wheel → TA-Lib → 其余依赖
-    - name: Install Python dependencies
+    # ──────────────────────────── 3. Python 3.10 + cache
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+        cache: "pip"
+
+    # ──────────────────────────── 4. 安装依赖（含 ta-lib-binary）
+    - name: Install Python deps
       run: |
         python -m pip install --upgrade pip
-
-        # 固定 NumPy 1.x（TA-Lib 兼容）
-        pip install numpy==1.26.4
-
-        # 提供 bdist_wheel 命令，避免 “invalid command 'bdist_wheel'”
-        pip install wheel
-
-        # 编译 TA-Lib Python 封装，禁用隔离复用已装 NumPy
-        pip install --no-build-isolation ta-lib==0.4.26
-
-        # 安装其余包（requirements.txt 已锁版本）
         pip install -r requirements.txt
 
-    # 5️⃣  生成 HTML
+    # ──────────────────────────── 5. 生成 HTML
     - name: Generate index.html
       run: python generate_html.py
 
-    # 6️⃣  如有变更则推送
-    - name: Commit & push updated index.html
+    # ──────────────────────────── 6. 提交（仅有变更才推）
+    - name: Commit & push if changed
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name  "GitHub Action"
         git add index.html
         if ! git diff --cached --quiet; then
           git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
-          git push origin main
+          git push
         else
           echo "Nothing to commit"
         fi
