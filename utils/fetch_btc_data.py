@@ -8,14 +8,13 @@ from core.risk import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 PAIR = "BTC-USD"
 TZ = "Asia/Shanghai"
 
-# 只拉取 1h 和 15m，多周期通过重采样得到 4h
+# 1h 拉取 5 天以保证至少有一个 4h 数据，15m 保持 1 天
 INTERVALS = {
-    "1h":  {"interval": "1h",  "period": "3d"},
+    "1h":  {"interval": "1h",  "period": "5d"},
     "15m": {"interval": "15m", "period": "1d"},
 }
 
 def _flatten_ohlc_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """扁平化 MultiIndex 列，然后首字母大写"""
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0).str.capitalize()
     else:
@@ -23,21 +22,19 @@ def _flatten_ohlc_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
-    """下载原始 OHLCV、扁平化列名、时区转换、添加指标并去空"""
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
     df = _flatten_ohlc_columns(df)
     idx = df.index
+    # 本地化并转上海时间
     df.index = idx.tz_convert(TZ) if idx.tzinfo else idx.tz_localize("UTC").tz_convert(TZ)
     df = add_basic_indicators(df).dropna()
     return df
 
 def get_btc_analysis() -> dict:
-    """返回 BTC 各项分析结果"""
-    # 拉 1h 和 15m
     df1h  = _download_tf(**INTERVALS["1h"])
     df15m = _download_tf(**INTERVALS["15m"])
 
-    # 从 1h 重采样出 4h
+    # 由 1h 重采样得 4h
     ohlc_map = {
         "Open":   "first",
         "High":   "max",
@@ -48,26 +45,26 @@ def get_btc_analysis() -> dict:
     df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc_map)
     df4h = add_basic_indicators(df4h).dropna()
 
-    # 最新点
     last1h = df1h.iloc[-1]
-    last4h = df4h.iloc[-1]
+    # 如果 4h 没数据，直接降级为 False
+    if not df4h.empty:
+        last4h = df4h.iloc[-1]
+        trend_up = last4h["Close"] > last4h["Ma20"]
+    else:
+        trend_up = False
 
+    # 1h 最新数据
     price = float(last1h["Close"])
     ma20  = float(last1h["Ma20"])
     rsi   = float(last1h["Rsi"])
     atr   = float(last1h["Atr"])
-
-    trend_up = last4h["Close"] > last4h["Ma20"]
+    # 15m 连续 12 根站上 MA20（即过去 3h）
     short_up = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
 
-    # 信号逻辑
     signal = "✅ 做多" if (price > ma20 and 30 < rsi < 70 and trend_up and short_up) else "⏸ 观望"
 
-    # 止损 / 止盈
     sl = price - ATR_MULT_SL * atr
     tp = price + ATR_MULT_TP * atr
-
-    # 头寸计算
     risk_usd = RISK_USD
     qty      = calc_position_size(risk_usd, price, sl)
 
