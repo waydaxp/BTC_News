@@ -1,82 +1,30 @@
+# core/risk.py
 """
-统一风控函数
-============================================
-提供:
-    • calc_atr(df, period=14)
-    • get_sl_tp(direction, entry, df,
-                mode="atr", atr_mul=1, rr=1.8,
-                lookback=20, buffer_pct=0.003)
---------------------------------------------
-mode:
-    "atr"        -> 固定 ATR×mul 止损，TP = SL × rr
-    "structure"  -> 最近 swing high/low ± buffer 止损
-                     TP = entry ± (risk × rr)
-返回:
-    sl_price, tp_price, text_str
+统一风控 & 仓位计算模块
+-------------------------------------------------
+如需参数化（账户余额 / 杠杆 / ATR 倍数等），
+后续可改为读取 config.yaml；现在先写死，保证脚本可跑通。
 """
 
-import pandas as pd
-import numpy  as np
+ACCOUNT_USD   = 1_000          # 账户本金
+RISK_PCT      = 0.02           # 每笔风险 2%
+LEVERAGE      = 20             # 杠杆倍数
+ATR_MULT_SL   = 1.0            # 止损 = entry ± 1 × ATR
+ATR_MULT_TP   = 1.5            # 止盈 = entry ± 1.5 × ATR
 
-
-# ────────────────────────────────────────────
-def calc_atr(df: pd.DataFrame, period: int = 14) -> float:
-    high, low, close = df["high"], df["low"], df["close"]
-    tr = np.maximum.reduce([
-        high - low,
-        (high - close.shift()).abs(),
-        (low  - close.shift()).abs()
-    ])
-    return tr.rolling(period).mean().iloc[-1]
-
-
-def get_sl_tp(
-    direction: str,
-    entry: float,
-    df: pd.DataFrame,
-    *,
-    mode: str = "atr",
-    atr_mul: float = 1.0,
-    rr: float = 1.8,                 # TP = SL × rr
-    lookback: int = 20,
-    buffer_pct: float = 0.003
-):
+# ---------------------------------------------------------
+def calc_position_size(entry_price: float) -> float:
     """
-    direction: "long" / "short"
-    mode     : "atr" / "structure"
+    计算在给定“杠杆后下单量”下，账户实际 USD 风险固定为 ACCOUNT_USD*RISK_PCT
+
+    返回:
+        position_qty (float) —— 杠杆后下单量；同时给函数挂一个属性 risk_usd
     """
-    if direction not in ("long", "short"):
-        return "N/A", "N/A", "⏸ 无方向，观望"
+    risk_usd = ACCOUNT_USD * RISK_PCT                 # 固定风险
+    position_qty = (risk_usd * LEVERAGE) / entry_price
 
-    # --- ATR 止损 ----------------------------------
-    if mode == "atr":
-        atr = calc_atr(df, 14)
-        sl = entry - atr * atr_mul if direction == "long" else entry + atr * atr_mul
-        tp = entry + atr * atr_mul * rr if direction == "long" else entry - atr * atr_mul * rr
+    # 挂一个属性，供外层模板直接使用
+    calc_position_size.risk_usd = round(risk_usd, 2)
 
-        text = (
-            f"{'✅ 做多' if direction=='long' else '🔻 做空'}\n"
-            f"止损 = ATR×{atr_mul:.1f} ≈ {abs(entry-sl):.2f}\n"
-            f"止盈 = {rr:.1f}R ≈ {abs(tp-entry):.2f}"
-        )
-        return round(sl, 2), round(tp, 2), text
-
-    # --- 结构止损 ----------------------------------
-    swing_buf = 1 - buffer_pct if direction == "long" else 1 + buffer_pct
-    if direction == "long":
-        swing = df["low"].rolling(lookback).min().iloc[-2]     # 前一根内最低点
-        sl = round(swing * swing_buf, 2)
-        risk = entry - sl
-        tp = round(entry + risk * rr, 2)
-    else:
-        swing = df["high"].rolling(lookback).max().iloc[-2]
-        sl = round(swing * swing_buf, 2)
-        risk = sl - entry
-        tp = round(entry - risk * rr, 2)
-
-    text = (
-        f"{'✅ 做多' if direction=='long' else '🔻 做空'}\n"
-        f"结构止损@前{lookback}根 swing ±{buffer_pct*100:.1f}%\n"
-        f"TP = {rr:.1f}R"
-    )
-    return sl, tp, text
+    # 四舍五入到 4 位小数（合约常见精度）
+    return round(position_qty, 4)
