@@ -1,4 +1,3 @@
-# utils/fetch_btc_data.py
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
@@ -11,8 +10,8 @@ PAIR = "BTC-USD"
 TZ   = "Asia/Shanghai"
 
 CFG = {
-    "1h":  {"interval":"1h",  "period":"7d"},
-    "15m": {"interval":"15m", "period":"1d"},
+    "1h":  {"interval": "1h",  "period": "7d"},
+    "15m": {"interval": "15m", "period": "1d"},
 }
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
@@ -23,20 +22,27 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
         progress=False,
         auto_adjust=False,
     )
+    # 确保时区
     if df.index.tz is None:
         df.index = df.index.tz_localize("UTC")
     df.index = df.index.tz_convert(TZ)
+    # 添加基础指标并去 NaN
     return add_basic_indicators(df).dropna()
 
 def get_btc_analysis() -> dict:
+    # 1h、15m 原始
     df1h  = _download_tf(**CFG["1h"])
-    # 从 1h 合成 4h
-    ohlc = {"Open":"first","High":"max","Low":"min","Close":"last","Volume":"sum"}
-    df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc).dropna()
-    df4h = add_basic_indicators(df4h)
-
     df15m = _download_tf(**CFG["15m"])
 
+    # 从 1h 合成 4h
+    ohlc = {"Open":"first", "High":"max", "Low":"min", "Close":"last", "Volume":"sum"}
+    df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc)
+    # 扁平化列名，只保留第一层（Open/High/...）
+    df4h.columns = df4h.columns.get_level_values(0)
+    # 再加指标并去 NaN
+    df4h = add_basic_indicators(df4h).dropna()
+
+    # 取最新一根
     last1h  = df1h.iloc[-1]
     last4h  = df4h.iloc[-1]
     last15m = df15m.iloc[-1]
@@ -46,17 +52,15 @@ def get_btc_analysis() -> dict:
     rsi   = float(last1h["Rsi"])
     atr   = float(last1h["Atr"])
 
-    # 多头信号：4h & 15m 双均线之上 且 RSI 在 30~70
+    # 判断信号：4h & 15m 双均线之上 且 RSI 在 30~70
     if last4h["Close"] > last4h["Ma20"] and last15m["Close"] > last15m["Ma20"] and 30 < rsi < 70:
-        side   = "long"
-        signal = "✅ 做多"
-        sl     = price - ATR_MULT_SL * atr
-        tp     = price + ATR_MULT_TP * atr
+        side, signal = "long",  "✅ 做多"
+        sl = price - ATR_MULT_SL * atr
+        tp = price + ATR_MULT_TP * atr
     else:
-        side   = "short"
-        signal = "⛔ 观望"
-        sl     = price + ATR_MULT_SL * atr
-        tp     = price - ATR_MULT_TP * atr
+        side, signal = "short", "⛔ 观望"
+        sl = price + ATR_MULT_SL * atr
+        tp = price - ATR_MULT_TP * atr
 
     qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
 
