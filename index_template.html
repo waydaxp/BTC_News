@@ -71,11 +71,11 @@
     <div class="metric">MA20: {{ btc_ma20 }}</div>
     <div class="metric">RSI: {{ btc_rsi }}</div>
     <div class="metric">ATR: {{ btc_atr }}</div>
-    <div class="metric">技术信号:</div>
-    <div class="signal-line">📈 长期4H: {{ btc_signal_4h }}</div>
-    <div class="signal-line">📉 中期1H: {{ btc_signal_1h }}</div>
-    <div class="signal-line">🕒 日内15M: {{ btc_signal_15m }}</div>
-    <div class="winrate">历史胜率: {{ btc_win_rate }}%</div>
+    <div class="metric">📈 技术信号:</div>
+    <div class="reason"><span style="font-weight:600;">📊 长期4H:</span> {{ btc_signal_4h }}<br><span class="sub">📌 原因: {{ btc_reason_4h }}</span></div>
+    <div class="reason"><span style="font-weight:600;">📉 中期1H:</span> {{ btc_signal_1h }}<br><span class="sub">📌 原因: {{ btc_reason_1h }}</span></div>
+    <div class="reason"><span style="font-weight:600;">⏱ 短线15M:</span> {{ btc_signal_15m }}<br><span class="sub">📌 原因: {{ btc_reason_15m }}</span></div>
+        <div class="winrate">历史胜率: {{ btc_win_rate }}%</div>
   </div>
 
   <!-- BTC 操作建议 -->
@@ -120,10 +120,10 @@
     <div class="metric">MA20: {{ eth_ma20 }}</div>
     <div class="metric">RSI: {{ eth_rsi }}</div>
     <div class="metric">ATR: {{ eth_atr }}</div>
-    <div class="metric">技术信号:</div>
-    <div class="signal-line">📈 长期4H: {{ eth_signal_4h }}</div>
-    <div class="signal-line">📉 中期1H: {{ eth_signal_1h }}</div>
-    <div class="signal-line">🕒 日内15M: {{ eth_signal_15m }}</div>
+    <div class="metric">📈 技术信号:</div>
+    <div class="reason"><span style="font-weight:600;">📊 长期4H:</span> {{ eth_signal_4h }}<br><span class="sub">📌 原因: {{ eth_reason_4h }}</span></div>
+    <div class="reason"><span style="font-weight:600;">📉 中期1H:</span> {{ eth_signal_1h }}<br><span class="sub">📌 原因: {{ eth_reason_1h }}</span></div>
+    <div class="reason"><span style="font-weight:600;">⏱ 短线15M:</span> {{ eth_signal_15m }}<br><span class="sub">📌 原因: {{ eth_reason_15m }}</span></div>
     <div class="winrate">历史胜率: {{ eth_win_rate }}%</div>
   </div>
 
