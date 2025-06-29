@@ -12,17 +12,15 @@ permissions:
 jobs:
   update-html:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Set up Python 3.9   # ← 关键
+    - name: Set up Python 3.9
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: "3.9"
 
-    - name: Install deps (wheel only)
+    - name: Install deps (wheel-only，秒装)
       run: |
         python -m pip install -U pip
         pip install --only-binary=:all: -r requirements.txt
@@ -38,4 +36,6 @@ jobs:
         if ! git diff --cached --quiet; then
           git commit -m "🕒 Auto update $(date -u '+%F %T')"
           git push
+        else
+          echo "Nothing to commit"
         fi
