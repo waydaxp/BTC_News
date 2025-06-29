@@ -2,40 +2,34 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/2 * * * *"   # 每 2 分钟
-  workflow_dispatch:         # 允许手动触发
+    - cron: "*/5 * * * *"      # 每 5 分钟
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # 缓存 pip 依赖，提速 40%+
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
 
-    - name: Install deps
-      run: |
-        python -m pip install -U pip
-        pip install -r requirements.txt
+      - name: Generate index.html
+        run: python generate_html.py
 
-    - name: Generate index.html
-      run: python generate_html.py
-
-    - name: Commit & push
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name  "GitHub Action"
-        git add index.html
-        git diff --cached --quiet || (git commit -m "⏰ Auto update $(date -u '+%F %T')" && git push)
+      - name: Commit & push if changed
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name  "GitHub Action"
+          git add index.html
+          git diff --cached --quiet || git commit -m "auto: update $(date -u +'%F %T')"
+          git push
