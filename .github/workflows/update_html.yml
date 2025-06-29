@@ -1,49 +1,42 @@
-name: Update HTML Page   # 工作流名称，可随意
+name: Update HTML Page
 
-# ──────────────────────── 触发器 ────────────────────────
 on:
   schedule:
-    - cron: "*/5 * * * *"      # 每 5 分钟（UTC）
-  workflow_dispatch:           # 手动触发按钮
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 permissions:
-  contents: write              # 允许向 main 分支推送
+  contents: write
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
-
     steps:
-    # 1) 拉代码
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # 2) Python 3.11 + pip cache
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: "pip"           # 自动为 requirements.txt 建缓存
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"     # ← 关键！有 ta-lib-binary 轮子
+          cache: "pip"
 
-    # 3) 安装依赖（ta-lib-binary 拿现成 wheel，无需编译）
-    - name: Install Python deps
-      run: |
-        python -m pip install -U pip
-        pip install -r requirements.txt
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
 
-    # 4) 生成 index.html
-    - name: Generate HTML
-      run: python generate_html.py
+      - name: Generate HTML
+        run: python generate_html.py
 
-    # 5) 若文件变动则推送
-    - name: Commit & push if changed
-      run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name  "GitHub Action"
-        git add index.html
-        if ! git diff --cached --quiet; then
-          git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
-          git push
-        else
-          echo "Nothing to commit"
-        fi
+      - name: Commit & push if changed
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name  "GitHub Action"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
+            git push
+          else
+            echo "Nothing to commit"
+          fi
