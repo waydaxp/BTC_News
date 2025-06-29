@@ -11,11 +11,17 @@ PAIR = "BTC-USD"
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
 
-    # 如果是 MultiIndex（含 ticker 名），则压平为单层列名
+    # 如果是 MultiIndex（即列名形如 ('BTC-USD', 'Open')），则取出第二层列名
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(1)
 
-    df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
+    # 确保所需列存在
+    required_cols = ["Open", "High", "Low", "Close", "Volume"]
+    missing = [col for col in required_cols if col not in df.columns]
+    if missing:
+        raise ValueError(f"缺失所需列: {missing}")
+
+    df = df[required_cols].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
