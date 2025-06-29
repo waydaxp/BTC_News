@@ -1,45 +1,53 @@
 # utils/fear_greed.py
 """
-获取 Crypto Fear & Greed Index
-数据源: https://api.alternative.me/fng/
-文档:  https://alternative.me/crypto/fear-and-greed-index/
+获取加密货币「恐惧与贪婪指数」
+数据源：https://api.alternative.me/fng/
 """
 
 from __future__ import annotations
-import requests
 from datetime import datetime, timezone
-from typing import Tuple
+import requests, json, os, pathlib
 
-_API = "https://api.alternative.me/fng/?limit=1&format=json"
+_URL   = "https://api.alternative.me/fng/"
+CACHE  = pathlib.Path(__file__).with_suffix(".cache.json")  # 本地缓存，防止接口抽风
+TIMEOUT = 5
 
-def _call_api() -> dict | None:
+
+def _fetch_live() -> dict[str, str] | None:
     try:
-        resp = requests.get(_API, timeout=3)
+        resp = requests.get(_URL, timeout=TIMEOUT)
         resp.raise_for_status()
-        return resp.json()
-    except (requests.RequestException, ValueError):
+        data = resp.json()["data"][0]          # 取最新一条
+        data["cache_ts"] = datetime.now(timezone.utc).isoformat()
+        CACHE.write_text(json.dumps(data, ensure_ascii=False))
+        return data
+    except Exception:
         return None
 
 
-def get_fear_and_greed() -> Tuple[str, str]:
+def _load_cache(max_age_min: int = 60) -> dict[str, str] | None:
+    """读取 ≤max_age_min 分钟的缓存，避免频繁请求"""
+    if not CACHE.exists():
+        return None
+    try:
+        data = json.loads(CACHE.read_text())
+        ts   = datetime.fromisoformat(data["cache_ts"])
+        age  = (datetime.now(timezone.utc) - ts).total_seconds() / 60
+        return data if age <= max_age_min else None
+    except Exception:
+        return None
+
+
+def get_fear_and_greed() -> str:
     """
-    Returns
-    -------
-    id:  str   # 原始时间戳（秒）— 可当作唯一 id
-    text: str  # '68 (Greed)' 这样的组合字符串
+    返回示例：
+    >>> '46（Fear）'
+    网络完全失败时 → 'N/A'
     """
-    js = _call_api()
-    if not js or "data" not in js:
-        return "N/A", "N/A"
+    data = _fetch_live() or _load_cache()     # 先尝试实时，再回退缓存
+    if not data:
+        return "N/A"
 
-    item = js["data"][0]         # 最近一条
-    score   = item["value"]      # '68'
-    desc    = item["value_classification"].capitalize()  # 'Greed'
-    ts_id   = item["timestamp"]  # '1722316800'
-
-    return ts_id, f"{score} ({desc})"
-
-
-# 快速本地测试
-if __name__ == "__main__":
-    print(get_fear_and_greed())
+    value  = data["value"]
+    label  = data["value_classification"]     # Extreme Fear / Greed / Neutral
+    return f"{value}（{label}）"
