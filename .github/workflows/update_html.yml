@@ -2,36 +2,52 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/2 * * * *"   # 每 2 分钟跑一次
-  workflow_dispatch:
+    - cron: "*/2 * * * *"   # 每 2 分钟
+  workflow_dispatch:        # 允许手动执行
+
+permissions:
+  contents: write           # 允许推送回仓库
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
+
     steps:
+    # 1️⃣  拉取仓库
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # 2️⃣  安装 Python（3.11 示例，可改 3.10 / 3.9）
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
+        cache: "pip"        # 默认按 requirements.txt 自动缓存
 
-    - name: Install dependencies
+    # 3️⃣  安装依赖
+    - name: Install Python dependencies
       run: |
         python -m pip install -U pip
-        pip install numpy==1.26.4 pandas==2.2.2 yfinance>=0.2.64 Jinja2>=3.1
+        pip install -r requirements.txt
 
+    # 4️⃣  生成 HTML
     - name: Generate index.html
       run: python generate_html.py
 
-    - name: Commit & push
+    # 5️⃣  如有变更则推送
+    - name: Commit & push updated index.html
       run: |
+        # Git 签名
         git config --global user.email "action@github.com"
         git config --global user.name  "GitHub Action"
-        git add index.html
-        if ! git diff --cached --quiet; then
-          git commit -m "🔄 Auto update $(date -u '+%Y-%m-%d %H:%M')"
-          git push origin main
+
+        # 允许首次文件不存在
+        git add -f index.html || true
+
+        # 仅当暂存区有差异才提交
+        if git diff --cached --quiet; then
+          echo "Nothing to commit"
         else
-          echo "No changes"
+          git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
+          git push origin main
+        fi
