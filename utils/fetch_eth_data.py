@@ -1,5 +1,5 @@
 import yfinance as yf
-import pandas as pd                    # ← 新增
+import pandas as pd
 from datetime import datetime
 from core.indicators import add_basic_indicators
 
@@ -11,7 +11,7 @@ CFG = {
     "4h" : dict(interval="4h",  period="60d"),
 }
 
-def _download_tf(interval: str, period: str) -> pd.DataFrame:   # ← 修改
+def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(
         PAIR,
         interval=interval,
@@ -21,7 +21,14 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:   # ← 修改
     ).dropna()
 
     df = add_basic_indicators(df)
-    df.index = df.index.tz_localize("UTC")
+
+    # -------- 同样的时区修正 --------
+    if df.index.tz is None:
+        df.index = df.index.tz_localize("UTC")
+    else:
+        df.index = df.index.tz_convert("UTC")
+    # --------------------------------
+
     return df
 
 def get_eth_analysis() -> dict:
@@ -62,11 +69,11 @@ def get_eth_analysis() -> dict:
     else:
         stop = target = None
 
-    account_usd       = 1000
-    risk_per_trade    = 0.02
-    max_loss          = round(account_usd * risk_per_trade, 2)
-    leverage          = 20
-    position_usd      = round(max_loss * leverage, 2)
+    account_usd    = 1000
+    risk_per_trade = 0.02
+    max_loss       = round(account_usd * risk_per_trade, 2)
+    leverage       = 20
+    position_usd   = round(max_loss * leverage, 2)
 
     return {
         "price"        : price,
@@ -80,5 +87,5 @@ def get_eth_analysis() -> dict:
         "take_profit"  : target,
         "max_loss"     : max_loss,
         "position_usd" : position_usd,
-        "update_time"  : datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        "update_time"  : datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
     }
