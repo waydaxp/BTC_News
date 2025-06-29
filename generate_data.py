@@ -1,17 +1,18 @@
-# generate_data.py
-
 from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
 from utils.fetch_fear_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
     btc = get_btc_analysis()
     eth = get_eth_analysis()
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
     macro = get_macro_event_summary()
-    page_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # ✅ 设置为北京时间（UTC+8）
+    beijing_tz = timezone(timedelta(hours=8))
+    page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
         # BTC 分析结果
@@ -65,6 +66,6 @@ def get_all_analysis() -> dict:
         # 宏观事件
         "macro_events":     macro,
 
-        # 页面更新时间
+        # 页面更新时间（北京时间）
         "page_update":      page_update,
     }
