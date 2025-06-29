@@ -1,35 +1,52 @@
 # core/indicators.py
+
 import pandas as pd
 
-MA_WINDOW = 20
-RSI_WINDOW = 14
-ATR_WINDOW = 14
+# 指标窗口
+C = {
+    "MA_WIN": 20,
+    "RSI_WIN": 14,
+    "ATR_WIN": 14,
+}
+
 
 def calc_rsi(series: pd.Series) -> pd.Series:
+    """计算 RSI 指标"""
     delta = series.diff()
     up = delta.clip(lower=0)
     down = -delta.clip(upper=0)
-    roll_up = up.rolling(RSI_WINDOW).mean()
-    roll_down = down.rolling(RSI_WINDOW).mean()
+    roll_up = up.rolling(C["RSI_WIN"]).mean()
+    roll_down = down.rolling(C["RSI_WIN"]).mean()
     rs = roll_up / roll_down
-    return 100 - 100 / (1 + rs)
+    return 100 - (100 / (1 + rs))
+
 
 def calc_atr(df: pd.DataFrame) -> pd.Series:
-    high = df["High"]
-    low = df["Low"]
-    prev_close = df["Close"].shift(1)
-    tr1 = high - low
-    tr2 = (high - prev_close).abs()
-    tr3 = (low - prev_close).abs()
-    tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    return tr.rolling(ATR_WINDOW).mean()
+    """计算 ATR 指标"""
+    high_low = df["High"] - df["Low"]
+    high_close = (df["High"] - df["Close"].shift()).abs()
+    low_close = (df["Low"] - df["Close"].shift()).abs()
+    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    return tr.rolling(C["ATR_WIN"]).mean()
+
 
 def add_basic_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    # 规范列名首字母大写
-    df = df.rename(columns=lambda c: c.capitalize())
-    # 只保留 OHLC + Volume
-    df = df[["Open","High","Low","Close","Volume"]]
-    df["Ma20"] = df["Close"].rolling(MA_WINDOW).mean()
+    """
+    1) 扁平化列名到首字母大写；
+    2) 提取必需的 OHLCV 五列；
+    3) 依次计算 MA20、RSI、ATR 并加入到 DataFrame。
+    """
+    df = df.copy()
+
+    # —— 1) 扁平化列名到首字母大写 —— 
+    df = df.rename(columns={c: str(c).capitalize() for c in df.columns})
+
+    # —— 2) 取 Open/High/Low/Close/Volume —— 
+    df = df[["Open", "High", "Low", "Close", "Volume"]]
+
+    # —— 3) 计算指标 —— 
+    df["Ma20"] = df["Close"].rolling(C["MA_WIN"]).mean()
     df["Rsi"]  = calc_rsi(df["Close"])
     df["Atr"]  = calc_atr(df)
+
     return df
