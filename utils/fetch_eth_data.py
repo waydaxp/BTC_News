@@ -11,8 +11,6 @@ PAIR = "ETH-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.droplevel(1)  # 修复多层列名
     df.columns = df.columns.str.title()
     df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.index = df.index.tz_localize(None)
@@ -20,26 +18,22 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     return df.dropna()
 
 
-def _judge_signal(df: pd.DataFrame, label: str) -> str:
+def _judge_signal(df: pd.DataFrame, window: int = 5) -> str:
     last = df.iloc[-1]
-    close = last['Close']
-    rsi = last['RSI']
-    ma20 = last['MA20']
-    ma5 = df['Close'].rolling(5).mean().iloc[-1]
+    ma5 = df['Close'].rolling(window).mean()
+    above_ma20 = (df['Close'].tail(window) > df['MA20'].tail(window)).sum()
+    below_ma20 = (df['Close'].tail(window) < df['MA20'].tail(window)).sum()
 
-    above_ma20_count = (df['Close'].tail(5) > df['MA20'].tail(5)).sum()
-    below_ma20_count = (df['Close'].tail(5) < df['MA20'].tail(5)).sum()
-
-    if close > ma20 and above_ma20_count >= 4 and 45 < rsi < 65 and close > ma5:
-        return f"🟢 做多信号（{label}）"
-    elif close < ma20 and below_ma20_count >= 4 and 35 < rsi < 55 and close < ma5:
-        return f"🔻 做空信号（{label}）"
-    elif 45 <= rsi <= 55:
-        return f"🔘 震荡中性（{label}）"
-    elif rsi > 70 or rsi < 30:
-        return f"⚠️ 背离风险（{label}）"
+    if above_ma20 >= window - 1 and last['Close'] > last['MA20'] and last['Close'] > ma5.iloc[-1] and 45 < last['RSI'] < 65:
+        return "🟢 多头趋势"
+    elif below_ma20 >= window - 1 and last['Close'] < last['MA20'] and last['Close'] < ma5.iloc[-1] and 35 < last['RSI'] < 55:
+        return "🔻 空头趋势"
+    elif abs(last['RSI'] - 50) < 3 and abs(last['Close'] - last['MA20']) / last['MA20'] < 0.01:
+        return "📊 震荡中性"
+    elif (last['RSI'] > 70 and last['Close'] < last['MA20']) or (last['RSI'] < 30 and last['Close'] > last['MA20']):
+        return "⚠️ 技术背离"
     else:
-        return f"⏸ 无趋势（{label}）"
+        return "⏸ 中性信号"
 
 
 def get_eth_analysis() -> dict:
@@ -47,13 +41,13 @@ def get_eth_analysis() -> dict:
     df1h = _download_tf("1h", "7d")
     df4h = _download_tf("4h", "30d")
 
-    signal15 = _judge_signal(df15, "15m")
-    signal1h = _judge_signal(df1h, "1h")
-    signal4h = _judge_signal(df4h, "4h")
+    signal15 = _judge_signal(df15)
+    signal1h = _judge_signal(df1h)
+    signal4h = _judge_signal(df4h)
 
-    last = df1h.iloc[-1]
-    price = float(last['Close'])
-    atr = float(last['ATR'])
+    last = df1h.iloc[-1]  # 用中期信号做风控建议
+    price = float(last["Close"])
+    atr = float(last["ATR"])
 
     if "多" in signal1h:
         sl = price - ATR_MULT_SL * atr
@@ -73,7 +67,7 @@ def get_eth_analysis() -> dict:
         "ma20": float(last['MA20']),
         "rsi": float(last['RSI']),
         "atr": atr,
-        "signal": f"{signal4h} / {signal1h} / {signal15}",
+        "signal": f"{signal4h}（4h） / {signal1h}（1h） / {signal15}（15m）",
         "sl": sl,
         "tp": tp,
         "qty": qty,
