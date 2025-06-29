@@ -5,62 +5,62 @@
   <title>Crypto Tech Dashboard</title>
   <style>
     body {
-      font-family: "Segoe UI", system-ui, sans-serif;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       margin: 0;
       padding: 0;
-      background: #fafafa;
+      background: #f9f9f9;
       color: #222;
-      font-size: 17px;
+      font-size: 16px;
     }
     .card {
       background: #fff;
-      border-left: 6px solid #2ecc71;
-      padding: 16px 22px;
-      margin: 14px;
+      border-left: 6px solid #3498db;
+      padding: 20px;
+      margin: 18px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .title {
       font-size: 22px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      color: #2c3e50;
     }
-    .title.eth { color: #2962FF; }
+    .title.eth {
+      color: #8e44ad;
+    }
     .metric {
-      font-size: 17px;
-      line-height: 1.8;
-    }
-    .reason {
-      font-size: 15px;
-      color: #555;
-      margin: 8px 0;
-    }
-    .reason span {
-      font-weight: bold;
-      color: #000;
-      font-size: 16px;
+      font-size: 18px;
+      margin-bottom: 6px;
+      line-height: 1.6;
     }
     .sub {
       font-size: 15px;
-      color: #444;
+      color: #7f8c8d;
       margin-top: 6px;
-      font-weight: 600;
     }
-    .winrate {
+    .reason {
+      font-size: 17px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 12px;
+    }
+    .reason-detail {
       font-size: 16px;
-      font-weight: 700;
-      margin-top: 8px;
-      color: #d35400;
+      font-weight: bold;
+      color: #c0392b; /* 红色强调 */
+      margin-left: 24px;
+      margin-top: 4px;
     }
     .section-divider {
       border-top: 2px dashed #ccc;
-      margin: 36px 12px 24px;
+      margin: 40px 16px 24px;
     }
-    .highlight {
-      font-weight: bold;
+    .winrate {
       font-size: 18px;
-      color: #0066cc;
-      margin-bottom: 4px;
+      font-weight: 600;
+      margin-top: 10px;
+      color: #d35400;
     }
   </style>
 </head>
@@ -73,11 +73,14 @@
     <div class="metric">MA20: {{ btc_ma20 }}</div>
     <div class="metric">RSI: {{ btc_rsi }}</div>
     <div class="metric">ATR: {{ btc_atr }}</div>
-    <div class="highlight">📈 技术信号:</div>
-    <div class="reason"><span>⏱ 短线15M:</span> {{ btc_signal_15m }}<br><span style="color:#888;">📌 原因: {{ btc_reason_15m }}</span></div>
-    <div class="reason"><span>📉 中期1H:</span> {{ btc_signal_1h }}<br><span style="color:#888;">📌 原因: {{ btc_reason_1h }}</span></div>
-    <div class="reason"><span>📊 长期4H:</span> {{ btc_signal_4h }}<br><span style="color:#888;">📌 原因: {{ btc_reason_4h }}</span></div>
-    <div class="winrate">📊 历史胜率: {{ btc_win_rate }}%</div>
+    <div class="reason">📌 技术信号:</div>
+    <div class="metric">⏱ 短线15M: {{ btc_signal_15m }}</div>
+    <div class="reason-detail">📍 原因: {{ btc_reason_15m }}</div>
+    <div class="metric">📉 中期1H: {{ btc_signal_1h }}</div>
+    <div class="reason-detail">📍 原因: {{ btc_reason_1h }}</div>
+    <div class="metric">📊 长期4H: {{ btc_signal_4h }}</div>
+    <div class="reason-detail">📍 原因: {{ btc_reason_4h }}</div>
+    <div class="winrate">历史胜率: {{ btc_win_rate }}%</div>
   </div>
 
   <!-- BTC 操作建议 -->
@@ -85,27 +88,35 @@
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: {{ btc_risk }}</div>
   </div>
+
   <div class="card">
     <div class="title">📍 短线建议（15分钟）</div>
     <div class="metric">📌 建仓价: {{ btc_entry_15m }}</div>
     <div class="metric">🛑 止损: {{ btc_sl_15m }}</div>
     <div class="metric">🎯 止盈: {{ btc_tp_15m }}</div>
+    <div class="reason-detail">📌 信号依据: {{ btc_reason_15m }}</div>
     <div class="sub">👉 日内快速进出策略，适合高波动交易时段。</div>
   </div>
+
   <div class="card">
     <div class="title">📍 中期建议（1小时）</div>
     <div class="metric">📌 建仓价: {{ btc_entry_1h }}</div>
     <div class="metric">🛑 止损: {{ btc_sl_1h }}</div>
     <div class="metric">🎯 止盈: {{ btc_tp_1h }}</div>
-    <div class="sub">👉 适合趋势确认后的跟随操作，持仓时间中等。</div>
+    <div class="reason-detail">📌 信号依据: {{ btc_reason_1h }}</div>
+    <div class="sub">👉 趋势确认后介入，适合中短线操作。</div>
   </div>
+
   <div class="card">
     <div class="title">📍 长期建议（4小时）</div>
     <div class="metric">📌 建仓价: {{ btc_entry_4h }}</div>
     <div class="metric">🛑 止损: {{ btc_sl_4h }}</div>
     <div class="metric">🎯 止盈: {{ btc_tp_4h }}</div>
+    <div class="reason-detail">📌 信号依据: {{ btc_reason_4h }}</div>
     <div class="sub">👉 更适合趋势交易者和波段布局。</div>
   </div>
+
+  <hr class="section-divider">
 
   <!-- ETH 技术分析 -->
   <div class="card">
@@ -114,11 +125,14 @@
     <div class="metric">MA20: {{ eth_ma20 }}</div>
     <div class="metric">RSI: {{ eth_rsi }}</div>
     <div class="metric">ATR: {{ eth_atr }}</div>
-    <div class="highlight">📈 技术信号:</div>
-    <div class="reason"><span>⏱ 短线15M:</span> {{ eth_signal_15m }}<br><span style="color:#888;">📌 原因: {{ eth_reason_15m }}</span></div>
-    <div class="reason"><span>📉 中期1H:</span> {{ eth_signal_1h }}<br><span style="color:#888;">📌 原因: {{ eth_reason_1h }}</span></div>
-    <div class="reason"><span>📊 长期4H:</span> {{ eth_signal_4h }}<br><span style="color:#888;">📌 原因: {{ eth_reason_4h }}</span></div>
-    <div class="winrate">📊 历史胜率: {{ eth_win_rate }}%</div>
+    <div class="reason">📌 技术信号:</div>
+    <div class="metric">⏱ 短线15M: {{ eth_signal_15m }}</div>
+    <div class="reason-detail">📍 原因: {{ eth_reason_15m }}</div>
+    <div class="metric">📉 中期1H: {{ eth_signal_1h }}</div>
+    <div class="reason-detail">📍 原因: {{ eth_reason_1h }}</div>
+    <div class="metric">📊 长期4H: {{ eth_signal_4h }}</div>
+    <div class="reason-detail">📍 原因: {{ eth_reason_4h }}</div>
+    <div class="winrate">历史胜率: {{ eth_win_rate }}%</div>
   </div>
 
   <!-- ETH 操作建议 -->
@@ -126,29 +140,35 @@
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: {{ eth_risk }}</div>
   </div>
+
   <div class="card">
     <div class="title">📍 短线建议（15分钟）</div>
     <div class="metric">📌 建仓价: {{ eth_entry_15m }}</div>
     <div class="metric">🛑 止损: {{ eth_sl_15m }}</div>
     <div class="metric">🎯 止盈: {{ eth_tp_15m }}</div>
-    <div class="sub">👉 快节奏交易策略，建议结合成交量和波动率使用。</div>
+    <div class="reason-detail">📌 信号依据: {{ eth_reason_15m }}</div>
+    <div class="sub">👉 快节奏策略，结合成交量和波动率。</div>
   </div>
+
   <div class="card">
     <div class="title">📍 中期建议（1小时）</div>
     <div class="metric">📌 建仓价: {{ eth_entry_1h }}</div>
     <div class="metric">🛑 止损: {{ eth_sl_1h }}</div>
     <div class="metric">🎯 止盈: {{ eth_tp_1h }}</div>
-    <div class="sub">👉 可作为趋势初期布局参考，适合日内持仓者。</div>
+    <div class="reason-detail">📌 信号依据: {{ eth_reason_1h }}</div>
+    <div class="sub">👉 适合趋势初期跟随进场。</div>
   </div>
+
   <div class="card">
     <div class="title">📍 长期建议（4小时）</div>
     <div class="metric">📌 建仓价: {{ eth_entry_4h }}</div>
     <div class="metric">🛑 止损: {{ eth_sl_4h }}</div>
     <div class="metric">🎯 止盈: {{ eth_tp_4h }}</div>
-    <div class="sub">👉 适合关注趋势大方向的投资者，建议搭配宏观面参考。</div>
+    <div class="reason-detail">📌 信号依据: {{ eth_reason_4h }}</div>
+    <div class="sub">👉 建议搭配基本面与宏观判断使用。</div>
   </div>
 
-  <!-- 宏观事件 -->
+  <!-- 宏观事件提醒 -->
   <div class="card">
     <div class="title">📅 宏观事件提醒</div>
     <pre class="metric">{{ macro_events }}</pre>
