@@ -1,53 +1,42 @@
-# utils/fear_greed.py
 """
-获取加密货币「恐惧与贪婪指数」
-数据源：https://api.alternative.me/fng/
+抓取 Crypto Fear & Greed Index
+https://api.alternative.me/fng/
 """
 
-from __future__ import annotations
-from datetime import datetime, timezone
-import requests, json, os, pathlib
-
-_URL   = "https://api.alternative.me/fng/"
-CACHE  = pathlib.Path(__file__).with_suffix(".cache.json")  # 本地缓存，防止接口抽风
-TIMEOUT = 5
+from datetime import datetime
+import requests
 
 
-def _fetch_live() -> dict[str, str] | None:
-    try:
-        resp = requests.get(_URL, timeout=TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()["data"][0]          # 取最新一条
-        data["cache_ts"] = datetime.now(timezone.utc).isoformat()
-        CACHE.write_text(json.dumps(data, ensure_ascii=False))
-        return data
-    except Exception:
-        return None
+API = "https://api.alternative.me/fng/?limit=1&format=json"
 
 
-def _load_cache(max_age_min: int = 60) -> dict[str, str] | None:
-    """读取 ≤max_age_min 分钟的缓存，避免频繁请求"""
-    if not CACHE.exists():
-        return None
-    try:
-        data = json.loads(CACHE.read_text())
-        ts   = datetime.fromisoformat(data["cache_ts"])
-        age  = (datetime.now(timezone.utc) - ts).total_seconds() / 60
-        return data if age <= max_age_min else None
-    except Exception:
-        return None
-
-
-def get_fear_and_greed() -> str:
+def get_fear_and_greed():
     """
-    返回示例：
-    >>> '46（Fear）'
-    网络完全失败时 → 'N/A'
+    返回 4 元组:
+        idx   → int   指数 0-100
+        text  → str   英文描述，如 "Greed"
+        emoji → str   😨 / 😊 / 😐  (自定义)
+        ts    → str   更新时间，UTC → Asia/Shanghai
     """
-    data = _fetch_live() or _load_cache()     # 先尝试实时，再回退缓存
-    if not data:
-        return "N/A"
+    r = requests.get(API, timeout=6).json()
+    d = r["data"][0]
 
-    value  = data["value"]
-    label  = data["value_classification"]     # Extreme Fear / Greed / Neutral
-    return f"{value}（{label}）"
+    idx = int(d["value"])
+    text = d["value_classification"]   # Extreme Fear / Greed …
+
+    # 简单映射到 emoji
+    if idx >= 75:
+        emoji = "🤩"
+    elif idx >= 55:
+        emoji = "😊"
+    elif idx >= 45:
+        emoji = "😐"
+    elif idx >= 25:
+        emoji = "😟"
+    else:
+        emoji = "😨"
+
+    ts_utc = datetime.utcfromtimestamp(int(d["timestamp"]))
+    ts = ts_utc.astimezone().strftime("%Y-%m-%d %H:%M")
+
+    return idx, text, emoji, ts   # ← 只返回 4 个
