@@ -5,25 +5,17 @@ from utils.fetch_eth_data import get_eth_analysis
 from utils.fetch_fear_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
 from datetime import datetime
-import pytz
+
 
 def get_all_analysis() -> dict:
-    # 各币种技术分析
     btc = get_btc_analysis()
     eth = get_eth_analysis()
-
-    # 恐惧与贪婪指数
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
-
-    # 宏观事件
     macro = get_macro_event_summary()
-
-    # 页面更新时间（北京时间）
-    cn_time = datetime.now(pytz.timezone("Asia/Shanghai"))
-    page_update = cn_time.strftime("%Y-%m-%d %H:%M:%S")
+    page_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        # BTC 技术分析
+        # BTC
         "btc_price": btc["price"],
         "btc_ma20": btc["ma20"],
         "btc_rsi": btc["rsi"],
@@ -35,7 +27,7 @@ def get_all_analysis() -> dict:
         "btc_risk": btc["risk_usd"],
         "btc_update_time": btc["update_time"],
 
-        # ETH 技术分析
+        # ETH
         "eth_price": eth["price"],
         "eth_ma20": eth["ma20"],
         "eth_rsi": eth["rsi"],
@@ -56,11 +48,12 @@ def get_all_analysis() -> dict:
         # 宏观事件
         "macro_events": macro,
 
-        # 页面更新时间
-        "page_update": page_update
+        # 页面更新时间（北京时间）
+        "page_update": page_update,
     }
 
 
 if __name__ == "__main__":
-    import pprint, json
+    import pprint
+    import json
     pprint.pp(json.dumps(get_all_analysis(), indent=2, ensure_ascii=False))
