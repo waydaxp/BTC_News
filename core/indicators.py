@@ -27,8 +27,9 @@ def calc_atr(df: pd.DataFrame) -> pd.Series:
 
 def add_basic_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df['MA5'] = df['Close'].rolling(MA_WIN_SHORT).mean()  # 新增 MA5
-    df['MA20'] = df['Close'].rolling(MA_WIN_LONG).mean()
+    df['MA5'] = df['Close'].rolling(5).mean()
+    df['MA10'] = df['Close'].rolling(10).mean()
+    df['MA20'] = df['Close'].rolling(20).mean()
     df['RSI'] = calc_rsi(df['Close'])
     df['ATR'] = calc_atr(df)
     return df
