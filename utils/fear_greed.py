@@ -1,42 +1,80 @@
+# utils/fear_greed.py
 """
-抓取 Crypto Fear & Greed Index
-https://api.alternative.me/fng/
+获取 Crypto Fear & Greed Index（恐惧与贪婪指数）
+------------------------------------------------
+返回元组：
+    (idx: int, text: str, emoji: str, ts_bj: str)
+
+示例：
+    >>> from utils.fear_greed import get_fear_and_greed
+    >>> get_fear_and_greed()
+    (68, 'Greed', '😄', '2025-06-30 09:45')
 """
 
-from datetime import datetime
+from __future__ import annotations
+
+import datetime as _dt
+import json
 import requests
+from zoneinfo import ZoneInfo
+
+__all__ = ["get_fear_and_greed"]
+
+_API = "https://api.alternative.me/fng/?limit=1&format=json"
+_TZ_BJ = ZoneInfo("Asia/Shanghai")
+_TZ_UTC = ZoneInfo("UTC")
+
+_EMOJI_MAP = {
+    "Extreme Fear": "😨",
+    "Fear":         "😟",
+    "Neutral":      "😐",
+    "Greed":        "😊",
+    "Extreme Greed":"😄",
+}
 
 
-API = "https://api.alternative.me/fng/?limit=1&format=json"
+def _query_api() -> dict:
+    """向 API 发起网络请求并返回第一条记录（dict）。"""
+    resp = requests.get(_API, timeout=8)
+    resp.raise_for_status()
+    obj: dict = json.loads(resp.text)
+    if obj.get("data"):
+        return obj["data"][0]
+    raise RuntimeError("Invalid response from Fear & Greed API")
 
 
-def get_fear_and_greed():
+def _utc_to_bj(ts: int) -> str:
+    """时间戳 → 北京时间字符串（YYYY-MM-DD HH:MM）"""
+    return (
+        _dt.datetime.fromtimestamp(ts, _TZ_UTC)
+        .astimezone(_TZ_BJ)
+        .strftime("%Y-%m-%d %H:%M")
+    )
+
+
+def get_fear_and_greed() -> tuple[int, str, str, str]:
     """
-    返回 4 元组:
-        idx   → int   指数 0-100
-        text  → str   英文描述，如 "Greed"
-        emoji → str   😨 / 😊 / 😐  (自定义)
-        ts    → str   更新时间，UTC → Asia/Shanghai
+    Returns
+    -------
+    idx : int
+        指数数值 0-100
+    text : str
+        文本描述（Extreme Fear/Fear/Neutral/…）
+    emoji : str
+        对应表情
+    ts_bj : str
+        北京时间字符串
     """
-    r = requests.get(API, timeout=6).json()
-    d = r["data"][0]
+    d = _query_api()
 
-    idx = int(d["value"])
-    text = d["value_classification"]   # Extreme Fear / Greed …
+    idx  = int(d["value"])
+    text = d["value_classification"]
+    ts_bj = _utc_to_bj(int(d["timestamp"]))
+    emoji = _EMOJI_MAP.get(text, "🤔")
 
-    # 简单映射到 emoji
-    if idx >= 75:
-        emoji = "🤩"
-    elif idx >= 55:
-        emoji = "😊"
-    elif idx >= 45:
-        emoji = "😐"
-    elif idx >= 25:
-        emoji = "😟"
-    else:
-        emoji = "😨"
+    return idx, text, emoji, ts_bj
 
-    ts_utc = datetime.utcfromtimestamp(int(d["timestamp"]))
-    ts = ts_utc.astimezone().strftime("%Y-%m-%d %H:%M")
 
-    return idx, text, emoji, ts   # ← 只返回 4 个
+# 快速自测
+if __name__ == "__main__":
+    print(get_fear_and_greed())
