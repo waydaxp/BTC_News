@@ -2,71 +2,56 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>{{ title if title else 'BTC & ETH 策略' }}</title>
-
+<title>BTC / ETH 双币技术分析</title>
 <style>
-body {                       /* 普通花括号不会被 Jinja2 解析 */
-  font-family: "Helvetica Neue", sans-serif;
-  background:#f7f7f7; padding:20px; line-height:1.6;
-}
-h2 {background:#fff;padding:10px;border-left:5px solid #4CAF50;font-size:20px}
-.section {background:#fff;margin-bottom:20px;padding:15px;border-left:3px solid #4CAF50}
+    body      { font-family: "SF Pro","Helvetica Neue",sans-serif; background:#f5f7fa; margin:0; padding:20px; }
+    h1        { margin: 0 0 20px; }
+    .card     { background:#ffffff; border-radius:8px; padding:18px 22px; box-shadow:0 2px 6px rgba(0,0,0,.06); margin-bottom:24px; }
+    .title    { font-size:18px; font-weight:600; margin-bottom:8px; }
+    .kv       { line-height:1.9; }
+    .kv b     { display:inline-block; min-width:110px; }
+    .footer   { font-size:14px; color:#6b7280; text-align:right; margin-top:30px; }
 </style>
-</head><body>
+</head>
+<body>
 
-<!-- ================  BTC  ================= -->
-<h2>📉【BTC 技术分析】</h2>
-<div class="section">
-  价格: {{ btc_price }}<br>
-  MA20: {{ btc_ma20 }}<br>
-  RSI : {{ btc_rsi }}<br>
-  技术信号: {{ btc_signal }}
+<h1>📊 加密货币每日量化报告</h1>
+
+<!-- ────────── BTC ────────── -->
+<div class="card">
+  <div class="title">₿ BTC 技术分析</div>
+  <div class="kv">
+    <b>现价:</b> {btc_price} USDT<br>
+    <b>方向:</b> {btc_direction}<br>
+    <b>策略:</b> {btc_strategy_text}<br>
+    <b>止损:</b> {btc_sl}<br>
+    <b>止盈:</b> {btc_tp}
+  </div>
 </div>
 
-<h2>📈 操作建议（BTC）</h2>
-<div class="section">
-  - 💰 风险金额: {{ btc_risk }}<br>
-  - 🛠 杠杆后下单量: {{ btc_position }}<br>
-  - 📌 建仓价: {{ btc_entry }}<br>
-  - 🛑 止损:   {{ btc_stop }}<br>
-  - 🎯 止盈:   {{ btc_target }}
+<!-- ────────── ETH ────────── -->
+<div class="card">
+  <div class="title">Ξ ETH 技术分析</div>
+  <div class="kv">
+    <b>现价:</b> {eth_price} USDT<br>
+    <b>方向:</b> {eth_direction}<br>
+    <b>策略:</b> {eth_strategy_text}<br>
+    <b>止损:</b> {eth_sl}<br>
+    <b>止盈:</b> {eth_tp}
+  </div>
 </div>
 
-<h3>📌 当前策略说明（BTC）</h3>
-<div class="section">{{ btc_strategy_text | replace('\n', '<br>') | safe }}</div>
-
-
-<!-- ================  ETH  ================= -->
-<h2>📉【ETH 技术分析】</h2>
-<div class="section">
-  价格: {{ eth_price }}<br>
-  MA20: {{ eth_ma20 }}<br>
-  RSI : {{ eth_rsi }}<br>
-  技术信号: {{ eth_signal }}
+<!-- ────────── 宏观及情绪 ────────── -->
+<div class="card">
+  <div class="title">宏观事件 & 情绪指标</div>
+  <div class="kv">
+      <b>恐惧 / 贪婪:</b> {fear_index}（{fear_level}，{fear_date}）<br>
+      <b>今日宏观要闻:</b><br>
+      {macro_events}
+  </div>
 </div>
 
-<h2>📈 操作建议（ETH）</h2>
-<div class="section">
-  - 💰 风险金额: {{ eth_risk }}<br>
-  - 🛠 杠杆后下单量: {{ eth_position }}<br>
-  - 📌 建仓价: {{ eth_entry }}<br>
-  - 🛑 止损:   {{ eth_stop }}<br>
-  - 🎯 止盈:   {{ eth_target }}
-</div>
+<p class="footer">最近更新时间：{update_time}</p>
 
-<h3>📌 当前策略说明（ETH）</h3>
-<div class="section">{{ eth_strategy_text | replace('\n','<br>') | safe }}</div>
-
-
-<!-- ================  宏观 & 情绪  ================= -->
-<h2>📅【宏观事件提醒】</h2>
-<div class="section">{{ macro_events | safe }}</div>
-
-<h2>📊 恐惧与贪婪指数（{{ fear_date }}）</h2>
-<div class="section">当前值: {{ fear_index }}（{{ fear_level }}）</div>
-
-<hr>
-<p style="text-align:right;font-size:13px;color:gray">
-🕒 最后更新：{{ update_time }}
-</p>
-</body></html>
+</body>
+</html>
