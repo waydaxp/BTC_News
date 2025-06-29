@@ -7,7 +7,3 @@ requests==2.32.4
 beautifulsoup4==4.13.4
 lxml==4.9.3
 jinja2==3.1.6
-# 🔽 社区版删掉
-# python-binance==1.0.29
-# 🔽 新增官方 SDK（只需其一）
-binance-connector>=3.4.0
