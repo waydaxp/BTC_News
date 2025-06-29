@@ -2,39 +2,39 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
-  workflow_dispatch:
+    - cron: '*/5 * * * *'      # 每 5 分钟运行
+  workflow_dispatch:           # 允许手动触发
 
 permissions:
-  contents: write
+  contents: write              # 允许向仓库推送
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ 拉取仓库
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    # ——▶ 修正处：直接装 ta-lib / ta-lib-dev
-    - name: Install TA-Lib system libraries
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential ta-lib ta-lib-dev
-
+    # 2️⃣ 安装 Python（3.11）
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
-    - name: Install Python deps
+    # 3️⃣ 安装依赖
+    #    ➜ requirements.txt 已把 `ta-lib` 改为 `ta-lib-binary`
+    - name: Install Python dependencies
       run: |
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    # 4️⃣ 生成最新 index.html
     - name: Generate index.html
       run: python generate_html.py
 
+    # 5️⃣ 如有变更则提交回主分支
     - name: Commit & push index.html
       run: |
         git config --global user.email "action@github.com"
