@@ -2,28 +2,35 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/5 * * * *"      # 每 5 分钟
-  workflow_dispatch:
+    - cron: "*/5 * * * *"          # 每 5 分钟运行
+  workflow_dispatch:               # 支持手动触发
 
 permissions:
-  contents: write
+  contents: write                  # 允许向仓库推送
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
 
     steps:
-    # 1) 拉仓库
-    - name: Checkout repo
+    # ─────────────────────────────────────────────────────────────
+    # 1️⃣  检出仓库
+    # ─────────────────────────────────────────────────────────────
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2) Python 3.11
+    # ─────────────────────────────────────────────────────────────
+    # 2️⃣  Python 3.11（可改 3.10/3.9，逻辑相同）
+    # ─────────────────────────────────────────────────────────────
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    # 3) 编译 TA-Lib C 库
+    # ─────────────────────────────────────────────────────────────
+    # 3️⃣  编译并安装 TA-Lib C 库
+    #     * 单线程 make 规避 gen_code 并发 Bug
+    # ─────────────────────────────────────────────────────────────
     - name: Build & install TA-Lib C library
       run: |
         sudo apt-get update
@@ -33,22 +40,37 @@ jobs:
         tar -xzf ta-lib-0.4.0-src.tar.gz
         cd ta-lib
         ./configure --prefix=/usr
-        make -j1                      # 单线程避免 gen_code 并发 Bug
+        make -j1                      # ⚠️ 必须单线程
         sudo make install
-        sudo ldconfig
+        sudo ldconfig                 # 刷新动态库缓存
 
-    # 4) 安装 Python 依赖
+    # ─────────────────────────────────────────────────────────────
+    # 4️⃣  安装 Python 依赖
+    #     步骤顺序：NumPy → TA-Lib (禁用隔离) → 其余包
+    # ─────────────────────────────────────────────────────────────
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
+
+        # ① 固定 NumPy 1.26.4（TA-Lib 兼容版本）
+        pip install numpy==1.26.4
+
+        # ② 编译 TA-Lib Python 封装，禁用隔离以复用已装 NumPy
+        pip install --no-build-isolation ta-lib==0.4.26
+
+        # ③ 安装项目其他依赖（已在 requirements.txt 精确锁定版本）
         pip install -r requirements.txt
 
-    # 5) 生成网页
+    # ─────────────────────────────────────────────────────────────
+    # 5️⃣  生成静态网页
+    # ─────────────────────────────────────────────────────────────
     - name: Generate index.html
       run: python generate_html.py
 
-    # 6) 推送变更
-    - name: Commit & push index.html
+    # ─────────────────────────────────────────────────────────────
+    # 6️⃣  若 index.html 有变化则推送
+    # ─────────────────────────────────────────────────────────────
+    - name: Commit & push updated index.html
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name  "GitHub Action"
