@@ -4,21 +4,20 @@
   <meta charset="utf-8">
   <title>Crypto Tech Dashboard</title>
   <style>
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;padding:0;background:#fafafa;color:#222;}
+    body{font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;margin:0;padding:0;background:#fafafa;color:#222;}
+    h2{margin:0 0 8px;padding:0;}
     .card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
     .title{font-size:20px;font-weight:700;margin-bottom:4px;}
     .metric{line-height:1.6;}
-    .sub{font-size:12px;color:#666;margin-top:4px;}
+    .sub{font-size:12px;color:#666;margin-top:8px;}
   </style>
 </head>
 <body>
-
   <div class="card">
     <div class="title">📉【BTC 技术分析】</div>
     <div class="metric">当前价格: {btc_price}</div>
     <div class="metric">MA20: {btc_ma20}</div>
     <div class="metric">RSI: {btc_rsi}</div>
-    <div class="metric">ATR: {btc_atr}</div>
     <div class="metric">技术信号: {btc_signal}</div>
     <p class="sub">更新时间: {btc_update_time}</p>
   </div>
@@ -26,7 +25,8 @@
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: {btc_risk}</div>
-    <div class="metric">🛠 仓位数量: {btc_qty}</div>
+    <div class="metric">🛠 杠杆后下单量: {btc_qty}</div>
+    <div class="metric">📌 建仓价: {btc_entry}</div>
     <div class="metric">🛑 止损: {btc_sl}</div>
     <div class="metric">🎯 止盈: {btc_tp}</div>
   </div>
@@ -36,7 +36,6 @@
     <div class="metric">当前价格: {eth_price}</div>
     <div class="metric">MA20: {eth_ma20}</div>
     <div class="metric">RSI: {eth_rsi}</div>
-    <div class="metric">ATR: {eth_atr}</div>
     <div class="metric">技术信号: {eth_signal}</div>
     <p class="sub">更新时间: {eth_update_time}</p>
   </div>
@@ -44,12 +43,10 @@
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: {eth_risk}</div>
-    <div class="metric">🛠 仓位数量: {eth_qty}</div>
+    <div class="metric">🛠 杠杆后下单量: {eth_qty}</div>
+    <div class="metric">📌 建仓价: {eth_entry}</div>
     <div class="metric">🛑 止损: {eth_sl}</div>
     <div class="metric">🎯 止盈: {eth_tp}</div>
   </div>
-
-  <p class="sub" style="text-align:center;">⏰ 页面更新于 {page_update_time} (北京时间)</p>
-
 </body>
 </html>
