@@ -12,11 +12,14 @@ PAIR = "ETH-USD"
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
 
-    # 如果是 MultiIndex（即列名形如 ('BTC-USD', 'Open')），则取出第二层列名
+    # 解决 MultiIndex 列名的问题
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(1)
+        try:
+            df = df.xs(PAIR, axis=1, level=0)
+        except KeyError:
+            raise ValueError(f"{PAIR} 不在返回数据中，可能是下载失败")
 
-    # 确保所需列存在
+    # 确保必需列存在
     required_cols = ["Open", "High", "Low", "Close", "Volume"]
     missing = [col for col in required_cols if col not in df.columns]
     if missing:
