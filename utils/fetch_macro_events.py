@@ -1,42 +1,40 @@
 # utils/fetch_macro_events.py
 """
-拉取 CoinMarketCal 未来 7 天内与 BTC / ETH 相关的高重要度事件
-需在 GitHub Secrets 中设置 COINMARKETCAL_KEY
+按日期升序返回未来宏观事件（最多 limit 条）。
+事件列表可根据需要改为接口爬虫或手动维护 YAML。
 """
 
-import os, requests, datetime as dt
+from __future__ import annotations
+from datetime import datetime
 from typing import List
 
-_API = "https://developers.coinmarketcal.com/v1/events"
-_HEADERS = {"x-api-key": os.getenv("COINMARKETCAL_KEY")}
+# ---- 临时硬编码示例 ----
+_RAW_EVENTS = [
+    # name, date(YYYY-MM-DD), impact
+    ("美国CPI公布",       "2025-06-28", "若超预期，BTC 或承压"),
+    ("FOMC 利率决议",     "2025-07-03", "加息可能引发波动"),
+    ("SEC 审查比特币 ETF", "2025-07-10", "若通过，或引发大涨"),
+]
 
-def _call_api() -> list[dict]:
-    params = {
-        "symbols": "BTC,ETH",
-        "page": 1,
-        "max": 10,
-        "dateRangeStart": dt.date.today().isoformat(),
-        "dateRangeEnd":   (dt.date.today() + dt.timedelta(days=7)).isoformat(),
-        "sortBy": "hot",      # 热度/重要度
-    }
-    try:
-        r = requests.get(_API, params=params, headers=_HEADERS, timeout=5)
-        r.raise_for_status()
-        return r.json()
-    except requests.RequestException:
-        return []
+def get_macro_events(limit: int | None = None) -> List[str]:
+    """
+    返回 **未 HTML 转义** 的字符串列表，可直接 `<br>` 连接：
 
-def get_macro_event_summary() -> str:
-    events = _call_api()
-    if not events:
-        return "⚠️ 无法获取实时宏观事件，请稍后再试。"
+    [
+        "- 美国CPI公布（2025-06-28，2 天后）：若超预期，BTC 或承压",
+        "- FOMC 利率决议（2025-07-03，7 天后）：加息可能引发波动",
+        ...
+    ]
+    """
+    today = datetime.utcnow().date()
 
-    lines: List[str] = []
-    today = dt.date.today()
-    for ev in events:
-        ev_date = dt.datetime.fromisoformat(ev["date"])
-        days = (ev_date.date() - today).days
-        lines.append(
-            f"- {ev['title']}（{ev_date:%m-%d}，{days} 天后）：{ev['description'][:40]}..."
-        )
-    return "\n".join(lines)
+    rows = []
+    for name, date_str, impact in _RAW_EVENTS:
+        dt = datetime.strptime(date_str, "%Y-%m-%d").date()
+        if dt < today:
+            continue                          # 已过去的事件跳过
+        d_left = (dt - today).days
+        rows.append(f"- {name}（{date_str}，{d_left} 天后）：{impact}")
+
+    rows.sort()                               # 升序
+    return rows[:limit] if limit else rows
