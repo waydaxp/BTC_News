@@ -34,15 +34,21 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 def _judge_signal(df: pd.DataFrame) -> str:
     last = df.iloc[-1]
     ma5 = df['Close'].rolling(5).mean()
-    recent = df['Close'].tail(5) > df['MA20'].tail(5)
-    above_ma20 = recent.sum() >= 4
-    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 4
 
-    if last['Close'] > last['MA20'] and above_ma20 and 45 < last['RSI'] < 65 and last['Close'] > ma5.iloc[-1]:
+    recent = df['Close'].tail(5) > df['MA20'].tail(5)
+    above_ma20 = recent.sum() >= 3
+    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
+
+    rsi = last['RSI']
+    close = last['Close']
+    ma20 = last['MA20']
+    ma5_val = ma5.iloc[-1]
+
+    if close > ma20 and above_ma20 and 45 < rsi < 70 and close > ma5_val:
         return "🟢 做多信号"
-    elif last['Close'] < last['MA20'] and below_ma20 and 35 < last['RSI'] < 55 and last['Close'] < ma5.iloc[-1]:
+    elif close < ma20 and below_ma20 and 30 < rsi < 55 and close < ma5_val:
         return "🔻 做空信号"
-    elif abs(last['RSI'] - 50) < 3:
+    elif abs(rsi - 50) < 5:
         return "⏸ 震荡中性"
     else:
         return "⏸ 中性信号"
@@ -80,17 +86,15 @@ def get_btc_analysis() -> dict:
     update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        # 综合展示使用
         "price": price1h,
         "ma20": float(last1h['MA20']),
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
 
-        # 三周期交易建议
-        "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
-        "entry_1h":  price1h, "sl_1h":  sl1h, "tp_1h":  tp1h,  "qty_1h":  qty1h,
-        "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
+        "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15, "entry_15m": price15,
+        "sl_1h": sl1h, "tp_1h": tp1h, "qty_1h": qty1h, "entry_1h": price1h,
+        "sl_4h": sl4h, "tp_4h": tp4h, "qty_4h": qty4h, "entry_4h": price4h,
 
         "risk_usd": RISK_USD,
         "update_time": update_time
