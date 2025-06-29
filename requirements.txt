@@ -32,7 +32,7 @@ matplotlib
 
 jinja2>=3.1
 
-ta-lib>=0.4.28
+ta-lib-binary>=0.4.28
 
 pandas
 
