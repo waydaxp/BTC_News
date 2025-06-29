@@ -1,80 +1,78 @@
-# utils/fetch_eth_data.py
-import numpy as np
-import pandas as pd
+"""
+拉取 ETH-USDT K 线（同 BTC 逻辑）
+"""
+from __future__ import annotations
+
 import yfinance as yf
-from datetime import datetime
+import pandas as pd
+from datetime import datetime, timedelta, timezone
 from core.indicators import add_basic_indicators
-from core.risk import calc_position_size, ATR_MULT_TP, ATR_MULT_SL
+from core.signal      import make_signal
+from core.risk        import calc_position_size, ATR_MULT_TP, ATR_MULT_SL
 
-PAIR = "ETH-USD"
+PAIR        = "ETH-USD"
+ACCOUNT_USD = 1000
+
 INTERVALS = {
-    "1h":  {"interval": "60m", "period": "90d"},
-    "4h":  {"interval": "240m", "period": "360d"},
-    "1d":  {"interval": "1d",  "period": "720d"},
-    "15m": {"interval": "15m", "period": "30d"},
+    "15m": dict(interval="15m", period="3d"),
+    "1h":  dict(interval="60m", period="14d"),
+    "4h":  dict(interval="240m", period="90d"),
 }
-TREND_LEN = 5
-N15_CONF  = 12
 
-# ---------------------------------------------------------
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df: pd.DataFrame = yf.download(
-        PAIR, interval=interval, period=period, progress=False
+        PAIR,
+        interval=interval,
+        period=period,
+        progress=False,
+        auto_adjust=False,
+        threads=False,
     )
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(-1)
-    df.index = df.index.tz_localize(None)
+    if df.empty:
+        raise RuntimeError(f"Yahoo 返回空 K线 ({interval}/{period})")
+
+    df.columns = [c.capitalize() for c in df.columns]
+    if df.index.tz is None:
+        df.index = df.index.tz_localize("UTC")
+    else:
+        df.index = df.index.tz_convert("UTC")
+
     return add_basic_indicators(df)
 
+# --------------------------------------------------------------------------- #
 
-def get_eth_analysis() -> dict:
-    dfs = {k: _download_tf(**v) for k, v in INTERVALS.items()}
-    df_1h, df_4h, df_1d, df_15m = (
-        dfs["1h"], dfs["4h"], dfs["1d"], dfs["15m"]
-    )
+def get_eth_analysis() -> dict[str, object]:
+    dfs = {k: _download_tf(**kw) for k, kw in INTERVALS.items()}
+    df_15m, df_1h, df_4h = dfs["15m"], dfs["1h"], dfs["4h"]
 
     last_1h = df_1h.iloc[-1]
     price   = float(last_1h["Close"])
-    ma20    = float(last_1h["MA20"])
-    rsi     = float(last_1h["RSI"])
     atr     = float(last_1h["ATR"])
 
-    trend_up = (
-        (df_1h["Close"].tail(TREND_LEN) > df_1h["MA20"].tail(TREND_LEN)).all()
-        and (df_4h["Close"].iloc[-1] > df_4h["MA20"].iloc[-1])
-        and (df_1d["Close"].iloc[-1] > df_1d["MA20"].iloc[-1])
-        and (df_15m["Close"].tail(N15_CONF) > df_15m["MA20"].tail(N15_CONF)).all()
-        and (df_1h["Close"].diff().tail(3).abs().sum() <= 2 * atr)
-        and rsi > 50
-    )
-    trend_down = (
-        (df_1h["Close"].tail(TREND_LEN) < df_1h["MA20"].tail(TREND_LEN)).all()
-        and (df_4h["Close"].iloc[-1] < df_4h["MA20"].iloc[-1])
-        and (df_1d["Close"].iloc[-1] < df_1d["MA20"].iloc[-1])
-        and (df_15m["Close"].tail(N15_CONF) < df_15m["MA20"].tail(N15_CONF)).all()
-        and (df_1h["Close"].diff().tail(3).abs().sum() <= 2 * atr)
-        and rsi < 50
+    signal = make_signal(df_15m, df_1h, df_4h)
+
+    pos_qty, risk_usd = calc_position_size(
+        balance_usd=ACCOUNT_USD,
+        price=price,
+        atr=atr,
+        atr_mult_sl=ATR_MULT_SL,
     )
 
-    direction = "long" if trend_up else "short" if trend_down else "neutral"
-
-    if direction in ("long", "short"):
-        sl = price - ATR_MULT_SL * atr if direction == "long" else price + ATR_MULT_SL * atr
-        tp = price + ATR_MULT_TP * atr if direction == "long" else price - ATR_MULT_TP * atr
-        pos = calc_position_size(price)
-    else:
-        sl = tp = pos = None
+    stop   = round(price - ATR_MULT_SL * atr, 2)
+    target = round(price + ATR_MULT_TP * atr, 2)
 
     return {
-        "price":          price,
-        "ma20":           ma20,
-        "rsi":            rsi,
-        "atr":            atr,
-        "direction":      direction,
-        "entry":          price if direction in ("long", "short") else None,
-        "sl":             sl,
-        "tp":             tp,
-        "quantity_after_leverage": pos,
-        "risk_usd":       calc_position_size.risk_usd,
-        "timestamp":      datetime.utcnow(),
+        "symbol": "ETH",
+        "last_price": price,
+        "atr": atr,
+        "signal": signal.text,
+        "side": signal.side,
+        "risk_usd": risk_usd,
+        "position_qty": pos_qty,
+        "entry": price,
+        "stop": stop if signal.side != "flat" else "N/A",
+        "target": target if signal.side != "flat" else "N/A",
+        "updated": datetime.now(timezone.utc).astimezone(
+            timezone(timedelta(hours=8))
+        ).strftime("%Y-%m-%d %H:%M"),
     }
