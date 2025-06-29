@@ -12,20 +12,20 @@ PAIR = "ETH-USD"
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
 
-    # ✅ 如果返回的是多层列（MultiIndex），取出对应币种数据
+    # ✅ 解决 MultiIndex 问题：
     if isinstance(df.columns, pd.MultiIndex):
         if PAIR in df.columns.levels[0]:
             df = df[PAIR]
         else:
             raise ValueError(f"MultiIndex 数据中未找到: {PAIR}")
 
-    df.columns = df.columns.str.title()  # 标准化列名
-    required_cols = ["Open", "High", "Low", "Close", "Volume"]
-    missing = [col for col in required_cols if col not in df.columns]
+    df = df.rename(columns=str.title)
+    
+    expected_cols = ["Open", "High", "Low", "Close", "Volume"]
+    missing = [col for col in expected_cols if col not in df.columns]
     if missing:
         raise ValueError(f"缺失所需列: {missing}")
 
-    df = df[required_cols].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
