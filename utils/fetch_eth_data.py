@@ -1,4 +1,3 @@
-# utils/fetch_eth_data.py
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
@@ -11,8 +10,8 @@ PAIR = "ETH-USD"
 TZ   = "Asia/Shanghai"
 
 CFG = {
-    "1h":  {"interval":"1h",  "period":"7d"},
-    "15m": {"interval":"15m", "period":"1d"},
+    "1h":  {"interval": "1h",  "period": "7d"},
+    "15m": {"interval": "15m", "period": "1d"},
 }
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
@@ -30,11 +29,12 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 
 def get_eth_analysis() -> dict:
     df1h  = _download_tf(**CFG["1h"])
-    ohlc  = {"Open":"first","High":"max","Low":"min","Close":"last","Volume":"sum"}
-    df4h  = df1h.resample("4h", closed="right", label="right").agg(ohlc).dropna()
-    df4h  = add_basic_indicators(df4h)
-
     df15m = _download_tf(**CFG["15m"])
+
+    ohlc = {"Open":"first", "High":"max", "Low":"min", "Close":"last", "Volume":"sum"}
+    df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc)
+    df4h.columns = df4h.columns.get_level_values(0)
+    df4h = add_basic_indicators(df4h).dropna()
 
     last1h  = df1h.iloc[-1]
     last4h  = df4h.iloc[-1]
@@ -46,15 +46,13 @@ def get_eth_analysis() -> dict:
     atr   = float(last1h["Atr"])
 
     if last4h["Close"] > last4h["Ma20"] and last15m["Close"] > last15m["Ma20"] and 30 < rsi < 70:
-        side   = "long"
-        signal = "✅ 做多"
-        sl     = price - ATR_MULT_SL * atr
-        tp     = price + ATR_MULT_TP * atr
+        side, signal = "long",  "✅ 做多"
+        sl = price - ATR_MULT_SL * atr
+        tp = price + ATR_MULT_TP * atr
     else:
-        side   = "short"
-        signal = "⛔ 观望"
-        sl     = price + ATR_MULT_SL * atr
-        tp     = price - ATR_MULT_TP * atr
+        side, signal = "short", "⛔ 观望"
+        sl = price + ATR_MULT_SL * atr
+        tp = price - ATR_MULT_TP * atr
 
     qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
 
