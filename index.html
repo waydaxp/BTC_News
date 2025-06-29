@@ -1,72 +1,65 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>Crypto Tech Dashboard</title>
-  <style>
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fafafa;margin:0;color:#222}
-    h2{margin:0 0 8px}
-    .card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-    .title{font-size:20px;font-weight:700;margin-bottom:4px}
-    .metric{line-height:1.6}
-    .ts{font-size:12px;color:#666;text-align:right;margin-top:4px}
-  </style>
+<meta charset="utf-8">
+<title>Crypto Tech Dashboard</title>
+<style>
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#fafafa;color:#222;}
+h2{margin:0 0 8px;}
+.card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.metric{line-height:1.6;}
+footer{font-size:13px;text-align:center;color:#777;margin:16px 0;}
+</style>
 </head>
 <body>
 
-  <!-- ===== ① BTC ===== -->
-  <div class="card">
-    <div class="title">📉【BTC 技术分析】</div>
-    <div class="metric">当前价格: 107375.0703125</div>
-    <div class="metric">MA20: 107642.392578125</div>
-    <div class="metric">RSI: 52.647530156431245</div>
-    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
-  </div>
+<!-- ==== BTC ==== -->
+<div class="card">
+  <div class="title">📉【BTC 技术分析】</div>
+  <div class="metric">当前价格: 107401.828125</div>
+  <div class="metric">MA20: 107643.73046875</div>
+  <div class="metric">RSI: 53.25908164407349</div>
+  <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
+</div>
 
-  <div class="card">
-    <div class="title">📊 操作建议（BTC）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 0.081</div>
-    <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 107128.51897321429</div>
-    <div class="metric">🎯 止盈: 107744.89732142857</div>
-  </div>
+<div class="card">
+  <div class="title">📊 操作建议（BTC）</div>
+  <div class="metric">💰 风险金额: 20.0</div>
+  <div class="metric">🛠 杠杆后下单量: 0.081</div>
+  <div class="metric">🛑 止损: 107154.36216517857</div>
+  <div class="metric">🎯 止盈: 107773.02706473214</div>
+</div>
 
-  <!-- ===== ② ETH ===== -->
-  <div class="card">
-    <div class="title">📉【ETH 技术分析】</div>
-    <div class="metric">当前价格: 2434.289794921875</div>
-    <div class="metric">MA20: 2441.1452392578126</div>
-    <div class="metric">RSI: 53.938110038304956</div>
-    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
-  </div>
+<!-- ==== ETH ==== -->
+<div class="card">
+  <div class="title">📉【ETH 技术分析】</div>
+  <div class="metric">当前价格: 2436.335205078125</div>
+  <div class="metric">MA20: 2441.247509765625</div>
+  <div class="metric">RSI: 55.693827122121036</div>
+  <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
+</div>
 
-  <div class="card">
-    <div class="title">📊 操作建议（ETH）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 2.507</div>
-    <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 2426.311279296875</div>
-    <div class="metric">🎯 止盈: 2446.257568359375</div>
-  </div>
+<div class="card">
+  <div class="title">📊 操作建议（ETH）</div>
+  <div class="metric">💰 风险金额: 20.0</div>
+  <div class="metric">🛠 杠杆后下单量: 2.501</div>
+  <div class="metric">🛑 止损: 2428.3377685546875</div>
+  <div class="metric">🎯 止盈: 2448.3313598632812</div>
+</div>
 
-  <!-- ===== ③ 宏观事件 ===== -->
-  <div class="card">
-    <div class="title">📅 宏观事件提醒</div>
-    <div class="metric">
-      - FOMC 利率决议（2025-07-03，4 天后）：加息可能引发波动<br>- 非农就业报告（2025-07-05，6 天后）：就业强劲或加大加息预期<br>- SEC 审查比特币 ETF（2025-07-10，11 天后）：若通过，或引发大涨          <!-- 这里通常是已用 <br> 拼接好的多行字符串 -->
-    </div>
-  </div>
+<!-- ==== 宏观 & 情绪 ==== -->
+<div class="card">
+  <div class="title">📅 宏观事件提醒（未来 5 件）</div>
+  <div class="metric">- FOMC 利率决议（2025-07-03，4 天后）：加息可能引发波动<br>- 非农就业报告（2025-07-05，6 天后）：就业强劲或加大加息预期<br>- SEC 审查比特币 ETF（2025-07-10，11 天后）：若通过，或引发大涨</div>
+</div>
 
-  <!-- 😨/😊 恐惧与贪婪指数 -->
-  <div class="card">
-    <div class="title">😨/😊 恐惧与贪婪指数（68）</div>
-    <div class="metric">当前值: （Greed）</div>
-  </div>
+<div class="card">
+  <div class="title">😨/😊 恐惧与贪婪指数</div>
+  <div class="metric">当前值: 68 😊 (Greed)</div>
+  <div class="metric">更新时间: 2025-06-29 00:00</div>
+</div>
 
-  <!-- ⏰ 更新时间 -->
-  <div class="card" style="text-align:right">
-    <span class="metric">更新时间: 2025-06-29 17:42 UTC</span>
-  </div>
+<footer>⏰ 页面更新于 2025-06-29 00:00 (本地时区)</footer>
 </body>
 </html>
