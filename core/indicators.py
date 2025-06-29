@@ -1,8 +1,7 @@
-# core/indicators.py
-
 import pandas as pd
 
-MA_WIN = 20
+MA_WIN_SHORT = 5     # 新增：用于 MA5
+MA_WIN_LONG = 20     # 原 MA20
 RSI_WIN = 14
 ATR_WIN = 14
 
@@ -28,7 +27,8 @@ def calc_atr(df: pd.DataFrame) -> pd.Series:
 
 def add_basic_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
-    df['MA20'] = df['Close'].rolling(MA_WIN).mean()
+    df['MA5'] = df['Close'].rolling(MA_WIN_SHORT).mean()  # 新增 MA5
+    df['MA20'] = df['Close'].rolling(MA_WIN_LONG).mean()
     df['RSI'] = calc_rsi(df['Close'])
     df['ATR'] = calc_atr(df)
     return df
