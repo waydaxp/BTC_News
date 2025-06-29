@@ -1,85 +1,71 @@
 # utils/fetch_eth_data.py
-"""
-下载 ETH 多周期 K 线 → 计算指标 → 输出一个 dict
-"""
-from __future__ import annotations
-
-from datetime import datetime, timezone, timedelta
-from typing import Literal
-
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
+from datetime import datetime
+from core.indicators  import add_basic_indicators
+from core.risk        import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 
-from core.indicators import add_basic_indicators
-from core.signal      import make_signal
-from core.risk        import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
-
-PAIR      = "ETH-USD"
-TZ        = timezone(timedelta(hours=8))      # 北京时间
-TREND_LEN = 4
+PAIR = "ETH-USD"
+TZ   = "Asia/Shanghai"
 
 INTERVALS = {
-    "1h" : dict(interval="1h",  period="180d"),
-    "4h" : dict(interval="1h",  period="360d"),
-    "15m": dict(interval="15m", period="30d"),
+    "1h":  {"interval": "1h",  "period": "3d"},
+    "4h":  {"interval": "1h",  "period": "10d"},
+    "15m": {"interval": "15m", "period": "1d"},
 }
 
-# --------------------------------------------------------------------------- #
-def _download_tf(interval: str, period: str) -> pd.DataFrame:
-    df: pd.DataFrame = yf.download(PAIR, interval=interval, period=period, progress=False)
-    df.index = df.index.tz_localize(None).tz_localize(TZ)
-    df.columns = [c.capitalize() for c in df.columns]
-    return add_basic_indicators(df).dropna()
+def _flatten_ohlc_columns(df: pd.DataFrame) -> pd.DataFrame:
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0).str.capitalize()
+    else:
+        df.columns = [str(c).capitalize() for c in df.columns]
+    return df
 
+def _download_tf(interval: str, period: str) -> pd.DataFrame:
+    df = yf.download(PAIR, interval=interval, period=period, progress=False)
+    df = _flatten_ohlc_columns(df)
+    idx = df.index
+    df.index = idx.tz_convert(TZ) if idx.tzinfo else idx.tz_localize("UTC").tz_convert(TZ)
+    df = add_basic_indicators(df).dropna()
+    return df
 
 def get_eth_analysis() -> dict:
-    dfs = {k: _download_tf(**cfg) for k, cfg in INTERVALS.items()}
+    df1h  = _download_tf(**INTERVALS["1h"])
+    ohlc  = {"open":"first","high":"max","low":"min","close":"last","volume":"sum"}
+    df4h  = _flatten_ohlc_columns(df1h.resample("4h", closed="right", label="right").agg(ohlc))
+    df4h  = add_basic_indicators(df4h).dropna()
+    df15m = _download_tf(**INTERVALS["15m"])
 
-    df_1h = dfs["1h"]
-    ohlc  = {
-        "Open": "first",
-        "High": "max",
-        "Low":  "min",
-        "Close":"last",
-        "Volume":"sum",
-        "MA20":"last",
-        "RSI":"last",
-        "ATR":"last",
-    }
-    dfs["4h"] = df_1h.resample("4H", label="right", closed="right").agg(ohlc).dropna()
+    last1h = df1h.iloc[-1]
+    last4h = df4h.iloc[-1]
 
-    df_4h  = dfs["4h"]
-    df_15m = dfs["15m"]
+    price = float(last1h["Close"])
+    ma20  = float(last1h["Ma20"])
+    rsi   = float(last1h["Rsi"])
+    atr   = float(last1h["Atr"])
 
-    last_1h = df_1h.iloc[-1]
-    price   = float(last_1h["Close"])
-    ma20    = float(last_1h["MA20"])
-    rsi     = float(last_1h["RSI"])
-    atr     = float(last_1h["ATR"])
+    trend_up = last4h["Close"] > last4h["Ma20"]
+    short_up = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
 
-    signal, _ = make_signal(df_1h, df_4h, df_15m, trend_len=TREND_LEN)
-
-    if signal in ("多", "空"):
-        side: Literal["long", "short"] = "long" if signal == "多" else "short"
-        qty   = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
-        entry = price
-        sl    = price - ATR_MULT_SL * atr if side == "long" else price + ATR_MULT_SL * atr
-        tp    = price + ATR_MULT_TP * atr if side == "long" else price - ATR_MULT_TP * atr
+    if price > ma20 and 30 < rsi < 70 and trend_up and short_up:
+        signal = "✅ 做多"
     else:
-        qty = entry = sl = tp = None
+        signal = "⏸ 观望"
 
-    return dict(
-        price        = round(price, 2),
-        ma20         = round(ma20, 2),
-        rsi          = round(rsi, 2),
-        atr          = round(atr, 2),
-        signal       = ("✅ 做多信号" if signal == "多"
-                        else "🔻 做空信号" if signal == "空"
-                        else "⏸ 中性信号：观望为主"),
-        qty          = round(qty,   3) if qty   else "N/A",
-        entry        = round(entry, 2) if entry else "N/A",
-        sl           = round(sl,    2) if sl    else "N/A",
-        tp           = round(tp,    2) if tp    else "N/A",
-        risk_usd     = RISK_USD,
-        update_time  = datetime.now(TZ).strftime("%Y-%m-%d %H:%M"),  # ★ 北京时间
-    )
+    sl       = price - ATR_MULT_SL  * atr
+    tp       = price + ATR_MULT_TP  * atr
+    risk_usd = RISK_USD
+    qty      = calc_position_size(risk_usd, price, sl)
+
+    return {
+        "price"      : price,
+        "ma20"       : ma20,
+        "rsi"        : rsi,
+        "atr"        : atr,
+        "signal"     : signal,
+        "sl"         : round(sl, 2),
+        "tp"         : round(tp, 2),
+        "qty"        : round(qty, 4),
+        "risk_usd"   : risk_usd,
+        "update_time": datetime.now().astimezone().strftime("%Y-%m-%d %H:%M"),
+    }
