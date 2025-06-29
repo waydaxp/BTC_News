@@ -11,7 +11,7 @@ from core.risk       import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_si
 PAIR = "BTC-USD"
 TZ   = "Asia/Shanghai"
 
-# 1h 和 15m 配置
+# 配置：1 小时和 15 分钟
 CFG = {
     "1h":  {"interval": "1h",  "period": "7d"},
     "15m": {"interval": "15m", "period": "1d"},
@@ -19,7 +19,7 @@ CFG = {
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     """
-    下载指定周期的 OHLCV 数据，设置时区，加基础指标，去除 NaN。
+    下载指定周期的 OHLCV 数据，修正时区、扁平化列名、添加指标、丢弃 NaN。
     """
     df = yf.download(
         PAIR,
@@ -28,7 +28,17 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
         progress=False,
         auto_adjust=False,
     )
-    # 标准化时区
+    # --- 扁平化列名（防 MultiIndex 或 tuple） ---
+    cols = []
+    for c in df.columns:
+        if isinstance(c, tuple):
+            # 多重索引取最后一层
+            cols.append(c[-1])
+        else:
+            cols.append(c)
+    df.columns = cols
+
+    # 时区标准化
     if df.index.tz is None:
         df.index = df.index.tz_localize("UTC")
     df.index = df.index.tz_convert(TZ)
@@ -41,7 +51,7 @@ def get_btc_analysis() -> dict:
     返回 BTC 的分析结果，字段与 ETH 完全一致：
     price, ma20, rsi, atr, signal, sl, tp, qty, risk_usd, update_time
     """
-    # 拉 1h 和 15m
+    # 下载各周期数据
     df1h  = _download_tf(**CFG["1h"])
     df15m = _download_tf(**CFG["15m"])
 
@@ -53,14 +63,16 @@ def get_btc_analysis() -> dict:
         "Close":  "last",
         "Volume": "sum",
     }
-    df4h = df1h[["Open","High","Low","Close","Volume"]] \
-        .resample("4h", closed="right", label="right") \
-        .agg(ohlc) \
+    df4h = (
+        df1h[["Open", "High", "Low", "Close", "Volume"]]
+        .resample("4h", closed="right", label="right")
+        .agg(ohlc)
         .dropna()
-    # 再给 4h 加指标
+    )
+    # 4h 再加一次指标
     df4h = add_basic_indicators(df4h).dropna()
 
-    # 取各周期最新值
+    # 各周期最新一行
     last1h  = df1h.iloc[-1]
     last4h  = df4h.iloc[-1]
     last15m = df15m.iloc[-1]
@@ -70,8 +82,12 @@ def get_btc_analysis() -> dict:
     rsi   = float(last1h["Rsi"])
     atr   = float(last1h["Atr"])
 
-    # 趋势 & 信号逻辑：4h + 15m 都在 MA20 之上 且 中性 RSI
-    if last4h["Close"] > last4h["Ma20"] and last15m["Close"] > last15m["Ma20"] and 30 < rsi < 70:
+    # 信号逻辑：4h + 15m 同向站上 MA20，且 RSI 中性
+    if (
+        last4h["Close"] > last4h["Ma20"]
+        and last15m["Close"] > last15m["Ma20"]
+        and 30 < rsi < 70
+    ):
         side, signal = "long",  "✅ 做多"
         sl = price - ATR_MULT_SL * atr
         tp = price + ATR_MULT_TP * atr
