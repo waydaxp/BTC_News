@@ -1,85 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>BTC & ETH 技术分析</title>
-<style>
-    body {
-        font-family: "Helvetica Neue", sans-serif;
-        background:#f7f7f7;
-        padding:20px;
-        line-height:1.6;
-    }
-    h2 {
-        background:#fff;
-        padding:10px;
-        border-left:5px solid #4CAF50;
-        font-size:20px;
-        margin:0 0 10px;
-    }
-    .section {
-        background:#fff;
-        margin-bottom:20px;
-        padding:15px;
-        border-left:3px solid #4CAF50;
-    }
-    .footer {
-        font-size:14px;
-        color:gray;
-        text-align:right;
-    }
-</style>
+  <meta charset="utf-8">
+  <title>Crypto Tech Dashboard</title>
+  <style>
+    body{font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;margin:0;padding:0;background:#fafafa;color:#222;}
+    h2{margin:0 0 8px;padding:0;}
+    .card{background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+    .title{font-size:20px;font-weight:700;margin-bottom:4px;}
+    .metric{line-height:1.6;}
+  </style>
 </head>
 <body>
+  <div class="card">
+    <div class="title">📉【BTC 技术分析】</div>
+    <div class="metric">当前价格: 107539.6015625</div>
+    <div class="metric">MA20: 107650.619140625</div>
+    <div class="metric">RSI: 56.647115266685425</div>
+    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
+  </div>
 
-<h2>📉【BTC 技术分析】</h2>
-<div class="section">
-    当前价格: 107627.6640625<br>
-    MA20: 107642.80234375<br>
-    RSI: 56.52599599729313<br>
-    技术信号: ⏸ 中性信号：观望
-</div>
+  <div class="card">
+    <div class="title">📊 操作建议（BTC）</div>
+    <div class="metric">💰 风险金额: 20.0</div>
+    <div class="metric">🛠 杠杆后下单量: 0.085</div>
+    <div class="metric">📌 建仓价: </div>
+    <div class="metric">🛑 止损: 107304.15959821429</div>
+    <div class="metric">🎯 止盈: 107892.76450892857</div>
+  </div>
 
-<h2>📊 操作建议（BTC）</h2>
-<div class="section">
-    💰 风险金额: 20.0<br>
-    🛠 杠杆后下单量: N/A<br>
-    📌 建仓价: N/A<br>
-    🛑 止损: N/A<br>
-    🎯 止盈: N/A
-</div>
+  <div class="card">
+    <div class="title">📉【ETH 技术分析】</div>
+    <div class="metric">当前价格: 2438.600341796875</div>
+    <div class="metric">MA20: 2441.3607666015623</div>
+    <div class="metric">RSI: 57.776514876705924</div>
+    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
+  </div>
 
-<h2>📉【ETH 技术分析】</h2>
-<div class="section">
-    当前价格: 2436.75146484375<br>
-    MA20: 2441.1070068359377<br>
-    RSI: 53.28497627668873<br>
-    技术信号: ⏸ 中性信号：观望
-</div>
-
-<h2>📊 操作建议（ETH）</h2>
-<div class="section">
-    💰 风险金额: 20.0<br>
-    🛠 杠杆后下单量: N/A<br>
-    📌 建仓价: N/A<br>
-    🛑 止损: N/A<br>
-    🎯 止盈: N/A
-</div>
-
-<h2>📅【宏观事件提醒】</h2>
-<div class="section">
-    - 美国CPI公布（2025-06-28，-2天后）：若超预期，BTC或承压
-- FOMC利率会议（2025-07-03，3天后）：加息可能引发波动
-- SEC审查比特币ETF（2025-07-10，10天后）：若通过，或引发大涨
-</div>
-
-<h2>😨/😄 恐惧与贪婪指数（1751155200）</h2>
-<div class="section">
-    当前值: 68（Greed）
-</div>
-
-<hr>
-<p class="footer">更新时间：2025-06-30 00:26</p>
-
+  <div class="card">
+    <div class="title">📊 操作建议（ETH）</div>
+    <div class="metric">💰 风险金额: 20.0</div>
+    <div class="metric">🛠 杠杆后下单量: 2.607</div>
+    <div class="metric">📌 建仓价: </div>
+    <div class="metric">🛑 止损: 2430.9297223772323</div>
+    <div class="metric">🎯 止盈: 2450.106270926339</div>
+  </div>
 </body>
 </html>
