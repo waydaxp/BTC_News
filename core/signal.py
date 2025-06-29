@@ -1,37 +1,52 @@
-import pandas as pd
+# core/signal.py
+"""
+决定做多 / 做空 / 观望 的信号生成器
+-------------------------------------------------
+思路：
+1. 读取 1H 与 4H DataFrame
+2. 依据 MA20、MA50、RSI 等条件给出方向
+   - long  : 多头
+   - short : 空头
+   - neutral / None : 观望
+"""
 
-TREND_LEN = 3   # 连续 K 线确认
-ADX_TH     = 20 # 趋势强度阈值
-
-def make_signal(df_1h: pd.DataFrame, df_4h: pd.DataFrame) -> str:
+def make_signal(df_1h, df_4h):
     """
-    传入 1h、4h 两个周期的带指标数据 → 返回 'long' / 'short' / 'neutral'
+    Parameters
+    ----------
+    df_1h : pandas.DataFrame
+        必须包含列 ["Close", "MA20", "RSI"]
+    df_4h : pandas.DataFrame
+        必须包含列 ["Close", "MA50"]
+
+    Returns
+    -------
+    str  'long' | 'short' | 'neutral'
     """
-    last_1h  = df_1h.iloc[-1]
-    last_4h  = df_4h.iloc[-1]
+    # 最近一根 1H、4H K 线
+    last_1h = df_1h.iloc[-1]
+    last_4h = df_4h.iloc[-1]
 
-    # 1) 连续 N 根 K 线方向（靠滚动求和判断）
-    df_1h["above_ma20"] = (df_1h["Close"] > df_1h["MA20"]).astype(int)
-    df_1h["below_ma20"] = (df_1h["Close"] < df_1h["MA20"]).astype(int)
-    up_cnt   = df_1h["above_ma20"].rolling(TREND_LEN).sum().iloc[-1]
-    down_cnt = df_1h["below_ma20"].rolling(TREND_LEN).sum().iloc[-1]
+    close_1h = float(last_1h["Close"])
+    ma20_1h  = float(last_1h["MA20"])
+    rsi_1h   = float(last_1h["RSI"])
 
-    # 2) ADX 过滤
-    has_trend = last_1h["ADX"] > ADX_TH
+    close_4h = float(last_4h["Close"])
+    ma50_4h  = float(last_4h["MA50"])
 
-    # 3) 多均线共振：MA20 与 MA50 方向一致
-    long_bias  = last_1h["Close"] > last_1h["MA20"] > last_1h["MA50"]
-    short_bias = last_1h["Close"] < last_1h["MA20"] < last_1h["MA50"]
+    # ────────── 条件拆分 ──────────
+    above_ma20  = close_1h > ma20_1h
+    below_ma20  = close_1h < ma20_1h
+    rsi_ok      = 30 < rsi_1h < 70
+    trend_up_4h = close_4h > ma50_4h
+    trend_dn_4h = close_4h < ma50_4h
 
-    # 4) 高周期（4h）方向和 1h 一致
-    long_4h  = last_4h["Close"] > last_4h["MA20"]
-    short_4h = last_4h["Close"] < last_4h["MA20"]
-
-    # === 组合判断 ===
-    if (up_cnt == TREND_LEN and long_bias and long_4h
-            and last_1h["RSI"].between(30,70) and has_trend):
+    # ────────── 决策树 ──────────
+    if above_ma20 and rsi_ok and trend_up_4h:
         return "long"
-    if (down_cnt == TREND_LEN and short_bias and short_4h
-            and last_1h["RSI"].between(30,70) and has_trend):
+
+    if below_ma20 and rsi_ok and trend_dn_4h:
         return "short"
+
+    # 其它情况：观望
     return "neutral"
