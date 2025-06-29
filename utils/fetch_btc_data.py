@@ -1,70 +1,101 @@
+# utils/fetch_btc_data.py
+"""
+下载 BTC 多周期 K 线 → 计算指标 → 输出一个 dict
+"""
 from __future__ import annotations
+
+from datetime import datetime, timezone, timedelta
+from typing import Literal
+
 import yfinance as yf
 import pandas as pd
+
 from core.indicators import add_basic_indicators
-from core.signal      import make_signal
-from core.risk        import build_risk
-from datetime         import datetime, timezone
+from core.signal      import make_signal          # 技术方向
+from core.risk        import (
+    calc_position_size,
+    ATR_MULT_SL,
+    ATR_MULT_TP,
+    RISK_USD,
+)
 
-PAIR = "BTC-USD"
-TZ   = "Asia/Shanghai"
-
-# ⚠️ 只能用 1h → 再重采样成 4h（或 90m）
-INTERVALS = {
-    "1h" : dict(interval="60m", period="120d"),   # 120 天够用
+PAIR       = "BTC-USD"
+TZ         = timezone(timedelta(hours=8))   # 北京时间
+TREND_LEN  = 4                              # 1h 连续 N 根
+INTERVALS: dict[str, dict[str, str]] = {
+    "1h" : dict(interval="1h",  period="90d"),
+    "4h" : dict(interval="1h",  period="180d"),   # 先 1h 拉长，再 resample
     "15m": dict(interval="15m", period="30d"),
 }
 
-def _flatten(df: pd.DataFrame) -> pd.DataFrame:
-    names = [c.capitalize() if isinstance(c, str) else str(c[0]).capitalize()
-             for c in df.columns]
-    df.columns = names
-    return df
-
-def _download(interval: str, period: str) -> pd.DataFrame:
-    df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    df = _flatten(df)
-    # 处理时区
-    if df.index.tz is None:
-        df.index = df.index.tz_localize("UTC").tz_convert(TZ)
-    else:
-        df.index = df.index.tz_convert(TZ)
+# --------------------------------------------------------------------------- #
+# 内部工具
+# --------------------------------------------------------------------------- #
+def _download_tf(interval: str, period: str) -> pd.DataFrame:
+    """拉指定周期，并附加指标"""
+    df: pd.DataFrame = yf.download(PAIR, interval=interval, period=period, progress=False)
+    df.index = df.index.tz_localize(None).tz_localize(TZ)   # 统一成北京时间
+    df.columns = [c.capitalize() for c in df.columns]       # 兼容 Pandas OHLC 列名
     return add_basic_indicators(df).dropna()
 
-def _resample_4h(df_1h: pd.DataFrame) -> pd.DataFrame:
-    """把 1h K 线转成 4h（开高低收 + 指标全部重算）"""
-    ohlc = {
-        "Open" : "first",
-        "High" : "max",
-        "Low"  : "min",
+
+# --------------------------------------------------------------------------- #
+# 核心接口
+# --------------------------------------------------------------------------- #
+def get_btc_analysis() -> dict:
+    # --- 1. 拉取多周期 K 线 -------------------------------------------------- #
+    dfs = {k: _download_tf(**cfg) for k, cfg in INTERVALS.items()}
+
+    # 4h 由 1h resample 而来（聚合 OHLC）
+    df_1h = dfs["1h"]
+    ohlc  = {
+        "Open":  "first",
+        "High":  "max",
+        "Low":   "min",
         "Close": "last",
-        "Volume": "sum",
+        "Volume":"sum",
+        "MA20":  "last",
+        "RSI":   "last",
+        "ATR":   "last",
     }
-    df = df_1h.resample("4H", label="right", closed="right").agg(ohlc).dropna()
-    return add_basic_indicators(df).dropna()
+    dfs["4h"] = df_1h.resample("4H", label="right", closed="right").agg(ohlc).dropna()
 
-# ---------- 主函数 ----------
-def get_btc_analysis(balance_usd: float = 1_000.0) -> dict:
-    df_1h  = _download(**INTERVALS["1h"])
-    df_4h  = _resample_4h(df_1h)
-    df_15m = _download(**INTERVALS["15m"])
+    df_4h  = dfs["4h"]
+    df_15m = dfs["15m"]
 
-    signal, trend_up = make_signal(df_1h, df_4h, df_15m)
+    # --- 2. 最近行情快照 ------------------------------------------------------ #
+    last_1h  = df_1h.iloc[-1]
+    price    = float(last_1h["Close"])
+    ma20     = float(last_1h["MA20"])
+    rsi      = float(last_1h["RSI"])
+    atr      = float(last_1h["ATR"])
 
-    last = df_1h.iloc[-1]
-    price = float(last["Close"])
-    atr   = float(last["ATR"])
+    # --- 3. 技术方向 & 建仓区 --------------------------------------------------- #
+    signal, trend_up = make_signal(df_1h, df_4h, df_15m, trend_len=TREND_LEN)
 
-    risk  = build_risk(price, atr, balance_usd)
+    # --- 4. 风控计算 ---------------------------------------------------------- #
+    if signal in ("多", "空"):
+        side: Literal["long", "short"] = "long" if signal == "多" else "short"
+        qty   = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
+        entry = price
+        sl    = price - ATR_MULT_SL * atr if side == "long" else price + ATR_MULT_SL * atr
+        tp    = price + ATR_MULT_TP * atr if side == "long" else price - ATR_MULT_TP * atr
+    else:  # 观望
+        qty = entry = sl = tp = None
 
-    return {
-        "pair"         : "BTC/USDT",
-        "price"        : price,
-        "ma20"         : float(last["MA20"]),
-        "rsi"          : float(last["RSI"]),
-        "atr"          : atr,
-        "signal"       : signal,          # ✅ 改名
-        "trend_up"     : trend_up,
-        **risk,
-        "update_time"  : datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M"),
-    }
+    # --- 5. 打包输出 ---------------------------------------------------------- #
+    return dict(
+        price        = round(price, 2),
+        ma20         = round(ma20, 2),
+        rsi          = round(rsi, 2),
+        atr          = round(atr, 2),
+        signal       = ("✅ 做多信号" if signal == "多"
+                        else "🔻 做空信号" if signal == "空"
+                        else "⏸ 中性信号：观望为主"),
+        qty          = round(qty,   3) if qty   else "N/A",
+        entry        = round(entry, 2) if entry else "N/A",
+        sl           = round(sl,    2) if sl    else "N/A",
+        tp           = round(tp,    2) if tp    else "N/A",
+        risk_usd     = RISK_USD,
+        update_time  = datetime.now(TZ).strftime("%Y-%m-%d %H:%M"),  # ★ 北京时间
+    )
