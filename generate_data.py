@@ -1,9 +1,3 @@
-from utils.fetch_btc_data import get_btc_analysis
-from utils.fetch_eth_data import get_eth_analysis
-from utils.fetch_fear_greed import get_fear_and_greed
-from utils.fetch_macro_events import get_macro_event_summary
-from datetime import datetime
-
 def get_all_analysis() -> dict:
     btc = get_btc_analysis()
     eth = get_eth_analysis()
@@ -23,6 +17,15 @@ def get_all_analysis() -> dict:
         "btc_qty":          btc["qty"],
         "btc_risk":         btc["risk_usd"],
         "btc_update_time":  btc["update_time"],
+        "btc_entry_15m":    btc.get("entry_15m", "N/A"),
+        "btc_sl_15m":       btc.get("sl_15m", "N/A"),
+        "btc_tp_15m":       btc.get("tp_15m", "N/A"),
+        "btc_entry_1h":     btc.get("entry_1h", "N/A"),
+        "btc_sl_1h":        btc.get("sl_1h", "N/A"),
+        "btc_tp_1h":        btc.get("tp_1h", "N/A"),
+        "btc_entry_4h":     btc.get("entry_4h", "N/A"),
+        "btc_sl_4h":        btc.get("sl_4h", "N/A"),
+        "btc_tp_4h":        btc.get("tp_4h", "N/A"),
 
         # ETH
         "eth_price":        eth["price"],
@@ -35,6 +38,15 @@ def get_all_analysis() -> dict:
         "eth_qty":          eth["qty"],
         "eth_risk":         eth["risk_usd"],
         "eth_update_time":  eth["update_time"],
+        "eth_entry_15m":    eth.get("entry_15m", "N/A"),
+        "eth_sl_15m":       eth.get("sl_15m", "N/A"),
+        "eth_tp_15m":       eth.get("tp_15m", "N/A"),
+        "eth_entry_1h":     eth.get("entry_1h", "N/A"),
+        "eth_sl_1h":        eth.get("sl_1h", "N/A"),
+        "eth_tp_1h":        eth.get("tp_1h", "N/A"),
+        "eth_entry_4h":     eth.get("entry_4h", "N/A"),
+        "eth_sl_4h":        eth.get("sl_4h", "N/A"),
+        "eth_tp_4h":        eth.get("tp_4h", "N/A"),
 
         # 恐惧与贪婪
         "fg_idx":           fg_idx,
@@ -45,10 +57,6 @@ def get_all_analysis() -> dict:
         # 宏观事件
         "macro_events":     macro,
 
-        # 页面更新时间（北京时间）
+        # 更新时间
         "page_update":      page_update,
     }
-
-if __name__ == "__main__":
-    import pprint, json
-    pprint.pp(json.dumps(get_all_analysis(), indent=2, ensure_ascii=False))
