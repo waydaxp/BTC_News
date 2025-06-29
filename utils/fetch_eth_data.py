@@ -1,73 +1,63 @@
-# utils/fetch_eth_data.py
-# --------------------------------------------------
-# ETH-USD 与 BTC 流程相同，代码几乎一致；如需改动阈值可单独调
-# --------------------------------------------------
-import yfinance as yf
-from datetime import datetime
-from core.indicators import add_basic_indicators
+# -*- coding: utf-8 -*-
+"""
+拉取 Binance ETH/USDT K 线 & 生成分析 dict
+----------------------------------------
+依赖：python-binance, pandas
+"""
 
-ACCOUNT_USD      = 1000
-LEVERAGE         = 20
-RISK_PER_TRADE   = 0.02
-ATR_SL_FACTOR    = 1.0
-ATR_TP_FACTOR    = 1.5
+import pandas as pd
+from datetime import datetime, timezone
+from binance.spot import Spot as Client
+
+from core.signal import make_signal
+from indicators import add_basic_indicators
+
+BINANCE = Client()
+
+PAIR = "ETHUSDT"
+LIMIT = 500
+INTERVALS = {
+    "15m": "15m",
+    "1h": "1h",
+    "4h": "4h",
+    "1d": "1d",
+}
 
 
-def _position_size():
-    max_loss = round(ACCOUNT_USD * RISK_PER_TRADE, 2)
-    position = round(max_loss * LEVERAGE, 2)
-    return max_loss, position
+def _fetch(interval: str) -> pd.DataFrame:
+    k = BINANCE.klines(PAIR, interval=interval, limit=LIMIT)
+    df = pd.DataFrame(k, columns=[
+        "open_time", "open", "high", "low", "close",
+        "volume", "_c1", "_c2", "_c3", "_c4", "_c5", "_c6"
+    ]).astype({"open": float, "high": float,
+               "low": float, "close": float, "volume": float})
+    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    df.set_index("open_time", inplace=True)
+    return df
 
 
 def get_eth_analysis() -> dict:
-    raw = yf.Ticker("ETH-USD").history(period="7d", interval="1h")
+    dfs = {k: _fetch(v) for k, v in INTERVALS.items()}
 
-    if raw.empty or len(raw) < 40:
-        return {"signal": "⚠️ 数据不足，无法计算指标"}
+    sig = make_signal(dfs["1h"], dfs["4h"], dfs["1d"], dfs["15m"])
 
-    df   = add_basic_indicators(raw)
-    last = df.iloc[-1]
+    price = dfs["1h"]["close"].iloc[-1]
+    side_txt = {"long": "✅ 做多", "short": "🔻 做空", "neutral": "⏸ 观望"}[sig["direction"]]
 
-    price = float(last["Close"])
-    ma20  = float(last["MA20"])
-    rsi   = float(last["RSI"])
-    atr   = float(last["ATR"])
-
-    if price > ma20 and 40 < rsi < 70:
-        direction = "long"
-        signal = f"✅ 做多信号：收盘价站上 MA20 且 RSI={rsi:.1f}"
-    elif price < ma20 and 30 < rsi < 60:
-        direction = "short"
-        signal = f"🔻 做空信号：收盘价跌破 MA20 且 RSI={rsi:.1f}"
-    else:
-        direction = "flat"
-        signal = "⏸ 中性信号：观望为主"
-
-    if direction == "long":
-        stop  = round(price - atr * ATR_SL_FACTOR, 2)
-        tp    = round(price + atr * ATR_TP_FACTOR, 2)
-        strat = "✅ 做多：\n  · 止损= price-ATR\n  · 止盈= price+1.5×ATR"
-    elif direction == "short":
-        stop  = round(price + atr * ATR_SL_FACTOR, 2)
-        tp    = round(price - atr * ATR_TP_FACTOR, 2)
-        strat = "🔻 做空：\n  · 止损= price+ATR\n  · 止盈= price-1.5×ATR"
-    else:
-        stop = tp = "N/A"
-        strat = "⏸ 观望：不入场"
-
-    max_loss, position = _position_size()
+    strategy_note = (
+        f"{side_txt}：{('买入→涨' if sig['direction']=='long' else '卖出→跌')}"
+        f" 跌 {round(sig['atr'] / price * 100,2)}% 止损，"
+        f"涨 {round(sig['atr'] * 1.5 / price * 100,2)}% 止盈"
+        if sig["direction"] in ("long", "short")
+        else "等待方向明确"
+    )
 
     return {
+        "symbol": "ETH/USDT",
         "price": price,
-        "ma20":  ma20,
-        "rsi":   rsi,
-        "atr":   atr,
-        "signal": signal,
-        "entry_price": price,
-        "stop_loss":   stop,
-        "take_profit": tp,
-        "max_loss":    max_loss,
-        "per_trade_position": position,
-        "strategy_text": strat,
-        "timestamp": datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        "direction": sig["direction"],
+        "strategy_text": strategy_note,
+        "sl": sig["sl"],
+        "tp": sig["tp"],
+        "update_time": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
     }
