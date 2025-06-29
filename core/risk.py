@@ -1,23 +1,51 @@
-from __future__ import annotations
+# core/risk.py
+"""
+与仓位、止损 / 止盈相关的统一计算逻辑
+------------------------------------------------
+其他模块只 import 常量 + calc_position_size 即可。
+"""
 
-ATR_MULT_SL: float = 1.0        # 止损 = 1×ATR
-ATR_MULT_TP: float = 1.5        # 止盈 = 1.5×ATR
-RISK_PCT:    float = 0.02       # 每笔风险资本占用 2%
+from typing import Literal
 
-def calc_position_size(price: float, atr: float, risk_usd: float) -> float:
+
+# === 全局风控参数（集中修改） =============================================== #
+ACCOUNT_SIZE_USD: float = 10_000          # ∙ 账户总权益（方便统一调整）
+RISK_PCT_PER_TRADE: float = 0.002         # ∙ 单笔风险占比 0.2% ⇒ 0.002
+RISK_USD: float = ACCOUNT_SIZE_USD * RISK_PCT_PER_TRADE
+
+ATR_MULT_SL: float = 1.5                  # ∙ 止损 = ± 1.5 ATR
+ATR_MULT_TP: float = 2.0                  # ∙ 止盈 = ± 2.0 ATR  (≈1:R=1.33)
+
+# 你也可以写到 config.yaml，再用 yaml.safe_load 读进来；此处为最简方式。
+
+
+# === 仓位计算 ================================================================ #
+def calc_position_size(
+    price: float,
+    risk_usd: float,
+    atr_mult_sl: float,
+    atr_value: float,
+    side: Literal["long", "short"],
+) -> float:
     """
-    依据 ATR 止损幅度计算合约张数（或现货数量）:
-    position = risk / (ATR_MULT_SL * atr)
+    根据 ATR 止损距离 → 反推可承受风险 USD → 计算合约张数（等同名义价值）
+    公式：
+        sl_distance = atr_mult_sl * atr_value
+        qty = risk_usd / sl_distance
+    side 不影响结果，保持参数一致以便调用方传递。
     """
-    dollar_per_unit = ATR_MULT_SL * atr
-    if dollar_per_unit == 0:
-        return 0.0
-    qty = risk_usd / dollar_per_unit
-    return round(qty, 3)
+    sl_distance = atr_mult_sl * atr_value
+    if sl_distance <= 0:
+        raise ValueError("ATR must be positive")
 
-def build_risk(price: float, atr: float, balance: float) -> dict:
-    risk_usd = balance * RISK_PCT
-    qty      = calc_position_size(price, atr, risk_usd)
-    sl       = price - ATR_MULT_SL * atr
-    tp       = price + ATR_MULT_TP * atr
-    return dict(risk_usd=risk_usd, qty=qty, sl=sl, tp=tp)
+    qty = risk_usd / sl_distance
+    return qty
+
+
+# === 方便外部引用 __all__ ==================================================== #
+__all__ = [
+    "RISK_USD",
+    "ATR_MULT_SL",
+    "ATR_MULT_TP",
+    "calc_position_size",
+]
