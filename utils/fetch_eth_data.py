@@ -9,7 +9,7 @@ PAIR = "ETH-USD"
 TZ = "Asia/Shanghai"
 
 INTERVALS = {
-    "1h":  {"interval": "1h",  "period": "3d"},
+    "1h":  {"interval": "1h",  "period": "5d"},
     "15m": {"interval": "15m", "period": "1d"},
 }
 
@@ -43,20 +43,22 @@ def get_eth_analysis() -> dict:
     df4h = add_basic_indicators(df4h).dropna()
 
     last1h = df1h.iloc[-1]
-    last4h = df4h.iloc[-1]
+    if not df4h.empty:
+        last4h = df4h.iloc[-1]
+        trend_up = last4h["Close"] > last4h["Ma20"]
+    else:
+        trend_up = False
 
     price = float(last1h["Close"])
     ma20  = float(last1h["Ma20"])
     rsi   = float(last1h["Rsi"])
     atr   = float(last1h["Atr"])
-
-    trend_up = last4h["Close"] > last4h["Ma20"]
     short_up = (df15m["Close"].tail(12) > df15m["Ma20"].tail(12)).all()
 
     signal = "✅ 做多" if (price > ma20 and 30 < rsi < 70 and trend_up and short_up) else "⏸ 观望"
 
-    sl       = price - ATR_MULT_SL * atr
-    tp       = price + ATR_MULT_TP * atr
+    sl = price - ATR_MULT_SL * atr
+    tp = price + ATR_MULT_TP * atr
     risk_usd = RISK_USD
     qty      = calc_position_size(risk_usd, price, sl)
 
