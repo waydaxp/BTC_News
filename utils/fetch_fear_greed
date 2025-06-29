@@ -23,7 +23,7 @@ def get_fear_and_greed():
     text  = item.get("value_classification", "N/A")
     ts    = int(item.get("timestamp", 0))
 
-    # 转为北京时间字符串
+    # 转 UTC→北京时间
     dt_utc = datetime.utcfromtimestamp(ts).replace(tzinfo=pytz.utc)
     dt_cn  = dt_utc.astimezone(pytz.timezone("Asia/Shanghai"))
     ts_str = dt_cn.strftime("%Y-%m-%d %H:%M")
