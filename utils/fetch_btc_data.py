@@ -2,7 +2,7 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime
 from pytz import timezone
-from core.indicators import add_basic_indicators, add_macd_boll_kdj
+from core.indicators import add_basic_indicators, add_macd_boll_kdj, backtest_signals
 from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
 PAIR = "BTC-USD"
@@ -99,6 +99,8 @@ def get_btc_analysis() -> dict:
     s1h, l1h = _judge_signal(df1h, "1h")
     s4h, l4h = _judge_signal(df4h, "4h")
 
+    win_rate = backtest_signals(df1h, "BTC-1h")
+
     last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
     price15, price1h, price4h = float(last15['Close']), float(last1h['Close']), float(last4h['Close'])
     atr15, atr1h, atr4h = float(last15['ATR']), float(last1h['ATR']), float(last4h['ATR'])
@@ -126,4 +128,5 @@ def get_btc_analysis() -> dict:
         "reason_15m": l15,
         "reason_1h": l1h,
         "reason_4h": l4h,
+        "win_rate": win_rate,
     }
