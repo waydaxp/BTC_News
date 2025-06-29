@@ -16,7 +16,8 @@ from __future__ import annotations
 import pandas as pd
 from datetime import datetime
 
-from indicators import add_basic_indicators, calc_atr, calc_rsi
+# core/signal.py
+from core.indicators import add_basic_indicators, calc_atr, calc_rsi
 
 # ========= CONFIG ========= #
 TREND_LEN = 3       # 连续 K 数
