@@ -128,5 +128,8 @@ def get_btc_analysis() -> dict:
         "reason_15m": l15,
         "reason_1h": l1h,
         "reason_4h": l4h,
+        "signal_15m": s15,
+        "signal_1h": s1h,
+        "signal_4h": s4h,
         "win_rate": win_rate,
     }
