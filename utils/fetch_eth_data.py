@@ -1,23 +1,29 @@
 """
-拉取 ETH-USDT K 线（同 BTC 逻辑）
+ETH 数据抓取 & 技术分析
+------------------------------------------------------------
+依赖同 fetch_btc_data.py
 """
+
 from __future__ import annotations
 
-import yfinance as yf
 import pandas as pd
-from datetime import datetime, timedelta, timezone
-from core.indicators import add_basic_indicators
+import yfinance as yf
+from datetime import datetime, timezone
+
+from core.indicators import add_basic_indicators, calc_atr
 from core.signal      import make_signal
-from core.risk        import calc_position_size, ATR_MULT_TP, ATR_MULT_SL
+from core.risk        import calc_position_size, ATR_MULT_SL, ATR_MULT_TP
 
 PAIR        = "ETH-USD"
-ACCOUNT_USD = 1000
+ACCOUNT_USD = 1_000
+RISK_PCT    = 0.02
 
 INTERVALS = {
     "15m": dict(interval="15m", period="3d"),
-    "1h":  dict(interval="60m", period="14d"),
-    "4h":  dict(interval="240m", period="90d"),
+    "1h" : dict(interval="60m", period="7d"),
+    "4h" : dict(interval="4h",  period="60d"),
 }
+
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df: pd.DataFrame = yf.download(
@@ -25,54 +31,48 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
         interval=interval,
         period=period,
         progress=False,
-        auto_adjust=False,
-        threads=False,
     )
-    if df.empty:
-        raise RuntimeError(f"Yahoo 返回空 K线 ({interval}/{period})")
 
-    df.columns = [c.capitalize() for c in df.columns]
-    if df.index.tz is None:
-        df.index = df.index.tz_localize("UTC")
-    else:
-        df.index = df.index.tz_convert("UTC")
+    clean_cols = []
+    for c in df.columns:
+        if isinstance(c, tuple):
+            c = c[0]
+        clean_cols.append(str(c).capitalize())
+    df.columns = clean_cols
 
-    return add_basic_indicators(df)
+    df = add_basic_indicators(df)
+    return df.dropna().copy()
 
-# --------------------------------------------------------------------------- #
 
-def get_eth_analysis() -> dict[str, object]:
+def get_eth_analysis() -> dict:
     dfs = {k: _download_tf(**kw) for k, kw in INTERVALS.items()}
     df_15m, df_1h, df_4h = dfs["15m"], dfs["1h"], dfs["4h"]
 
-    last_1h = df_1h.iloc[-1]
-    price   = float(last_1h["Close"])
-    atr     = float(last_1h["ATR"])
+    signal, trend_up = make_signal(df_1h, df_4h, df_15m)
 
-    signal = make_signal(df_15m, df_1h, df_4h)
+    last    = df_1h.iloc[-1]
+    price   = float(last["Close"])
+    ma20    = float(last["Ma20"])
+    rsi     = float(last["Rsi"])
+    atr     = float(last["Atr"])
 
-    pos_qty, risk_usd = calc_position_size(
-        balance_usd=ACCOUNT_USD,
-        price=price,
-        atr=atr,
-        atr_mult_sl=ATR_MULT_SL,
-    )
-
-    stop   = round(price - ATR_MULT_SL * atr, 2)
-    target = round(price + ATR_MULT_TP * atr, 2)
+    risk_usd    = round(ACCOUNT_USD * RISK_PCT, 2)
+    entry_price = price
+    stop_loss   = round(price - ATR_MULT_SL * atr, 2)
+    take_profit = round(price + ATR_MULT_TP * atr, 2)
+    qty         = calc_position_size(risk_usd, entry_price, stop_loss)
 
     return {
-        "symbol": "ETH",
-        "last_price": price,
-        "atr": atr,
-        "signal": signal.text,
-        "side": signal.side,
-        "risk_usd": risk_usd,
-        "position_qty": pos_qty,
-        "entry": price,
-        "stop": stop if signal.side != "flat" else "N/A",
-        "target": target if signal.side != "flat" else "N/A",
-        "updated": datetime.now(timezone.utc).astimezone(
-            timezone(timedelta(hours=8))
-        ).strftime("%Y-%m-%d %H:%M"),
+        "price"       : price,
+        "ma20"        : ma20,
+        "rsi"         : rsi,
+        "atr"         : atr,
+        "signal"      : signal,
+        "trend_up"    : trend_up,
+        "entry_price" : entry_price,
+        "stop_loss"   : stop_loss,
+        "take_profit" : take_profit,
+        "risk_usd"    : risk_usd,
+        "position_qty": qty,
+        "update_time" : datetime.now(timezone.utc).strftime("%F %T UTC"),
     }
