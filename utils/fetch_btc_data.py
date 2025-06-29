@@ -6,14 +6,14 @@ from datetime import datetime
 import pytz
 
 from core.indicators import add_basic_indicators
-from core.risk import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
+from core.risk       import RISK_USD, ATR_MULT_SL, ATR_MULT_TP, calc_position_size
 
 PAIR = "BTC-USD"
-TZ = "Asia/Shanghai"
+TZ   = "Asia/Shanghai"
 
 CFG = {
-    "1h":  {"interval": "1h",   "period": "7d"},
-    "15m": {"interval": "15m",  "period": "1d"},
+    "1h":  {"interval":"1h",  "period":"7d"},
+    "15m": {"interval":"15m", "period":"1d"},
 }
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
@@ -31,9 +31,9 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     return add_basic_indicators(df).dropna()
 
 def get_btc_analysis() -> dict:
-    df1h = _download_tf(**CFG["1h"])
-    # 从 1h 重采样到 4h
-    ohlc = {"Open":"first", "High":"max", "Low":"min", "Close":"last", "Volume":"sum"}
+    df1h  = _download_tf(**CFG["1h"])
+    # 从 1h 生成 4h
+    ohlc = {"Open":"first","High":"max","Low":"min","Close":"last","Volume":"sum"}
     df4h = df1h.resample("4h", closed="right", label="right").agg(ohlc).dropna()
     df4h = add_basic_indicators(df4h)
 
@@ -48,7 +48,7 @@ def get_btc_analysis() -> dict:
     rsi   = float(last1h["Rsi"])
     atr   = float(last1h["Atr"])
 
-    # 多头信号：4h & 15m 双均线之上且 RSI 正常
+    # 多头条件：4h & 15m 双均线之上 且 RSI 在 30~70 之间
     if last4h["Close"] > last4h["Ma20"] and last15m["Close"] > last15m["Ma20"] and 30 < rsi < 70:
         side   = "long"
         signal = "✅ 做多"
@@ -63,14 +63,14 @@ def get_btc_analysis() -> dict:
     qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
 
     return {
-        "price": price,
-        "ma20":  round(ma20, 2),
-        "rsi":   round(rsi, 2),
-        "atr":   round(atr, 2),
-        "signal": signal,
-        "sl":    round(sl, 2),
-        "tp":    round(tp, 2),
-        "qty":   round(qty, 4),
-        "risk_usd": RISK_USD,
-        "update_time": datetime.now(pytz.timezone(TZ)).strftime("%Y-%m-%d %H:%M"),
+        "price":        price,
+        "ma20":         round(ma20,2),
+        "rsi":          round(rsi,2),
+        "atr":          round(atr,2),
+        "signal":       signal,
+        "sl":           round(sl,2),
+        "tp":           round(tp,2),
+        "qty":          round(qty,4),
+        "risk_usd":     RISK_USD,
+        "update_time":  datetime.now(pytz.timezone(TZ)).strftime("%Y-%m-%d %H:%M"),
     }
