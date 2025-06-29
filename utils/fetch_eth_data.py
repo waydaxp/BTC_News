@@ -1,16 +1,17 @@
-# utils/fetch_eth_data.py
 import yfinance as yf
+import pandas as pd                    # ← 新增
 from datetime import datetime
 from core.indicators import add_basic_indicators
 
 PAIR = "ETH-USD"
-CFG  = {
-    "15m": dict(interval="15m", period="3d",  limit=800),
-    "1h" : dict(interval="60m", period="14d", limit=800),
-    "4h" : dict(interval="4h",  period="60d", limit=800),
+
+CFG = {
+    "15m": dict(interval="15m", period="3d"),
+    "1h" : dict(interval="60m", period="14d"),
+    "4h" : dict(interval="4h",  period="60d"),
 }
 
-def _download_tf(interval: str, period: str, **_) -> yf.pd.DataFrame:
+def _download_tf(interval: str, period: str) -> pd.DataFrame:   # ← 修改
     df = yf.download(
         PAIR,
         interval=interval,
@@ -18,6 +19,7 @@ def _download_tf(interval: str, period: str, **_) -> yf.pd.DataFrame:
         progress=False,
         auto_adjust=False,
     ).dropna()
+
     df = add_basic_indicators(df)
     df.index = df.index.tz_localize("UTC")
     return df
@@ -60,23 +62,23 @@ def get_eth_analysis() -> dict:
     else:
         stop = target = None
 
-    account_usd      = 1000
-    risk_per_trade   = 0.02
-    max_loss         = round(account_usd * risk_per_trade, 2)
-    leverage         = 20
-    position_size_usd= round(max_loss * leverage, 2)
+    account_usd       = 1000
+    risk_per_trade    = 0.02
+    max_loss          = round(account_usd * risk_per_trade, 2)
+    leverage          = 20
+    position_usd      = round(max_loss * leverage, 2)
 
     return {
-        "price"      : price,
-        "ma20"       : ma20,
-        "rsi"        : rsi,
-        "atr"        : atr,
-        "signal"     : signal,
-        "direction"  : direction,
-        "entry_price": entry,
-        "stop_loss"  : stop,
-        "take_profit": target,
-        "max_loss"   : max_loss,
-        "position_usd": position_size_usd,
-        "update_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        "price"        : price,
+        "ma20"         : ma20,
+        "rsi"          : rsi,
+        "atr"          : atr,
+        "signal"       : signal,
+        "direction"    : direction,
+        "entry_price"  : entry,
+        "stop_loss"    : stop,
+        "take_profit"  : target,
+        "max_loss"     : max_loss,
+        "position_usd" : position_usd,
+        "update_time"  : datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     }
