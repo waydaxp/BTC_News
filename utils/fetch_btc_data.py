@@ -1,60 +1,64 @@
-# -*- coding: utf-8 -*-
-"""
-拉取 Binance BTC/USDT K 线 & 生成分析 dict
-----------------------------------------
-依赖：python-binance, pandas, pandas_market_calendars
-"""
+# utils/fetch_btc_data.py
+import yfinance as yf
+from datetime import datetime, timezone, timedelta
 
-import pandas as pd
-from datetime import datetime, timezone
-from binance.spot import Spot as Client
+from core.indicators import add_basic_indicators
 
-from core.signal import make_signal
-# utils/fetch_btc_data.py (ETH 文件同理)
-from core.indicators import add_basic_indicators, calc_atr, calc_rsi
-
-BINANCE = Client()
-
-PAIR = "BTCUSDT"
-LIMIT = 500           # 500 根足够
-INTERVALS = {
-    "15m": "15m",
-    "1h": "1h",
-    "4h": "4h",
-    "1d": "1d"
-}
-
-
-def _fetch(interval: str) -> pd.DataFrame:
-    k = BINANCE.klines(PAIR, interval=interval, limit=LIMIT)
-    df = pd.DataFrame(k, columns=[
-        "open_time", "open", "high", "low", "close",
-        "volume", "_c1", "_c2", "_c3", "_c4", "_c5", "_c6"
-    ]).astype({"open": float, "high": float,
-               "low": float, "close": float, "volume": float})
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
-    df.set_index("open_time", inplace=True)
-    return df
+PAIR = "BTC-USD"      # Coinbase 现货
+PERIOD = "7d"
+INTERVAL = "60m"
 
 
 def get_btc_analysis() -> dict:
-    dfs = {k: _fetch(v) for k, v in INTERVALS.items()}
+    df = yf.download(PAIR, period=PERIOD, interval=INTERVAL, progress=False)
+    df = df.rename(columns=str.title)        # 高低收列转大写首字母
+    df = add_basic_indicators(df)
 
-    sig = make_signal(dfs["1h"], dfs["4h"], dfs["1d"], dfs["15m"])
+    last = df.iloc[-1]
 
-    price = dfs["1h"]["close"].iloc[-1]
-    side_txt = {"long": "✅ 做多", "short": "🔻 做空", "neutral": "⏸ 观望"}[sig["direction"]]
+    price = float(last["Close"])
+    ma20 = float(last["MA20"])
+    rsi = float(last["RSI"])
+    atr = float(last["ATR"])
 
-    strategy_note = f"{side_txt}：{('买入→涨' if sig['direction']=='long' else '卖出→跌')}" \
-                    f" 跌 {round(sig['atr'] / price * 100,2)}% 止损，涨 {round(sig['atr'] * 1.5 / price * 100,2)}% 止盈" \
-                    if sig["direction"] in ("long", "short") else "等待方向明确"
+    # === 信号判定 ===
+    if price > ma20 and 30 < rsi < 70:
+        direction = "long"
+        signal = "✅ 做多信号：站上 MA20 且 RSI 健康"
+    elif price < ma20 and 30 < rsi < 70:
+        direction = "short"
+        signal = "🔻 做空信号：跌破 MA20 且 RSI 弱势"
+    else:
+        direction = "flat"
+        signal = "⏸ 中性信号：观望为主"
+
+    # === 风控（ATR 动态止损 / 止盈 1:1.5） ===
+    risk_usd = 20            # 单笔可承受亏损
+    leverage = 20
+    position = risk_usd * leverage
+
+    if direction == "long":
+        stop_loss = round(price - atr, 2)
+        take_profit = round(price + 1.5 * atr, 2)
+    elif direction == "short":
+        stop_loss = round(price + atr, 2)
+        take_profit = round(price - 1.5 * atr, 2)
+    else:
+        stop_loss = take_profit = None
+
+    bj_time = datetime.now(timezone(timedelta(hours=8))).strftime("%F %T")
 
     return {
-        "symbol": "BTC/USDT",
         "price": price,
-        "direction": sig["direction"],
-        "strategy_text": strategy_note,
-        "sl": sig["sl"],
-        "tp": sig["tp"],
-        "update_time": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        "ma20": ma20,
+        "rsi": rsi,
+        "atr": atr,
+        "signal": signal,
+        "direction": direction,
+        "entry_price": price,
+        "stop_loss": stop_loss,
+        "take_profit": take_profit,
+        "risk_usd": risk_usd,
+        "position": position,
+        "updated_time": bj_time,
     }
