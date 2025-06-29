@@ -11,9 +11,11 @@ PAIR = "ETH-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
+
+    # 如果是 MultiIndex（含 ticker 名），则压平为单层列名
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)  # 修复多层列名
-    df.columns = df.columns.str.title()
+        df.columns = df.columns.get_level_values(1)
+
     df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
