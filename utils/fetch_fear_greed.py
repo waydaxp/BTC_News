@@ -9,16 +9,24 @@ def get_fear_and_greed():
     data = requests.get(url, timeout=5).json().get("data", [])
     if not data:
         return 0, "Unknown", "", ""
+    
     rec = data[0]
     idx = int(rec["value"])
     txt = rec["value_classification"]
+
+    # 表情映射
     emoji = {
-        "Extreme Fear":"😨", "Fear":"😨",
-        "Neutral":"😐",
-        "Greed":"😊", "Extreme Greed":"😊"
+        "Extreme Fear": "😨",
+        "Fear": "😨",
+        "Neutral": "😐",
+        "Greed": "😊",
+        "Extreme Greed": "😊"
     }.get(txt, "")
-    ts = datetime.utcfromtimestamp(int(rec["timestamp"])).replace(
-        tzinfo=pytz.utc
-    ).astimezone(pytz.timezone("Asia/Shanghai"))
-    ts_str = ts.strftime("%Y-%m-%d %H:%M:%S")
+
+    # 时间戳转换为北京时间
+    utc_dt = datetime.utcfromtimestamp(int(rec["timestamp"]))  # UTC 时间
+    beijing_tz = pytz.timezone("Asia/Shanghai")
+    beijing_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(beijing_tz)
+    ts_str = beijing_dt.strftime("%Y-%m-%d %H:%M:%S")  # 格式化北京时间
+
     return idx, txt, emoji, ts_str
