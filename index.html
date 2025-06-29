@@ -1,101 +1,79 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>Crypto Tech Dashboard</title>
+<meta charset="utf-8">
+<title>Crypto Tech Dashboard</title>
+<style>
+ :root{--green:#2ecc71;--card:#fff;--bg:#fafafa;--txt:#222;--sub:#666}
+ body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ .card{background:var(--card);border-left:6px solid var(--green);
+       margin:12px;padding:14px 18px;border-radius:6px;
+       box-shadow:0 1px 4px rgba(0,0,0,.05)}
+ .title{font-weight:700;font-size:18px;margin:0 0 6px}
+ .metric{margin:0}
+ .sub{color:var(--sub);font-size:13px}
+ ul{margin:0;padding-left:18px}
+</style>
+</head><body>
 
-  <style>
-    :root {
-      --green: #2ecc71;
-      --card-bg: #fff;
-      --body-bg: #fafafa;
-      --text: #222;
-      --sub: #666;
-    }
-    body{
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,"Segoe UI",sans-serif;
-      margin:0;padding:0;
-      background:var(--body-bg);color:var(--text);
-    }
-    h2{margin:0 0 6px;font-size:20px;}
-    .card{
-      background:var(--card-bg);
-      border-left:6px solid var(--green);
-      padding:14px 18px;
-      margin:12px;
-      border-radius:6px;
-      box-shadow:0 1px 4px rgba(0,0,0,.05)
-    }
-    .title{font-weight:700;font-size:18px;margin-bottom:6px;}
-    .metric{line-height:1.6;font-size:15px;}
-    .sub{color:var(--sub);font-size:13px;}
-  </style>
-</head>
-<body>
-
-  <!-- ===== BTC 技术分析 ===== -->
-  <div class="card">
-    <div class="title">📉【BTC 技术分析】</div>
-    <div class="metric">当前价格: 107545.375</div>
-    <div class="metric">MA20: 107658.2375</div>
-    <div class="metric">RSI: 55.860431369962406</div>
-    <div class="metric">ATR: 244.90234375</div>
-    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
-    <div class="sub">更新时间: 2025-06-30 02:02</div>
-  </div>
-
-  <!-- ===== BTC 操作建议 ===== -->
-  <div class="card">
-    <div class="title">📊 操作建议（BTC）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 0.082</div>
-    <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 107300.47265625</div>
-    <div class="metric">🎯 止盈: 107912.728515625</div>
-  </div>
-
-  <!-- ===== ETH 技术分析 ===== -->
-  <div class="card">
-    <div class="title">📉【ETH 技术分析】</div>
-    <div class="metric">当前价格: 2439.64501953125</div>
-    <div class="metric">MA20: 2441.3260131835937</div>
-    <div class="metric">RSI: 57.74508381856234</div>
-    <div class="metric">ATR: 7.7569580078125</div>
-    <div class="metric">技术信号: ⏸ 中性信号：观望为主</div>
-    <div class="sub">更新时间: 2025-06-30 02:02</div>
-  </div>
-
-  <!-- ===== ETH 操作建议 ===== -->
-  <div class="card">
-    <div class="title">📊 操作建议（ETH）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-    <div class="metric">🛠 杠杆后下单量: 2.578</div>
-    <div class="metric">📌 建仓价: </div>
-    <div class="metric">🛑 止损: 2431.8880615234375</div>
-    <div class="metric">🎯 止盈: 2451.2804565429688</div>
-  </div>
-
-  <!-- ===== 宏观事件提醒 ===== -->
-  <div class="card">
-    <div class="title">📅 宏观事件提醒</div>
-    <div class="metric" style="white-space:pre-line;">
-<br>📅<br>【<br>宏<br>观<br>事<br>件<br>提<br>醒<br>】<br>
-<br>-<br> <br>美<br>国<br>C<br>P<br>I<br>公<br>布<br>（<br>2<br>0<br>2<br>5<br>-<br>0<br>6<br>-<br>2<br>8<br>，<br>-<br>1<br>天<br>后<br>）<br>：<br>若<br>超<br>预<br>期<br>，<br>B<br>T<br>C<br>或<br>承<br>压<br>
-<br>-<br> <br>F<br>O<br>M<br>C<br>利<br>率<br>会<br>议<br>（<br>2<br>0<br>2<br>5<br>-<br>0<br>7<br>-<br>0<br>3<br>，<br>4<br>天<br>后<br>）<br>：<br>加<br>息<br>可<br>能<br>引<br>发<br>波<br>动<br>
-<br>-<br> <br>S<br>E<br>C<br>审<br>查<br>比<br>特<br>币<br>E<br>T<br>F<br>（<br>2<br>0<br>2<br>5<br>-<br>0<br>7<br>-<br>1<br>0<br>，<br>1<br>1<br>天<br>后<br>）<br>：<br>若<br>通<br>过<br>，<br>或<br>引<br>发<br>大<br>涨<br>
+<!-- BTC 技术分析 -->
+<div class="card">
+ <div class="title">📉【BTC 技术分析】</div>
+ <p class="metric">当前价格: 107566.3359375</p>
+ <p class="metric">MA20: 107659.285546875</p>
+ <p class="metric">RSI: 56.29016514200906</p>
+ <p class="metric">ATR: 246.39955357142858</p>
+ <p class="metric">技术信号: ⏸ 中性信号：观望为主</p>
+ <p class="sub">更新时间: 2025-06-29 18:07</p>
 </div>
-  </div>
 
-  <!-- ===== 恐惧与贪婪 ===== -->
-  <div class="card">
-    <div class="title">😰/😊 恐惧与贪婪指数 （2025-06-29 16:00）</div>
-    <div class="metric">当前值: 68 😊（Greed）</div>
-  </div>
+<!-- BTC 操作建议 -->
+<div class="card">
+ <div class="title">📊 操作建议（BTC）</div>
+ <p class="metric">💰 风险金额: 20.0</p>
+ <p class="metric">🛠 杠杆后下单量: 0.081</p>
+ <p class="metric">📌 建仓价: </p>
+ <p class="metric">🛑 止损: 107319.93638392857</p>
+ <p class="metric">🎯 止盈: 107935.93526785714</p>
+</div>
 
-  <!-- ===== 页脚更新时间 ===== -->
-  <div class="card" style="background:#f7f7f7;text-align:right;">
-    <span class="sub">⏰ 页面更新于 2025-06-30 02:02 (北京时间)</span>
-  </div>
+<!-- ETH 技术分析 -->
+<div class="card">
+ <div class="title">📉【ETH 技术分析】</div>
+ <p class="metric">当前价格: 2438.7841796875</p>
+ <p class="metric">MA20: 2441.2829711914064</p>
+ <p class="metric">RSI: 56.913418375057695</p>
+ <p class="metric">ATR: 7.818446568080357</p>
+ <p class="metric">技术信号: ⏸ 中性信号：观望为主</p>
+ <p class="sub">更新时间: 2025-06-29 18:07</p>
+</div>
 
-</body>
-</html>
+<!-- ETH 操作建议 -->
+<div class="card">
+ <div class="title">📊 操作建议（ETH）</div>
+ <p class="metric">💰 风险金额: 20.0</p>
+ <p class="metric">🛠 杠杆后下单量: 2.558</p>
+ <p class="metric">📌 建仓价: </p>
+ <p class="metric">🛑 止损: 2430.96573311942</p>
+ <p class="metric">🎯 止盈: 2450.5118495396205</p>
+</div>
+
+<!-- 宏观事件 -->
+<div class="card">
+ <div class="title">📅 宏观事件提醒（未来 5 件）</div>
+ <ul style='margin:0;padding-left:18px'><li>FOMC 利率会议（2025-07-03，4天后）：加息可能引发波动</li><li>SEC 审查比特币 ETF（2025-07-10，11天后）：若通过，或引发大涨</li><li>欧洲央行利率决议（2025-07-18，19天后）：欧元波动或外溢至加密</li><li>美国 PCE 物价指数（2025-07-26，27天后）：通胀高企或利空风险资产</li></ul>
+</div>
+
+<!-- 恐惧与贪婪 -->
+<div class="card">
+ <div class="title">😰/😊 恐惧与贪婪指数（2025-06-29 16:00）</div>
+ <p class="metric">当前值: 68（Greed） 😊</p>
+</div>
+
+<!-- 页脚 -->
+<div class="card" style="background:#f4f4f4;text-align:right">
+ <span class="sub">⏰ 页面更新于 2025-06-30 02:07 (北京时间)</span>
+</div>
+
+</body></html>
