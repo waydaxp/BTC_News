@@ -1,5 +1,4 @@
 # utils/fetch_eth_data.py
-
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
@@ -60,14 +59,14 @@ def get_eth_analysis() -> dict:
     qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, side)
 
     return {
-        "price":        price,
-        "ma20":         round(ma20,2),
-        "rsi":          round(rsi,2),
-        "atr":          round(atr,2),
-        "signal":       signal,
-        "sl":           round(sl,2),
-        "tp":           round(tp,2),
-        "qty":          round(qty,4),
-        "risk_usd":     RISK_USD,
-        "update_time":  datetime.now(pytz.timezone(TZ)).strftime("%Y-%m-%d %H:%M"),
+        "price":       round(price,2),
+        "ma20":        round(ma20,2),
+        "rsi":         round(rsi,2),
+        "atr":         round(atr,2),
+        "signal":      signal,
+        "sl":          round(sl,2),
+        "tp":          round(tp,2),
+        "qty":         round(qty,4),
+        "risk_usd":    round(RISK_USD,2),
+        "update_time": datetime.now(pytz.timezone(TZ)).strftime("%Y-%m-%d %H:%M"),
     }
