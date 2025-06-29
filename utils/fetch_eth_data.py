@@ -1,86 +1,73 @@
 # utils/fetch_eth_data.py
-# -----------------------------------------------------------
-# ETH 技术分析（返回字段与 BTC 相同）
-# 默认 still 使用 ATR × 1 止损 / 1.8 R 止盈
-# -----------------------------------------------------------
-
+# --------------------------------------------------
+# ETH-USD 与 BTC 流程相同，代码几乎一致；如需改动阈值可单独调
+# --------------------------------------------------
 import yfinance as yf
-import pandas  as pd
+from datetime import datetime
+from core.indicators import add_basic_indicators
 
-from core.signal import make_signal, TREND_LEN
-from core.risk   import get_sl_tp
-
-
-# ─────────── 工具函数 ─────────── #
-def _fetch_ohlc(interval: str, lookback: str) -> pd.DataFrame:
-    df = yf.Ticker("ETH-USD").history(period=lookback, interval=interval)
-    df.rename(columns=str.lower, inplace=True)
-    return df
+ACCOUNT_USD      = 1000
+LEVERAGE         = 20
+RISK_PER_TRADE   = 0.02
+ATR_SL_FACTOR    = 1.0
+ATR_TP_FACTOR    = 1.5
 
 
-def _ensure_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    if "ma20" not in df:
-        df["ma20"] = df["close"].rolling(20, min_periods=20).mean()
-
-    if "rsi" not in df:
-        delta = df["close"].diff()
-        up    = delta.clip(lower=0).rolling(14).mean()
-        down  = -delta.clip(upper=0).rolling(14).mean()
-        rs    = up / down
-        df["rsi"] = 100 - 100 / (1 + rs)
-
-    return df
-# ─────────────────────────────── #
+def _position_size():
+    max_loss = round(ACCOUNT_USD * RISK_PER_TRADE, 2)
+    position = round(max_loss * LEVERAGE, 2)
+    return max_loss, position
 
 
 def get_eth_analysis() -> dict:
-    df_1h = _fetch_ohlc("1h", "14d")
-    df_4h = _fetch_ohlc("4h", "60d")
+    raw = yf.Ticker("ETH-USD").history(period="7d", interval="1h")
 
-    if df_1h.empty or df_4h.empty:
-        return {"signal": "⚠️ 数据不足", "strategy_text": "无"}
+    if raw.empty or len(raw) < 40:
+        return {"signal": "⚠️ 数据不足，无法计算指标"}
 
-    df_1h = _ensure_indicators(df_1h)
-    df_4h = _ensure_indicators(df_4h)
+    df   = add_basic_indicators(raw)
+    last = df.iloc[-1]
 
-    direction = make_signal(df_1h, df_4h)
+    price = float(last["Close"])
+    ma20  = float(last["MA20"])
+    rsi   = float(last["RSI"])
+    atr   = float(last["ATR"])
 
-    last  = df_1h.iloc[-1]
-    price = float(last["close"])
-    ma20  = float(last["ma20"])
-    rsi   = float(last["rsi"])
-
-    # 动态 SL / TP
-    sl, tp, strat_txt = get_sl_tp(
-        direction, price, df_1h,
-        mode="atr",
-        atr_mul=1.0,
-        rr=1.8
-    )
+    if price > ma20 and 40 < rsi < 70:
+        direction = "long"
+        signal = f"✅ 做多信号：收盘价站上 MA20 且 RSI={rsi:.1f}"
+    elif price < ma20 and 30 < rsi < 60:
+        direction = "short"
+        signal = f"🔻 做空信号：收盘价跌破 MA20 且 RSI={rsi:.1f}"
+    else:
+        direction = "flat"
+        signal = "⏸ 中性信号：观望为主"
 
     if direction == "long":
-        sig = f"✅ 做多信号：连续{TREND_LEN}根站上 MA20"
+        stop  = round(price - atr * ATR_SL_FACTOR, 2)
+        tp    = round(price + atr * ATR_TP_FACTOR, 2)
+        strat = "✅ 做多：\n  · 止损= price-ATR\n  · 止盈= price+1.5×ATR"
     elif direction == "short":
-        sig = f"🔻 做空信号：连续{TREND_LEN}根跌破 MA20"
+        stop  = round(price + atr * ATR_SL_FACTOR, 2)
+        tp    = round(price - atr * ATR_TP_FACTOR, 2)
+        strat = "🔻 做空：\n  · 止损= price+ATR\n  · 止盈= price-1.5×ATR"
     else:
-        sig = "⏸ 中性信号：观望为主"
+        stop = tp = "N/A"
+        strat = "⏸ 观望：不入场"
 
-    acct_usd = 1000
-    leverage = 20
-    max_loss = round(acct_usd * 0.02, 2)
-    pos_size = round(max_loss * leverage, 2)
+    max_loss, position = _position_size()
 
     return {
         "price": price,
         "ma20":  ma20,
         "rsi":   rsi,
-        "signal": sig,
-
-        "entry_price":  price,
-        "stop_loss":    sl,
-        "take_profit":  tp,
-        "max_loss":     max_loss,
-        "per_trade_position": pos_size,
-
-        "strategy_text": strat_txt,
+        "atr":   atr,
+        "signal": signal,
+        "entry_price": price,
+        "stop_loss":   stop,
+        "take_profit": tp,
+        "max_loss":    max_loss,
+        "per_trade_position": position,
+        "strategy_text": strat,
+        "timestamp": datetime.utcnow().isoformat(timespec="seconds") + "Z"
     }
