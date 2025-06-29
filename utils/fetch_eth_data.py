@@ -10,23 +10,31 @@ PAIR = "ETH-USD"
 
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
-    df = yf.download(PAIR, interval=interval, period=period, progress=False)
+    df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
 
-    # ✅ 解决 MultiIndex 问题：
+    # DEBUG 打印结构
+    print("[DEBUG] Columns:", df.columns)
+
+    # ✅ 处理 MultiIndex 或普通列名情况
     if isinstance(df.columns, pd.MultiIndex):
-        if PAIR in df.columns.levels[0]:
-            df = df[PAIR]
-        else:
-            raise ValueError(f"MultiIndex 数据中未找到: {PAIR}")
-
-    df = df.rename(columns=str.title)
+        try:
+            df = df[PAIR]  # 提取单资产数据
+        except KeyError:
+            raise ValueError(f"[错误] 多层索引中未找到: {PAIR}. 当前列结构: {df.columns}")
     
+    # ✅ 标准化列名
+    df = df.rename(columns=str.title)
+
+    # ✅ 检查所需列
     expected_cols = ["Open", "High", "Low", "Close", "Volume"]
     missing = [col for col in expected_cols if col not in df.columns]
     if missing:
-        raise ValueError(f"缺失所需列: {missing}")
+        raise ValueError(f"[错误] 缺失所需列: {missing}, 当前列为: {df.columns.tolist()}")
 
+    # ✅ 时间索引去时区
     df.index = df.index.tz_localize(None)
+
+    # ✅ 添加指标并清洗
     df = add_basic_indicators(df)
     return df.dropna()
 
