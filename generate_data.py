@@ -1,43 +1,74 @@
-# generate_data.py
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Crypto Tech Dashboard</title>
+  <style>
+    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; margin:0;padding:0;background:#fafafa;color:#222; }
+    h2 { margin:0 0 8px;padding:0; }
+    .card { background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .title { font-size:20px;font-weight:700;margin-bottom:4px; }
+    .metric { line-height:1.6; }
+    .sub { font-size:12px;color:#888;margin-top:4px; }
+  </style>
+</head>
+<body>
+  <!-- BTC 技术分析 -->
+  <div class="card">
+    <div class="title">📉 BTC 技术分析</div>
+    <div class="metric">当前价格: {{ btc_price }}</div>
+    <div class="metric">MA20: {{ btc_ma20 }}</div>
+    <div class="metric">RSI: {{ btc_rsi }}</div>
+    <div class="metric">ATR: {{ btc_atr }}</div>
+    <div class="metric">技术信号: {{ btc_signal }}</div>
+  </div>
 
-from utils.fetch_btc_data import get_btc_analysis
-from utils.fetch_eth_data import get_eth_analysis
-from utils.fetch_macro import get_macro_events
-from utils.fetch_fg_index import get_fg_index
+  <!-- BTC 操作建议 -->
+  <div class="card">
+    <div class="title">📊 操作建议（BTC, 以中期为主）</div>
+    <div class="metric">💰 风险金额: {{ btc_risk }}</div>
+    <div class="metric">🛠 杠杆后下单量: {{ btc_qty }}</div>
+    <div class="metric">📌 建仓价: {{ btc_price }}</div>
+    <div class="metric">🛑 止损: {{ btc_sl }}</div>
+    <div class="metric">🎯 止盈: {{ btc_tp }}</div>
+  </div>
 
-def get_all_analysis():
-    btc = get_btc_analysis()
-    eth = get_eth_analysis()
-    macro = get_macro_events()
-    fg_data = get_fg_index()
+  <!-- ETH 技术分析 -->
+  <div class="card">
+    <div class="title">📉 ETH 技术分析</div>
+    <div class="metric">当前价格: {{ eth_price }}</div>
+    <div class="metric">MA20: {{ eth_ma20 }}</div>
+    <div class="metric">RSI: {{ eth_rsi }}</div>
+    <div class="metric">ATR: {{ eth_atr }}</div>
+    <div class="metric">技术信号: {{ eth_signal }}</div>
+  </div>
 
-    return {
-        # BTC 信息
-        "btc_price": round(btc["price"], 2),
-        "btc_ma20": round(btc["ma20"], 2),
-        "btc_rsi": round(btc["rsi"], 2),
-        "btc_atr": round(btc["atr"], 2),
-        "btc_signal": btc["signal"],
-        "btc_risk": btc["risk_usd"],
-        "btc_qty": round(btc["qty"], 6),
-        "btc_sl": round(btc["sl"], 2) if btc["sl"] else "None",
-        "btc_tp": round(btc["tp"], 2) if btc["tp"] else "None",
+  <!-- ETH 操作建议 -->
+  <div class="card">
+    <div class="title">📊 操作建议（ETH, 以中期为主）</div>
+    <div class="metric">💰 风险金额: {{ eth_risk }}</div>
+    <div class="metric">🛠 杠杆后下单量: {{ eth_qty }}</div>
+    <div class="metric">📌 建仓价: {{ eth_price }}</div>
+    <div class="metric">🛑 止损: {{ eth_sl }}</div>
+    <div class="metric">🎯 止盈: {{ eth_tp }}</div>
+  </div>
 
-        # ETH 信息
-        "eth_price": round(eth["price"], 2),
-        "eth_ma20": round(eth["ma20"], 2),
-        "eth_rsi": round(eth["rsi"], 2),
-        "eth_atr": round(eth["atr"], 2),
-        "eth_signal": eth["signal"],
-        "eth_risk": eth["risk_usd"],
-        "eth_qty": round(eth["qty"], 6),
-        "eth_sl": round(eth["sl"], 2) if eth["sl"] else "None",
-        "eth_tp": round(eth["tp"], 2) if eth["tp"] else "None",
+  <!-- 宏观事件提醒 -->
+  <div class="card">
+    <div class="title">📅 宏观事件提醒</div>
+    <pre class="metric">{{ macro_events }}</pre>
+  </div>
 
-        # 宏观与贪婪指数
-        "macro_events": macro,
-        "fg_idx": fg_data["value"],
-        "fg_txt": fg_data["text"],
-        "fg_emoji": fg_data["emoji"],
-        "page_update": btc["update_time"]  # 页面统一用 BTC 更新时间
-    }
+  <!-- 恐惧与贪婪指数 -->
+  <div class="card">
+    <div class="title">😨/😊 恐惧与贪婪指数</div>
+    <div class="metric">当前值: {{ fg_idx }} ({{ fg_txt }}) {{ fg_emoji }}</div>
+  </div>
+
+  <!-- 更新时间 -->
+  <div class="card">
+    <div class="title">⏰ 页面更新时间</div>
+    <div class="metric">{{ page_update }}（北京时间）</div>
+  </div>
+</body>
+</html>
