@@ -13,19 +13,13 @@
   </style>
 </head>
 <body>
-
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
     <div class="metric">当前价格: {{ btc_price }}</div>
     <div class="metric">MA20: {{ btc_ma20 }}</div>
     <div class="metric">RSI: {{ btc_rsi }}</div>
     <div class="metric">ATR: {{ btc_atr }}</div>
-    <div class="metric">技术信号:</div>
-    <ul class="metric">
-      <li>📈 长期 (4h): {{ btc_signal_4h }}</li>
-      <li>📉 中期 (1h): {{ btc_signal_1h }}</li>
-      <li>⚡ 短线 (15m): {{ btc_signal_15m }}</li>
-    </ul>
+    <div class="metric">技术信号: {{ btc_signal }}</div>
   </div>
 
   <div class="card">
@@ -43,12 +37,7 @@
     <div class="metric">MA20: {{ eth_ma20 }}</div>
     <div class="metric">RSI: {{ eth_rsi }}</div>
     <div class="metric">ATR: {{ eth_atr }}</div>
-    <div class="metric">技术信号:</div>
-    <ul class="metric">
-      <li>📈 长期 (4h): {{ eth_signal_4h }}</li>
-      <li>📉 中期 (1h): {{ eth_signal_1h }}</li>
-      <li>⚡ 短线 (15m): {{ eth_signal_15m }}</li>
-    </ul>
+    <div class="metric">技术信号: {{ eth_signal }}</div>
   </div>
 
   <div class="card">
@@ -74,6 +63,5 @@
     <div class="title">⏰ 页面更新时间</div>
     <div class="metric">{{ page_update }}（北京时间）</div>
   </div>
-
 </body>
 </html>
