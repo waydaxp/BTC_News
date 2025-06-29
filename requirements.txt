@@ -32,5 +32,8 @@ matplotlib
 
 jinja2>=3.1
 
+ta-lib>=0.4.28
+pandas
+
 pytz
 
