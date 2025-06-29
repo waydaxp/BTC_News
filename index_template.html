@@ -4,12 +4,45 @@
   <meta charset="utf-8">
   <title>Crypto Tech Dashboard</title>
   <style>
-    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; margin:0;padding:0;background:#fafafa;color:#222; }
-    h2 { margin:0 0 8px;padding:0; }
-    .card { background:#fff;border-left:6px solid #2ecc71;padding:12px 18px;margin:12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06); }
-    .title { font-size:20px;font-weight:700;margin-bottom:4px; }
-    .metric { line-height:1.6; }
-    .sub { font-size:12px;color:#888;margin-top:4px; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+      color: #222;
+    }
+    h2 {
+      margin: 0 0 8px;
+      padding: 0;
+    }
+    .card {
+      background: #fff;
+      border-left: 6px solid #2ecc71;
+      padding: 12px 18px;
+      margin: 12px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .metric {
+      line-height: 1.6;
+    }
+    .sub {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+    .highlight {
+      background: #fffbdd;
+      font-weight: bold;
+    }
+    .up { color: green; }
+    .down { color: red; }
+    .neutral { color: gray; }
   </style>
 </head>
 <body>
@@ -19,7 +52,7 @@
     <div class="metric">MA20: {{ btc_ma20 }}</div>
     <div class="metric">RSI: {{ btc_rsi }}</div>
     <div class="metric">ATR: {{ btc_atr }}</div>
-    <div class="metric">技术信号: {{ btc_signal }}</div>
+    <div class="metric highlight">技术信号: {{ btc_signal }}</div>
   </div>
 
   <div class="card">
@@ -37,7 +70,7 @@
     <div class="metric">MA20: {{ eth_ma20 }}</div>
     <div class="metric">RSI: {{ eth_rsi }}</div>
     <div class="metric">ATR: {{ eth_atr }}</div>
-    <div class="metric">技术信号: {{ eth_signal }}</div>
+    <div class="metric highlight">技术信号: {{ eth_signal }}</div>
   </div>
 
   <div class="card">
