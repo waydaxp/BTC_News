@@ -1,57 +1,43 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<title>BTC / ETH 双币技术分析</title>
+<meta charset="UTF-8" />
+<title>BTC & ETH 技术分析</title>
 <style>
-    body      { font-family: "SF Pro","Helvetica Neue",sans-serif; background:#f5f7fa; margin:0; padding:20px; }
-    h1        { margin: 0 0 20px; }
-    .card     { background:#ffffff; border-radius:8px; padding:18px 22px; box-shadow:0 2px 6px rgba(0,0,0,.06); margin-bottom:24px; }
-    .title    { font-size:18px; font-weight:600; margin-bottom:8px; }
-    .kv       { line-height:1.9; }
-    .kv b     { display:inline-block; min-width:110px; }
-    .footer   { font-size:14px; color:#6b7280; text-align:right; margin-top:30px; }
+body{font-family:Helvetica,Arial,sans-serif;background:#f8f9fa;padding:2rem}
+h2{border-left:5px solid #28a745;padding:.5rem 1rem;background:#fff}
+.section{background:#fff;margin:1rem 0;padding:1rem;border-left:3px solid #28a745}
+.footer{font-size:.9rem;color:#777;text-align:right}
 </style>
 </head>
 <body>
 
-<h1>📊 加密货币每日量化报告</h1>
-
-<!-- ────────── BTC ────────── -->
-<div class="card">
-  <div class="title">₿ BTC 技术分析</div>
-  <div class="kv">
-    <b>现价:</b> {btc_price} USDT<br>
-    <b>方向:</b> {btc_direction}<br>
-    <b>策略:</b> {btc_strategy_text}<br>
-    <b>止损:</b> {btc_sl}<br>
-    <b>止盈:</b> {btc_tp}
-  </div>
+<h2>📉 BTC 技术分析</h2>
+<div class="section">
+当前价: {btc_price}<br>
+MA20: {btc_ma20}<br>
+RSI: {btc_rsi}<br>
+技术信号: {btc_signal}
 </div>
 
-<!-- ────────── ETH ────────── -->
-<div class="card">
-  <div class="title">Ξ ETH 技术分析</div>
-  <div class="kv">
-    <b>现价:</b> {eth_price} USDT<br>
-    <b>方向:</b> {eth_direction}<br>
-    <b>策略:</b> {eth_strategy_text}<br>
-    <b>止损:</b> {eth_sl}<br>
-    <b>止盈:</b> {eth_tp}
-  </div>
+<h2>📈 BTC 风控 & 操作</h2>
+<div class="section">
+💰 单笔风险 USD: {btc_risk}<br>
+🛠 杠杆后下单量: {btc_position}<br>
+📌 入场价: {btc_entry}<br>
+🛑 止损: {btc_stop}<br>
+🎯 止盈: {btc_target}
 </div>
 
-<!-- ────────── 宏观及情绪 ────────── -->
-<div class="card">
-  <div class="title">宏观事件 & 情绪指标</div>
-  <div class="kv">
-      <b>恐惧 / 贪婪:</b> {fear_index}（{fear_level}，{fear_date}）<br>
-      <b>今日宏观要闻:</b><br>
-      {macro_events}
-  </div>
+<h2>📉 ETH 技术分析</h2>
+<div class="section">
+当前价: {eth_price}<br>
+MA20: {eth_ma20}<br>
+RSI: {eth_rsi}<br>
+技术信号: {eth_signal}
 </div>
 
-<p class="footer">最近更新时间：{update_time}</p>
-
+<hr>
+<p class="footer">更新时间（北京时间）：{updated_time}</p>
 </body>
 </html>
