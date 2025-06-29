@@ -14,13 +14,17 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     # DEBUG 打印结构
     print("[DEBUG] Columns:", df.columns)
 
-    # ✅ 处理 MultiIndex 或普通列名情况
+    # ✅ 处理 MultiIndex 情况
     if isinstance(df.columns, pd.MultiIndex):
-        try:
-            df = df[PAIR]  # 提取单资产数据
-        except KeyError:
-            raise ValueError(f"[错误] 多层索引中未找到: {PAIR}. 当前列结构: {df.columns}")
-    
+        if "Ticker" in df.columns.names and "Price" in df.columns.names:
+            try:
+                # 正确方式：使用 xs 提取 'BTC-USD' 的全部价格数据
+                df = df.xs(PAIR, level="Ticker", axis=1)
+            except KeyError:
+                raise ValueError(f"[错误] MultiIndex 中未找到: {PAIR}")
+        else:
+            raise ValueError("[错误] 未识别的 MultiIndex 结构")
+
     # ✅ 标准化列名
     df = df.rename(columns=str.title)
 
@@ -30,7 +34,7 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     if missing:
         raise ValueError(f"[错误] 缺失所需列: {missing}, 当前列为: {df.columns.tolist()}")
 
-    # ✅ 时间索引去时区
+    # ✅ 时间索引去除时区
     df.index = df.index.tz_localize(None)
 
     # ✅ 添加指标并清洗
