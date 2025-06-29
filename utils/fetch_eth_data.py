@@ -8,82 +8,87 @@ from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
 PAIR = "ETH-USD"
 
+
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    df = df[['Open','High','Low','Close','Volume']].copy()
+    df.columns = df.columns.str.title()  # 标准化列名
+    df = df[["Open", "High", "Low", "Close", "Volume"]].copy()
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     return df.dropna()
 
-def judge_signal(df: pd.DataFrame, timeframe: str) -> str:
-    last = df.iloc[-1]
-    recent_close = df['Close'].tail(5)
-    recent_ma20 = df['MA20'].tail(5)
-    above_ma20_count = (recent_close > recent_ma20).sum()
-    below_ma20_count = (recent_close < recent_ma20).sum()
 
-    if last['Close'] > last['MA20'] and above_ma20_count >= 4 and 45 < last['RSI'] < 65 and last['Close'] > df['Close'].rolling(5).mean().iloc[-1]:
-        return f"🟢 做多信号（{timeframe}）"
-    elif last['Close'] < last['MA20'] and below_ma20_count >= 4 and 35 < last['RSI'] < 55 and last['Close'] < df['Close'].rolling(5).mean().iloc[-1]:
-        return f"🔻 做空信号（{timeframe}）"
+def _judge_signal(df: pd.DataFrame, window: int, rsi_low: int, rsi_high: int) -> str:
+    last = df.iloc[-1]
+    ma5 = df['Close'].rolling(5).mean()
+
+    recent = df['Close'].tail(window) > df['MA20'].tail(window)
+    above_ma20 = recent.sum() >= int(window * 0.8)
+
+    below_recent = df['Close'].tail(window) < df['MA20'].tail(window)
+    below_ma20 = below_recent.sum() >= int(window * 0.8)
+
+    rsi = last['RSI']
+
+    # 背离预警
+    if (df['Close'].diff().tail(3).mean() > 0 and df['RSI'].diff().tail(3).mean() < 0) or \
+       (df['Close'].diff().tail(3).mean() < 0 and df['RSI'].diff().tail(3).mean() > 0):
+        return "⚠️ 背离预警"
+
+    # 无趋势：涨跌相等
+    last_10 = df['Close'].diff().tail(10)
+    ups = (last_10 > 0).sum()
+    downs = (last_10 < 0).sum()
+    if abs(ups - downs) <= 2:
+        return "😶 无趋势"
+
+    # 震荡中性
+    if 45 <= rsi <= 55:
+        return "📉 震荡中性"
+
+    if last['Close'] > last['MA20'] and above_ma20 and rsi_low < rsi < rsi_high and last['Close'] > ma5.iloc[-1]:
+        return "🟢 做多信号"
+    elif last['Close'] < last['MA20'] and below_ma20 and (rsi - 5) < 55 and last['Close'] < ma5.iloc[-1]:
+        return "🔻 做空信号"
     else:
-        return f"⏸ 中性信号：观望（{timeframe}）"
+        return "⏸ 中性信号"
+
 
 def get_eth_analysis() -> dict:
-    df15 = _download_tf("15m", "3d")
-    df1h = _download_tf("1h", "7d")
-    df4h = df1h.resample("4h", label="right", closed="right").agg({
-        'Open': 'first',
-        'High': 'max',
-        'Low': 'min',
-        'Close': 'last',
-        'Volume': 'sum',
-    }).dropna()
-    df4h = add_basic_indicators(df4h)
+    df15 = _download_tf("15m", "3d")    # 短线
+    df1h = _download_tf("1h", "7d")      # 中期
+    df4h = _download_tf("4h", "30d")     # 长期
 
-    last = df1h.iloc[-1]
+    signal15 = _judge_signal(df15, window=5, rsi_low=45, rsi_high=65)
+    signal1h = _judge_signal(df1h, window=10, rsi_low=45, rsi_high=65)
+    signal4h = _judge_signal(df4h, window=8, rsi_low=50, rsi_high=65)
+
+    last = df1h.iloc[-1]  # 中期信号用于交易建议
     price = float(last['Close'])
-    ma20 = float(last['MA20'])
-    rsi = float(last['RSI'])
     atr = float(last['ATR'])
 
-    trend_short = judge_signal(df15, "15m")
-    trend_mid = judge_signal(df1h, "1h")
-    trend_long = judge_signal(df4h, "4h")
-
-    # 以中期信号为核心做仓位判断
-    if "做多" in trend_mid:
-        signal = trend_mid
+    if "多" in signal1h:
         sl = price - ATR_MULT_SL * atr
         tp = price + ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "long")
-    elif "做空" in trend_mid:
-        signal = trend_mid
+    elif "空" in signal1h:
         sl = price + ATR_MULT_SL * atr
         tp = price - ATR_MULT_TP * atr
         qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "short")
     else:
-        signal = trend_mid
-        sl = None
-        tp = None
-        qty = 0.0
+        sl, tp, qty = None, None, 0.0
 
     update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return {
         "price": price,
-        "ma20": ma20,
-        "rsi": rsi,
+        "ma20": float(last['MA20']),
+        "rsi": float(last['RSI']),
         "atr": atr,
-        "signal": signal,
+        "signal": f"{signal4h} (4h) / {signal1h} (1h) / {signal15} (15m)",
         "sl": sl,
         "tp": tp,
         "qty": qty,
         "risk_usd": RISK_USD,
-        "update_time": update_time,
-        "trend_short": trend_short,
-        "trend_mid": trend_mid,
-        "trend_long": trend_long,
+        "update_time": update_time
     }
