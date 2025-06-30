@@ -31,6 +31,10 @@
     .metric {
       margin-bottom: 6px;
     }
+    .sub {
+      font-size: 14px;
+      color: #666;
+    }
     .signal-header {
       font-size: 20px;
       font-weight: bold;
@@ -68,7 +72,7 @@
       border-radius: 4px;
     }
     .strategy-title {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: bold;
       color: #2c3e50;
       margin-bottom: 8px;
@@ -78,12 +82,6 @@
       color: #444;
       white-space: pre-line;
       line-height: 1.6;
-    }
-    .winrate {
-      font-size: 15px;
-      font-weight: bold;
-      color: #d35400;
-      margin-top: 12px;
     }
     pre {
       background: #f4f4f4;
@@ -96,21 +94,6 @@
 </head>
 <body>
 
-  <!-- 周期建议说明 -->
-  <div class="card">
-    <div class="title">📘 不同周期建议说明</div>
-    <div style="line-height: 1.6; font-size: 15px; color: #444;">
-      <strong>📌 短线建议（15分钟级别）</strong><br>
-      适用于超短期操作，以15分钟K线为参考。通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
-      <br><br>
-      <strong>📌 中期建议（1小时级别）</strong><br>
-      适合持仓数小时至1-2天，以1小时K线为参考，主要关注中期趋势和动量。
-      <br><br>
-      <strong>📌 长期建议（4小时及以上）</strong><br>
-      适合趋势型交易者，以4小时或日线周期为判断依据，持仓周期可达数日甚至数周。
-    </div>
-  </div>
-
   <!-- BTC 技术分析 -->
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
@@ -120,14 +103,39 @@
     <div class="metric">ATR: {{ btc_atr }}</div>
   </div>
 
+  <!-- BTC 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
     <div class="metric">💰 风险金额: {{ btc_risk }}</div>
   </div>
 
+  <!-- BTC 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
+
+    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
+      {% if tf == '15m' %}
+      <div style="margin-bottom: 8px;">
+        <strong>📍 短线建议（15分钟）</strong><br>
+        适用于超短期操作，以 15 分钟 K 线为参考。<br>
+        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
+      </div>
+      {% elif tf == '1h' %}
+      <div style="margin-bottom: 8px;">
+        <strong>📍 中期建议（1小时）</strong><br>
+        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
+        综合短期波动与中期趋势，适合日内或隔夜持仓。
+      </div>
+      {% elif tf == '4h' %}
+      <div>
+        <strong>📍 长期建议（4小时）</strong><br>
+        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
+        聚焦中期价格动能和趋势延续。
+      </div>
+      {% endif %}
+    </div>
+
     <div class="metric">📌 建仓价: {{ ctx['btc_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损: {{ ctx['btc_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈: {{ ctx['btc_tp_' ~ tf] }}</div>
@@ -150,14 +158,39 @@
     <div class="metric">ATR: {{ eth_atr }}</div>
   </div>
 
+  <!-- ETH 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
     <div class="metric">💰 风险金额: {{ eth_risk }}</div>
   </div>
 
+  <!-- ETH 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
+
+    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
+      {% if tf == '15m' %}
+      <div style="margin-bottom: 8px;">
+        <strong>📍 短线建议（15分钟）</strong><br>
+        适用于超短期操作，以 15 分钟 K 线为参考。<br>
+        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
+      </div>
+      {% elif tf == '1h' %}
+      <div style="margin-bottom: 8px;">
+        <strong>📍 中期建议（1小时）</strong><br>
+        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
+        综合短期波动与中期趋势，适合日内或隔夜持仓。
+      </div>
+      {% elif tf == '4h' %}
+      <div>
+        <strong>📍 长期建议（4小时）</strong><br>
+        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
+        聚焦中期价格动能和趋势延续。
+      </div>
+      {% endif %}
+    </div>
+
     <div class="metric">📌 建仓价: {{ ctx['eth_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损: {{ ctx['eth_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈: {{ ctx['eth_tp_' ~ tf] }}</div>
@@ -183,6 +216,7 @@
     <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
   </div>
 
+  <!-- 页面更新时间 -->
   <div class="card">
     <div class="title">⏰ 页面更新时间</div>
     <div class="metric">{{ page_update }}（北京时间）</div>
