@@ -2,65 +2,79 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>Crypto Tech Dashboard</title>
+  <title>Crypto 技术面仪表盘</title>
   <style>
     body {
-      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      background: #fafafa;
+      color: #222;
       margin: 0;
       padding: 0;
-      background: #f9f9f9;
-      color: #222;
-      font-size: 16px;
     }
     .card {
       background: #fff;
-      border-left: 6px solid #3498db;
-      padding: 20px;
-      margin: 18px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      border-left: 6px solid #2ecc71;
+      padding: 18px 22px;
+      margin: 16px;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
     .title {
       font-size: 22px;
-      font-weight: 700;
+      font-weight: bold;
       margin-bottom: 12px;
-      color: #2c3e50;
     }
     .title.eth {
-      color: #8e44ad;
+      color: #2962FF;
     }
     .metric {
-      font-size: 18px;
       margin-bottom: 6px;
-      line-height: 1.6;
     }
     .sub {
-      font-size: 15px;
-      color: #7f8c8d;
-      margin-top: 6px;
+      font-size: 14px;
+      color: #666;
     }
-    .reason {
-      font-size: 17px;
+    .signal-header {
+      font-size: 20px;
       font-weight: bold;
-      color: #2c3e50;
-      margin-top: 12px;
+      color: #0a60d1;
+      margin-bottom: 12px;
     }
-    .reason-detail {
-      font-size: 16px;
+    .signal-line {
+      font-size: 18px;
       font-weight: bold;
-      color: #c0392b; /* 红色强调 */
-      margin-left: 24px;
-      margin-top: 4px;
+      color: #333;
+      margin-bottom: 6px;
     }
-    .section-divider {
-      border-top: 2px dashed #ccc;
-      margin: 40px 16px 24px;
+    .signal-neutral {
+      color: #e67e22;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .signal-long {
+      color: #27ae60;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .signal-reason {
+      font-size: 18px;
+      color: #c0392b;
+      font-weight: bold;
+      margin: 6px 0 14px 0;
     }
     .winrate {
-      font-size: 18px;
-      font-weight: 600;
-      margin-top: 10px;
+      font-size: 15px;
+      font-weight: bold;
       color: #d35400;
+      margin-top: 12px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -69,18 +83,15 @@
   <!-- BTC 技术分析 -->
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格: 108404.1953125</div>
-    <div class="metric">MA20: 107772.557421875</div>
-    <div class="metric">RSI: 58.962896239581426</div>
-    <div class="metric">ATR: 329.04464285714283</div>
-    <div class="reason">📌 技术信号:</div>
-    <div class="metric">⏱ 短线15M: ⏸ 中性信号</div>
-    <div class="reason-detail">📍 原因: 未检测到显著信号</div>
-    <div class="metric">📉 中期1H: ⏸ 中性信号</div>
-    <div class="reason-detail">📍 原因: 未检测到显著信号</div>
-    <div class="metric">📊 长期4H: 🟢 做多信号</div>
-    <div class="reason-detail">📍 原因: 收盘价持续站上 MA20 且 RSI 处于多头区间</div>
-    <div class="winrate">历史胜率: 48.1%</div>
+    <div class="metric">当前价格: 108318.6171875</div>
+    <div class="metric">MA20: 107715.0265625</div>
+    <div class="metric">RSI: 64.55728311075895</div>
+    <div class="metric">ATR: 339.2974330357143</div>
+    <div class="signal-header">📌 技术信号:</div>
+    <div class="signal-line">⏱ 短线15M: <span class="signal-neutral">⏸ 中性信号</span></div>
+    <div class="signal-line">📉 中期1H: <span class="signal-neutral">⏸ 中性信号</span></div>
+    <div class="signal-line">📊 长期4H: <span class="signal-long">🟢 做多信号</span></div>
+    <div class="winrate">📈 历史胜率: 39.4%</div>
   </div>
 
   <!-- BTC 操作建议 -->
@@ -91,48 +102,43 @@
 
   <div class="card">
     <div class="title">📍 短线建议（15分钟）</div>
-    <div class="metric">📌 建仓价: 108404.1953125</div>
+    <div class="metric">📌 建仓价: 108318.6171875</div>
     <div class="metric">🛑 止损: None</div>
     <div class="metric">🎯 止盈: None</div>
-    <div class="reason-detail">📌 信号依据: 未检测到显著信号</div>
+    <div class="signal-reason">📌 信号依据: 未检测到显著信号</div>
     <div class="sub">👉 日内快速进出策略，适合高波动交易时段。</div>
   </div>
 
   <div class="card">
     <div class="title">📍 中期建议（1小时）</div>
-    <div class="metric">📌 建仓价: 108404.1953125</div>
+    <div class="metric">📌 建仓价: 108318.6171875</div>
     <div class="metric">🛑 止损: None</div>
     <div class="metric">🎯 止盈: None</div>
-    <div class="reason-detail">📌 信号依据: 未检测到显著信号</div>
-    <div class="sub">👉 趋势确认后介入，适合中短线操作。</div>
+    <div class="signal-reason">📌 信号依据: 未检测到显著信号</div>
+    <div class="sub">👉 趋势确认后介入，适合日内持仓。</div>
   </div>
 
   <div class="card">
     <div class="title">📍 长期建议（4小时）</div>
-    <div class="metric">📌 建仓价: 108404.1953125</div>
-    <div class="metric">🛑 止损: 107629.07700892857</div>
-    <div class="metric">🎯 止盈: 109437.68638392857</div>
-    <div class="reason-detail">📌 信号依据: 收盘价持续站上 MA20 且 RSI 处于多头区间</div>
+    <div class="metric">📌 建仓价: 108318.6171875</div>
+    <div class="metric">🛑 止损: 107671.70619419643</div>
+    <div class="metric">🎯 止盈: 109181.16517857143</div>
+    <div class="signal-reason">📌 信号依据: 收盘价持续站上 MA20 且 RSI 处于多头区间</div>
     <div class="sub">👉 更适合趋势交易者和波段布局。</div>
   </div>
-
-  <hr class="section-divider">
 
   <!-- ETH 技术分析 -->
   <div class="card">
     <div class="title eth">📉 ETH 技术分析</div>
-    <div class="metric">当前价格: 2502.1328125</div>
-    <div class="metric">MA20: 2448.2316772460936</div>
-    <div class="metric">RSI: 71.9118305551566</div>
-    <div class="metric">ATR: 14.350080217633929</div>
-    <div class="reason">📌 技术信号:</div>
-    <div class="metric">⏱ 短线15M: ⏸ 中性信号</div>
-    <div class="reason-detail">📍 原因: 未检测到显著信号</div>
-    <div class="metric">📉 中期1H: 🟢 趋势偏强</div>
-    <div class="reason-detail">📍 原因: 价格突破 MA20 上方 2% 且 RSI 强势</div>
-    <div class="metric">📊 长期4H: 🟢 做多信号</div>
-    <div class="reason-detail">📍 原因: 收盘价持续站上 MA20 且 RSI 处于多头区间</div>
-    <div class="winrate">历史胜率: 33.7%</div>
+    <div class="metric">当前价格: 2502.04052734375</div>
+    <div class="metric">MA20: 2444.66591796875</div>
+    <div class="metric">RSI: 75.40795278976793</div>
+    <div class="metric">ATR: 12.863734654017858</div>
+    <div class="signal-header">📌 技术信号:</div>
+    <div class="signal-line">⏱ 短线15M: <span class="signal-neutral">🟢 趋势偏强</span></div>
+    <div class="signal-line">📉 中期1H: <span class="signal-neutral">🟢 趋势偏强</span></div>
+    <div class="signal-line">📊 长期4H: <span class="signal-long">🟢 趋势偏强</span></div>
+    <div class="winrate">📈 历史胜率: 29.2%</div>
   </div>
 
   <!-- ETH 操作建议 -->
@@ -143,49 +149,49 @@
 
   <div class="card">
     <div class="title">📍 短线建议（15分钟）</div>
-    <div class="metric">📌 建仓价: 2502.1328125</div>
+    <div class="metric">📌 建仓价: 2502.04052734375</div>
     <div class="metric">🛑 止损: None</div>
     <div class="metric">🎯 止盈: None</div>
-    <div class="reason-detail">📌 信号依据: 未检测到显著信号</div>
-    <div class="sub">👉 快节奏策略，结合成交量和波动率。</div>
+    <div class="signal-reason">📌 信号依据: 价格突破 MA20 上方 2% 且 RSI 强势</div>
+    <div class="sub">👉 快节奏交易策略，建议结合成交量和波动率使用。</div>
   </div>
 
   <div class="card">
     <div class="title">📍 中期建议（1小时）</div>
-    <div class="metric">📌 建仓价: 2502.1328125</div>
+    <div class="metric">📌 建仓价: 2502.04052734375</div>
     <div class="metric">🛑 止损: None</div>
     <div class="metric">🎯 止盈: None</div>
-    <div class="reason-detail">📌 信号依据: 价格突破 MA20 上方 2% 且 RSI 强势</div>
-    <div class="sub">👉 适合趋势初期跟随进场。</div>
+    <div class="signal-reason">📌 信号依据: 价格突破 MA20 上方 2% 且 RSI 强势</div>
+    <div class="sub">👉 可作为趋势初期布局参考，适合日内持仓者。</div>
   </div>
 
   <div class="card">
     <div class="title">📍 长期建议（4小时）</div>
-    <div class="metric">📌 建仓价: 2502.1328125</div>
-    <div class="metric">🛑 止损: 2465.728097098214</div>
-    <div class="metric">🎯 止盈: 2550.672433035714</div>
-    <div class="reason-detail">📌 信号依据: 收盘价持续站上 MA20 且 RSI 处于多头区间</div>
-    <div class="sub">👉 建议搭配基本面与宏观判断使用。</div>
+    <div class="metric">📌 建仓价: 2502.04052734375</div>
+    <div class="metric">🛑 止损: None</div>
+    <div class="metric">🎯 止盈: None</div>
+    <div class="signal-reason">📌 信号依据: 价格突破 MA20 上方 2% 且 RSI 强势</div>
+    <div class="sub">👉 适合关注趋势大方向的投资者，建议搭配宏观面参考。</div>
   </div>
 
   <!-- 宏观事件提醒 -->
   <div class="card">
     <div class="title">📅 宏观事件提醒</div>
-    <pre class="metric">- 美国 CPI（2025-06-28，-2 天后）：超预期则 BTC 承压
-- FOMC 利率会议（2025-07-03，3 天后）：或引发波动
-- SEC 比特币 ETF（2025-07-10，10 天后）：若通过大涨</pre>
+    <pre>- 美国 CPI（2025-06-28，-3 天后）：超预期则 BTC 承压
+- FOMC 利率会议（2025-07-03，2 天后）：或引发波动
+- SEC 比特币 ETF（2025-07-10，9 天后）：若通过大涨</pre>
   </div>
 
-  <!-- 恐惧与贪婪 -->
+  <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: 68 (Greed) 😊</div>
+    <div class="metric">当前值: 66（Greed）😊</div>
   </div>
 
-  <!-- 更新时间 -->
+  <!-- 页面更新时间 -->
   <div class="card">
     <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">2025-06-30 07:59:04（北京时间）</div>
+    <div class="metric">2025-06-30 08:04:55（北京时间）</div>
   </div>
 
 </body>
