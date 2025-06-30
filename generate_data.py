@@ -1,23 +1,23 @@
 from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
-from utils.fetch_fear_greed import get_fear_and_greed
+from utils.fetch_fear_and_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
-from utils.strategy_helper import get_strategy_explanation  # ✅ 新增
+from utils.strategy_explainer import get_strategy_explanation
 from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
-    # 调用各模块分析
+    # 分析数据获取
     btc = get_btc_analysis()
     eth = get_eth_analysis()
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
     macro = get_macro_event_summary()
 
-    # ✅ 设置为北京时间
+    # 设置北京时间
     beijing_tz = timezone(timedelta(hours=8))
     page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        # BTC 分析结果
+        # === BTC ===
         "btc_price":        btc["price"],
         "btc_ma20":         btc["ma20"],
         "btc_rsi":          btc["rsi"],
@@ -44,11 +44,11 @@ def get_all_analysis() -> dict:
         "btc_reason_15m":   btc.get("reason_15m", ""),
         "btc_reason_1h":    btc.get("reason_1h", ""),
         "btc_reason_4h":    btc.get("reason_4h", ""),
-        "btc_explain_15m":  get_strategy_explanation(btc.get("signal_15m", "")),  # ✅ 新增
-        "btc_explain_1h":   get_strategy_explanation(btc.get("signal_1h", "")),   # ✅ 新增
-        "btc_explain_4h":   get_strategy_explanation(btc.get("signal_4h", "")),   # ✅ 新增
+        "btc_strategy_15m": get_strategy_explanation(btc.get("signal_15m", "")),
+        "btc_strategy_1h":  get_strategy_explanation(btc.get("signal_1h", "")),
+        "btc_strategy_4h":  get_strategy_explanation(btc.get("signal_4h", "")),
 
-        # ETH 分析结果
+        # === ETH ===
         "eth_price":        eth["price"],
         "eth_ma20":         eth["ma20"],
         "eth_rsi":          eth["rsi"],
@@ -75,19 +75,15 @@ def get_all_analysis() -> dict:
         "eth_reason_15m":   eth.get("reason_15m", ""),
         "eth_reason_1h":    eth.get("reason_1h", ""),
         "eth_reason_4h":    eth.get("reason_4h", ""),
-        "eth_explain_15m":  get_strategy_explanation(eth.get("signal_15m", "")),  # ✅ 新增
-        "eth_explain_1h":   get_strategy_explanation(eth.get("signal_1h", "")),   # ✅ 新增
-        "eth_explain_4h":   get_strategy_explanation(eth.get("signal_4h", "")),   # ✅ 新增
+        "eth_strategy_15m": get_strategy_explanation(eth.get("signal_15m", "")),
+        "eth_strategy_1h":  get_strategy_explanation(eth.get("signal_1h", "")),
+        "eth_strategy_4h":  get_strategy_explanation(eth.get("signal_4h", "")),
 
-        # 恐惧与贪婪指数
+        # === 市场情绪 & 宏观 ===
         "fg_idx":           fg_idx,
         "fg_txt":           fg_txt,
         "fg_emoji":         fg_emoji,
         "fg_ts":            fg_ts,
-
-        # 宏观事件
         "macro_events":     macro,
-
-        # 页面更新时间（北京时间）
         "page_update":      page_update,
     }
