@@ -2,7 +2,7 @@ from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
 from utils.fetch_fear_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
-from utils.strategy_explainer import get_strategy_explanation
+from utils.strategy_helper import get_strategy_explanation
 from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
