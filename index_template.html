@@ -89,6 +89,9 @@
 </head>
 <body>
 
+{% macro attribute(obj, name) %}{{ obj[name] if name in obj else '' }}{% endmacro %}
+{% set ctx = globals() %}
+
   <!-- BTC 技术分析 -->
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
@@ -108,13 +111,13 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(_self, 'btc_entry_' ~ tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(_self, 'btc_sl_' ~ tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(_self, 'btc_tp_' ~ tf) }}</div>
+    <div class="metric">📌 建仓价: {{ attribute(ctx, 'btc_entry_' ~ tf) }}</div>
+    <div class="metric">🛑 止损: {{ attribute(ctx, 'btc_sl_' ~ tf) }}</div>
+    <div class="metric">🎯 止盈: {{ attribute(ctx, 'btc_tp_' ~ tf) }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_self, 'btc_signal_' ~ tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(_self, 'btc_reason_' ~ tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(_self, 'btc_strategy_' ~ tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(ctx, 'btc_signal_' ~ tf) }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ attribute(ctx, 'btc_reason_' ~ tf) }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(ctx, 'btc_strategy_' ~ tf) }}</div>
   </div>
   {% endfor %}
 
@@ -137,13 +140,13 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(_self, 'eth_entry_' ~ tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(_self, 'eth_sl_' ~ tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(_self, 'eth_tp_' ~ tf) }}</div>
+    <div class="metric">📌 建仓价: {{ attribute(ctx, 'eth_entry_' ~ tf) }}</div>
+    <div class="metric">🛑 止损: {{ attribute(ctx, 'eth_sl_' ~ tf) }}</div>
+    <div class="metric">🎯 止盈: {{ attribute(ctx, 'eth_tp_' ~ tf) }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_self, 'eth_signal_' ~ tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(_self, 'eth_reason_' ~ tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(_self, 'eth_strategy_' ~ tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(ctx, 'eth_signal_' ~ tf) }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ attribute(ctx, 'eth_reason_' ~ tf) }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(ctx, 'eth_strategy_' ~ tf) }}</div>
   </div>
   {% endfor %}
 
