@@ -114,7 +114,7 @@
     <div class="signal-header">📌 技术信号:</div>
     <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_context, 'btc_signal_' + tf) }}</span></div>
     <div class="signal-reason">📌 信号依据: {{ attribute(_context, 'btc_reason_' + tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(_context, 'btc_strategy_' + tf) }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ _context.get('btc_strategy_' + tf) }}</div>
   </div>
   {% endfor %}
 
@@ -143,7 +143,7 @@
     <div class="signal-header">📌 技术信号:</div>
     <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_context, 'eth_signal_' + tf) }}</span></div>
     <div class="signal-reason">📌 信号依据: {{ attribute(_context, 'eth_reason_' + tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(_context, 'eth_strategy_' + tf) }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ _context.get('eth_strategy_' + tf) }}</div>
   </div>
   {% endfor %}
 
