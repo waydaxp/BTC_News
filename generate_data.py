@@ -2,6 +2,7 @@ from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
 from utils.fetch_fear_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
+from utils.strategy_helper import get_strategy_explanation  # ✅ 新增
 from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
@@ -43,6 +44,9 @@ def get_all_analysis() -> dict:
         "btc_reason_15m":   btc.get("reason_15m", ""),
         "btc_reason_1h":    btc.get("reason_1h", ""),
         "btc_reason_4h":    btc.get("reason_4h", ""),
+        "btc_explain_15m":  get_strategy_explanation(btc.get("signal_15m", "")),  # ✅ 新增
+        "btc_explain_1h":   get_strategy_explanation(btc.get("signal_1h", "")),   # ✅ 新增
+        "btc_explain_4h":   get_strategy_explanation(btc.get("signal_4h", "")),   # ✅ 新增
 
         # ETH 分析结果
         "eth_price":        eth["price"],
@@ -71,6 +75,9 @@ def get_all_analysis() -> dict:
         "eth_reason_15m":   eth.get("reason_15m", ""),
         "eth_reason_1h":    eth.get("reason_1h", ""),
         "eth_reason_4h":    eth.get("reason_4h", ""),
+        "eth_explain_15m":  get_strategy_explanation(eth.get("signal_15m", "")),  # ✅ 新增
+        "eth_explain_1h":   get_strategy_explanation(eth.get("signal_1h", "")),   # ✅ 新增
+        "eth_explain_4h":   get_strategy_explanation(eth.get("signal_4h", "")),   # ✅ 新增
 
         # 恐惧与贪婪指数
         "fg_idx":           fg_idx,
