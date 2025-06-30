@@ -108,12 +108,12 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(_context, 'btc_entry_' + tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(_context, 'btc_sl_' + tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(_context, 'btc_tp_' + tf) }}</div>
+    <div class="metric">📌 建仓价: {{ _context.get('btc_entry_' + tf) }}</div>
+    <div class="metric">🛑 止损: {{ _context.get('btc_sl_' + tf) }}</div>
+    <div class="metric">🎯 止盈: {{ _context.get('btc_tp_' + tf) }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_context, 'btc_signal_' + tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(_context, 'btc_reason_' + tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ _context.get('btc_signal_' + tf) }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ _context.get('btc_reason_' + tf) }}</div>
     <div class="strategy-explanation">📋 当前策略说明：{{ _context.get('btc_strategy_' + tf) }}</div>
   </div>
   {% endfor %}
@@ -137,12 +137,12 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(_context, 'eth_entry_' + tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(_context, 'eth_sl_' + tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(_context, 'eth_tp_' + tf) }}</div>
+    <div class="metric">📌 建仓价: {{ _context.get('eth_entry_' + tf) }}</div>
+    <div class="metric">🛑 止损: {{ _context.get('eth_sl_' + tf) }}</div>
+    <div class="metric">🎯 止盈: {{ _context.get('eth_tp_' + tf) }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(_context, 'eth_signal_' + tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(_context, 'eth_reason_' + tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ _context.get('eth_signal_' + tf) }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ _context.get('eth_reason_' + tf) }}</div>
     <div class="strategy-explanation">📋 当前策略说明：{{ _context.get('eth_strategy_' + tf) }}</div>
   </div>
   {% endfor %}
