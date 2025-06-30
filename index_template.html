@@ -89,83 +89,80 @@
 </head>
 <body>
 
-{% macro attribute(obj, name) %}{{ obj[name] if name in obj else '' }}{% endmacro %}
-{% set ctx = globals() %}
-
   <!-- BTC 技术分析 -->
   <div class="card">
     <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格: {{ btc_price }}</div>
-    <div class="metric">MA20: {{ btc_ma20 }}</div>
-    <div class="metric">RSI: {{ btc_rsi }}</div>
-    <div class="metric">ATR: {{ btc_atr }}</div>
+    <div class="metric">当前价格: {{ ctx['btc_price'] }}</div>
+    <div class="metric">MA20: {{ ctx['btc_ma20'] }}</div>
+    <div class="metric">RSI: {{ ctx['btc_rsi'] }}</div>
+    <div class="metric">ATR: {{ ctx['btc_atr'] }}</div>
   </div>
 
   <!-- BTC 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（BTC）</div>
-    <div class="metric">💰 风险金额: {{ btc_risk }}</div>
+    <div class="metric">💰 风险金额: {{ ctx['btc_risk'] }}</div>
   </div>
 
   <!-- BTC 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(ctx, 'btc_entry_' ~ tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(ctx, 'btc_sl_' ~ tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(ctx, 'btc_tp_' ~ tf) }}</div>
+    <div class="metric">📌 建仓价: {{ ctx['btc_entry_' ~ tf] }}</div>
+    <div class="metric">🛑 止损: {{ ctx['btc_sl_' ~ tf] }}</div>
+    <div class="metric">🎯 止盈: {{ ctx['btc_tp_' ~ tf] }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(ctx, 'btc_signal_' ~ tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(ctx, 'btc_reason_' ~ tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(ctx, 'btc_strategy_' ~ tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ ctx['btc_signal_' ~ tf] }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ ctx['btc_reason_' ~ tf] }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ ctx['btc_strategy_' ~ tf] }}</div>
   </div>
   {% endfor %}
 
   <!-- ETH 技术分析 -->
   <div class="card">
     <div class="title eth">📉 ETH 技术分析</div>
-    <div class="metric">当前价格: {{ eth_price }}</div>
-    <div class="metric">MA20: {{ eth_ma20 }}</div>
-    <div class="metric">RSI: {{ eth_rsi }}</div>
-    <div class="metric">ATR: {{ eth_atr }}</div>
+    <div class="metric">当前价格: {{ ctx['eth_price'] }}</div>
+    <div class="metric">MA20: {{ ctx['eth_ma20'] }}</div>
+    <div class="metric">RSI: {{ ctx['eth_rsi'] }}</div>
+    <div class="metric">ATR: {{ ctx['eth_atr'] }}</div>
   </div>
 
   <!-- ETH 操作建议 -->
   <div class="card">
     <div class="title">📊 操作建议（ETH）</div>
-    <div class="metric">💰 风险金额: {{ eth_risk }}</div>
+    <div class="metric">💰 风险金额: {{ ctx['eth_risk'] }}</div>
   </div>
 
   <!-- ETH 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ attribute(ctx, 'eth_entry_' ~ tf) }}</div>
-    <div class="metric">🛑 止损: {{ attribute(ctx, 'eth_sl_' ~ tf) }}</div>
-    <div class="metric">🎯 止盈: {{ attribute(ctx, 'eth_tp_' ~ tf) }}</div>
+    <div class="metric">📌 建仓价: {{ ctx['eth_entry_' ~ tf] }}</div>
+    <div class="metric">🛑 止损: {{ ctx['eth_sl_' ~ tf] }}</div>
+    <div class="metric">🎯 止盈: {{ ctx['eth_tp_' ~ tf] }}</div>
     <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ attribute(ctx, 'eth_signal_' ~ tf) }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ attribute(ctx, 'eth_reason_' ~ tf) }}</div>
-    <div class="strategy-explanation">📋 当前策略说明：{{ attribute(ctx, 'eth_strategy_' ~ tf) }}</div>
+    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ ctx['eth_signal_' ~ tf] }}</span></div>
+    <div class="signal-reason">📌 信号依据: {{ ctx['eth_reason_' ~ tf] }}</div>
+    <div class="strategy-explanation">📋 当前策略说明：{{ ctx['eth_strategy_' ~ tf] }}</div>
   </div>
   {% endfor %}
 
   <!-- 宏观事件提醒 -->
   <div class="card">
     <div class="title">📅 宏观事件提醒</div>
-    <pre>{{ macro_events }}</pre>
+    <pre>{{ ctx['macro_events'] }}</pre>
   </div>
 
   <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
+    <div class="metric">当前值: {{ ctx['fg_idx'] }}（{{ ctx['fg_txt'] }}）{{ ctx['fg_emoji'] }}</div>
   </div>
 
   <!-- 页面更新时间 -->
   <div class="card">
     <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">{{ page_update }}（北京时间）</div>
+    <div class="metric">{{ ctx['page_update'] }}（北京时间）</div>
   </div>
 
 </body>
