@@ -2,7 +2,7 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/2 * * * *"  # 每 2 分钟尝试运行（但 GitHub 最快只保证 5 分钟）
+    - cron: "*/2 * * * *"  # 每 5 分钟尝试运行（但 GitHub 最快只保证 5 分钟）
   workflow_dispatch:        # 支持手动触发
 
 permissions:
