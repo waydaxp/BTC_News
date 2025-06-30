@@ -6,7 +6,7 @@ from utils.strategy_helper import get_strategy_explanation
 from datetime import datetime, timedelta, timezone
 
 def get_all_analysis() -> dict:
-    # 分析数据获取
+    # 获取分析数据
     btc = get_btc_analysis()
     eth = get_eth_analysis()
     fg_idx, fg_txt, fg_emoji, fg_ts = get_fear_and_greed()
@@ -17,7 +17,7 @@ def get_all_analysis() -> dict:
     page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        # === BTC ===
+        # === BTC 数据 ===
         "btc_price":        btc["price"],
         "btc_ma20":         btc["ma20"],
         "btc_rsi":          btc["rsi"],
@@ -48,7 +48,7 @@ def get_all_analysis() -> dict:
         "btc_strategy_1h":  get_strategy_explanation(btc.get("signal_1h", "")),
         "btc_strategy_4h":  get_strategy_explanation(btc.get("signal_4h", "")),
 
-        # === ETH ===
+        # === ETH 数据 ===
         "eth_price":        eth["price"],
         "eth_ma20":         eth["ma20"],
         "eth_rsi":          eth["rsi"],
@@ -79,7 +79,7 @@ def get_all_analysis() -> dict:
         "eth_strategy_1h":  get_strategy_explanation(eth.get("signal_1h", "")),
         "eth_strategy_4h":  get_strategy_explanation(eth.get("signal_4h", "")),
 
-        # === 市场情绪 & 宏观 ===
+        # === 市场情绪 & 宏观事件 ===
         "fg_idx":           fg_idx,
         "fg_txt":           fg_txt,
         "fg_emoji":         fg_emoji,
