@@ -2,51 +2,48 @@ name: Update HTML Page
 
 on:
   schedule:
-    - cron: "*/2 * * * *"   # 每 2 分钟
-  workflow_dispatch:        # 允许手动执行
+    - cron: "*/2 * * * *"  # 每 2 分钟尝试运行（但 GitHub 最快只保证 5 分钟）
+  workflow_dispatch:        # 支持手动触发
 
 permissions:
-  contents: write           # 允许推送回仓库
+  contents: write           # 允许推送回主分支
 
 jobs:
   update-html:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣  拉取仓库
+    # 1️⃣ 拉取仓库
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # 2️⃣  安装 Python（3.11 示例，可改 3.10 / 3.9）
+    # 2️⃣ 安装 Python（可换为 3.10/3.9）
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
-        cache: "pip"        # 默认按 requirements.txt 自动缓存
+        cache: "pip"
 
-    # 3️⃣  安装依赖
-    - name: Install Python dependencies
+    # 3️⃣ 安装依赖
+    - name: Install dependencies
       run: |
         python -m pip install -U pip
         pip install -r requirements.txt
 
-    # 4️⃣  生成 HTML
-    - name: Generate index.html
+    # 4️⃣ 生成 index.html 文件
+    - name: Generate HTML page
       run: python generate_html.py
 
-    # 5️⃣  如有变更则推送
+    # 5️⃣ 如文件有变化则提交
     - name: Commit & push updated index.html
       run: |
-        # Git 签名
         git config --global user.email "action@github.com"
         git config --global user.name  "GitHub Action"
 
-        # 允许首次文件不存在
-        git add -f index.html || true
+        git add index.html || true
 
-        # 仅当暂存区有差异才提交
         if git diff --cached --quiet; then
-          echo "Nothing to commit"
+          echo "✅ No changes to commit"
         else
           git commit -m "🕒 Auto update at $(date -u '+%Y-%m-%d %H:%M')"
           git push origin main
