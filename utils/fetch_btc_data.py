@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from pytz import timezone
 from core.indicators import add_basic_indicators, add_macd_boll_kdj, backtest_signals
-from core.risk import get_risk_params, calc_position_size, DEFAULT_MODE
+from core.risk import calc_position_size, get_risk_params, DEFAULT_MODE
 
 PAIR = "BTC-USD"
 
@@ -22,17 +22,14 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     last = df.iloc[-1]
     prev = df.iloc[-2]
-
     close = last['Close']
     rsi = last['RSI']
     ma20 = last['MA20']
-    ma5_val = last['MA5']
+    ma5 = last['MA5']
+    macd, macd_signal = last['MACD'], last['MACD_Signal']
+    prev_macd, prev_macd_signal = prev['MACD'], prev['MACD_Signal']
     vol = last['Volume']
     avg_vol = df['Volume'].rolling(20).mean().iloc[-1]
-    macd = last['MACD']
-    macd_signal = last['MACD_signal']
-    prev_macd = prev['MACD']
-    prev_macd_signal = prev['MACD_signal']
 
     signal, reason = "⏸ 中性信号", "未检测到显著信号"
 
@@ -45,10 +42,10 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
         signal = "🔻 顶部反转（可尝试做空）"
         reason = "RSI 高位回落 + 跌破 MA20"
-    elif close > ma20 and rsi > 50 and close > ma5_val:
+    elif close > ma20 and rsi > 50 and close > ma5:
         signal = "🟢 做多信号"
         reason = "价格站上 MA20 且 RSI 强"
-    elif close < ma20 and rsi < 50 and close < ma5_val:
+    elif close < ma20 and rsi < 50 and close < ma5:
         signal = "🔻 做空信号"
         reason = "价格低于 MA20 且 RSI 弱"
     elif abs(close - ma20) / ma20 < 0.005:
@@ -59,9 +56,8 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     return signal, reason
 
 
-def _calc_trade(entry: float, atr: float, signal: str) -> tuple:
-    atr_sl, atr_tp, risk_usd = get_risk_params(DEFAULT_MODE)
-
+def _calc_trade(entry: float, atr: float, signal: str, mode: str = DEFAULT_MODE) -> tuple:
+    atr_sl, atr_tp, risk_usd = get_risk_params(mode)
     if "多" in signal:
         sl = entry - atr_sl * atr
         tp = entry + atr_tp * atr
@@ -87,54 +83,39 @@ def get_btc_analysis() -> dict:
     win_rate = backtest_signals(df1h, "BTC-1h")
 
     last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
-    atr15 = float(last15['ATR'])
-    atr1h = float(last1h['ATR'])
-    atr4h = float(last4h['ATR'])
+    atr15, atr1h, atr4h = float(last15['ATR']), float(last1h['ATR']), float(last4h['ATR'])
+    entry15, entry1h, entry4h = float(last15['MA20']), float(last1h['MA20']), float(last4h['MA20'])
 
-    price15 = float(last15['Close'])
-    price1h = float(last1h['Close'])
-    price4h = float(last4h['Close'])
-
-    sl15, tp15, qty15 = _calc_trade(price15, atr15, s15)
-    sl1h, tp1h, qty1h = _calc_trade(price1h, atr1h, s1h)
-    sl4h, tp4h, qty4h = _calc_trade(price4h, atr4h, s4h)
-
-    _, _, risk_usd = get_risk_params(DEFAULT_MODE)
+    sl15, tp15, qty15 = _calc_trade(entry15, atr15, s15)
+    sl1h, tp1h, qty1h = _calc_trade(entry1h, atr1h, s1h)
+    sl4h, tp4h, qty4h = _calc_trade(entry4h, atr4h, s4h)
 
     update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        "price": price1h,
+        "price": entry1h,
         "ma20": float(last1h['MA20']),
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-
-        "entry_15m": price15,
+        "entry_15m": entry15,
         "sl_15m": sl15,
         "tp_15m": tp15,
         "qty_15m": qty15,
-
-        "entry_1h": price1h,
+        "entry_1h": entry1h,
         "sl_1h": sl1h,
         "tp_1h": tp1h,
         "qty_1h": qty1h,
-
-        "entry_4h": price4h,
+        "entry_4h": entry4h,
         "sl_4h": sl4h,
         "tp_4h": tp4h,
         "qty_4h": qty4h,
-
-        "risk_usd": risk_usd,
         "update_time": update_time,
-
         "reason_15m": l15,
         "reason_1h": l1h,
         "reason_4h": l4h,
-
         "signal_15m": s15,
         "signal_1h": s1h,
         "signal_4h": s4h,
-
         "win_rate": win_rate,
     }
