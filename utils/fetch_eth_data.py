@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from pytz import timezone
 from core.indicators import add_basic_indicators, add_macd_boll_kdj, backtest_signals
-from core.risk import calc_position_size, get_risk_params, DEFAULT_MODE
+from core.risk import get_risk_params, calc_position_size, DEFAULT_MODE
 
 PAIR = "ETH-USD"
 
@@ -24,8 +24,8 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     rsi = last['RSI']
     ma20 = last['MA20']
     ma5 = last['MA5']
-    macd, macd_signal = last['MACD'], last['MACD_Signal']
-    prev_macd, prev_macd_signal = prev['MACD'], prev['MACD_Signal']
+    macd, macd_signal = last.get('MACD'), last.get('MACD_Signal')
+    prev_macd, prev_macd_signal = prev.get('MACD'), prev.get('MACD_Signal')
     vol = last['Volume']
     avg_vol = df['Volume'].rolling(20).mean().iloc[-1]
 
@@ -53,16 +53,16 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     print(f"[DEBUG] {PAIR}-{interval_label}: Signal={signal}, Reason={reason}, RSI={rsi:.2f}, Close={close:.2f}")
     return signal, reason
 
-def _calc_trade(entry: float, atr: float, signal: str, mode=DEFAULT_MODE) -> tuple:
-    atr_mult_sl, atr_mult_tp, risk_usd = get_risk_params(mode)
+def _calc_trade(entry: float, atr: float, signal: str) -> tuple:
+    atr_sl, atr_tp, risk_usd = get_risk_params()
     if "多" in signal:
-        sl = entry - atr_mult_sl * atr
-        tp = entry + atr_mult_tp * atr
-        qty = calc_position_size(entry, risk_usd, atr_mult_sl, atr, "long")
+        sl = entry - atr_sl * atr
+        tp = entry + atr_tp * atr
+        qty = calc_position_size(entry, risk_usd, atr_sl, atr, "long")
     elif "空" in signal:
-        sl = entry + atr_mult_sl * atr
-        tp = entry - atr_mult_tp * atr
-        qty = calc_position_size(entry, risk_usd, atr_mult_sl, atr, "short")
+        sl = entry + atr_sl * atr
+        tp = entry - atr_tp * atr
+        qty = calc_position_size(entry, risk_usd, atr_sl, atr, "short")
     else:
         sl, tp, qty = None, None, 0.0
     return sl, tp, qty
@@ -78,23 +78,35 @@ def get_eth_analysis() -> dict:
 
     win_rate = backtest_signals(df1h, "ETH-1h")
 
+    last15 = df15.iloc[-1]
     last1h = df1h.iloc[-1]
-    atr1h = float(last1h['ATR'])
-    predicted_entry = float(last1h['MA20'])
-    sl1h, tp1h, qty1h = _calc_trade(predicted_entry, atr1h, s1h)
+    last4h = df4h.iloc[-1]
+
+    atr15, atr1h, atr4h = last15['ATR'], last1h['ATR'], last4h['ATR']
+    entry15, entry1h, entry4h = last15['MA20'], last1h['MA20'], last4h['MA20']
+
+    sl15, tp15, _ = _calc_trade(entry15, atr15, s15)
+    sl1h, tp1h, qty1h = _calc_trade(entry1h, atr1h, s1h)
+    sl4h, tp4h, _ = _calc_trade(entry4h, atr4h, s4h)
 
     update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        "price": predicted_entry,
+        "price": float(last1h['Close']),
         "ma20": float(last1h['MA20']),
         "rsi": float(last1h['RSI']),
-        "atr": atr1h,
+        "atr": float(last1h['ATR']),
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-        "entry_1h": predicted_entry,
+        "entry_15m": float(entry15),
+        "sl_15m": sl15,
+        "tp_15m": tp15,
+        "entry_1h": float(entry1h),
         "sl_1h": sl1h,
         "tp_1h": tp1h,
         "qty_1h": qty1h,
+        "entry_4h": float(entry4h),
+        "sl_4h": sl4h,
+        "tp_4h": tp4h,
         "risk_usd": get_risk_params()[2],
         "update_time": update_time,
         "reason_15m": l15,
