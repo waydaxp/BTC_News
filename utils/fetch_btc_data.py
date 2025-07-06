@@ -34,24 +34,24 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     ma5_val = ma5.iloc[-1]
     vol = last['Volume']
     avg_vol = df['Volume'].rolling(10).mean().iloc[-1]
+    macd = last['MACD']
+    macd_signal = last['MACD_Signal']
+    prev_macd = df['MACD'].iloc[-2]
+    prev_macd_signal = df['MACD_Signal'].iloc[-2]
+
     recent = df['Close'].tail(5) > df['MA20'].tail(5)
     above_ma20 = recent.sum() >= 3
     below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
-    prev_candle = df.iloc[-2]
 
+    prev_candle = df.iloc[-2]
     reason = "未检测到显著信号"
     signal = "⏸ 中性信号"
 
-    # 🚀 新增逻辑：突破爆发型做多信号判断
-    if (
-        rsi > 50 and
-        df['MACD'].iloc[-2] < df['MACD_signal'].iloc[-2] and
-        df['MACD'].iloc[-1] > df['MACD_signal'].iloc[-1] and
-        vol > avg_vol * 1.5
-    ):
-        signal = "🚀 强烈短线做多信号（突破爆发型）"
-        reason = "RSI > 50 且 MACD 金叉刚发生，成交量放大 > 过去均值的 1.5 倍"
-    
+    # === 增加：MACD 金叉 + RSI > 50 + 成交量放大 ===
+    if rsi > 50 and prev_macd < prev_macd_signal and macd > macd_signal and vol > avg_vol * 1.5:
+        signal = "🟢 强烈短线做多信号（突破爆发型）"
+        reason = "RSI > 50，MACD 金叉刚发生，成交量超过过去均值 1.5 倍"
+
     elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
         signal = "🟢 底部反转（可尝试做多）"
         reason = "RSI 超跌连续低位 + 价格回升至 MA20 上方"
