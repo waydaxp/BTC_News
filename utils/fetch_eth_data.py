@@ -2,24 +2,16 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime
 from pytz import timezone
-from core.indicators import add_basic_indicators, add_macd_boll_kdj
+from core.indicators import add_basic_indicators, add_macd_boll_kdj, backtest_signals
 from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
-from core.backtest import backtest_signals
 
 PAIR = "ETH-USD"
 
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
     if isinstance(df.columns, pd.MultiIndex):
-        if "Ticker" in df.columns.names and "Price" in df.columns.names:
-            df = df.xs(PAIR, level="Ticker", axis=1)
-        else:
-            raise ValueError("[错误] 未识别的 MultiIndex 结构")
+        df = df.xs(PAIR, level=1, axis=1)
     df = df.rename(columns=str.title)
-    expected_cols = ["Open", "High", "Low", "Close", "Volume"]
-    missing = [col for col in expected_cols if col not in df.columns]
-    if missing:
-        raise ValueError(f"[错误] 缺失所需列: {missing}, 当前列为: {df.columns.tolist()}")
     df.index = df.index.tz_localize(None)
     df = add_basic_indicators(df)
     df = add_macd_boll_kdj(df)
@@ -27,58 +19,26 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
 
 def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     last = df.iloc[-1]
-    ma5 = df['Close'].rolling(5).mean()
-    rsi = last['RSI']
     close = last['Close']
+    rsi = last['RSI']
     ma20 = last['MA20']
-    ma5_val = ma5.iloc[-1]
-    vol = last['Volume']
-    avg_vol = df['Volume'].rolling(10).mean().iloc[-1]
-    macd = last['MACD']
-    macd_signal = last['MACD_Signal']
-    prev_macd = df['MACD'].iloc[-2]
-    prev_macd_signal = df['MACD_Signal'].iloc[-2]
-
-    recent = df['Close'].tail(5) > df['MA20'].tail(5)
-    above_ma20 = recent.sum() >= 3
-    below_ma20 = (df['Close'].tail(5) < df['MA20'].tail(5)).sum() >= 3
-
+    ma5_val = df['MA5'].iloc[-1]
     prev_candle = df.iloc[-2]
-    reason = "未检测到显著信号"
-    signal = "⏸ 中性信号"
 
-    if rsi > 50 and prev_macd < prev_macd_signal and macd > macd_signal and vol > avg_vol * 1.5:
-        signal = "🟢 强烈短线做多信号（突破爆发型）"
-        reason = "RSI > 50，MACD 金叉刚发生，成交量超过过去均值 1.5 倍"
+    signal, reason = "⏸ 中性信号", "未检测到显著信号"
 
-    elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
+    if rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
         signal = "🟢 底部反转（可尝试做多）"
-        reason = "RSI 超跌连续低位 + 价格回升至 MA20 上方"
+        reason = "RSI 超跌 + 回升至 MA20 上方"
     elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
         signal = "🔻 顶部反转（可尝试做空）"
-        reason = "RSI 高位回落 + 收盘价跌破 MA20"
-    elif close > ma20 and above_ma20 and 45 < rsi < 70 and close > ma5_val:
+        reason = "RSI 高位回落 + 跌破 MA20"
+    elif close > ma20 and rsi > 50 and close > ma5_val:
         signal = "🟢 做多信号"
-        reason = "收盘价持续站上 MA20 且 RSI 处于多头区间"
-    elif close < ma20 and below_ma20 and 30 < rsi < 55 and close < ma5_val:
+        reason = "价格站上 MA20 且 RSI 强"
+    elif close < ma20 and rsi < 50 and close < ma5_val:
         signal = "🔻 做空信号"
-        reason = "收盘价持续低于 MA20 且 RSI 偏空"
-    elif close > ma20 * 1.02 and rsi > 60:
-        signal = "🟢 趋势偏强"
-        reason = "价格突破 MA20 上方 2% 且 RSI 强势"
-    elif close < ma20 * 0.98 and rsi < 40:
-        signal = "🔻 趋势偏弱"
-        reason = "价格低于 MA20 且 RSI 弱势"
-    elif rsi < 35 and close > prev_candle['Open'] and close > ma5_val and close > ma20:
-        signal = "🟢 超跌反弹"
-        reason = "RSI 超跌 + 当前 K 线强势回升 + 均线突破"
-    elif (
-        rsi > 40 and rsi - df['RSI'].iloc[-5] > 10 and close > ma5_val and
-        last['Close'] > last['Open'] and prev_candle['Low'] < prev_candle['Close'] and
-        vol > avg_vol
-    ):
-        signal = "🟢 反转信号"
-        reason = "RSI 回升 + 均线突破 + 成交量放大 + 多头 K 线形态"
+        reason = "价格低于 MA20 且 RSI 弱"
     elif abs(close - ma20) / ma20 < 0.005:
         signal = "⏸ 震荡中性"
         reason = "价格围绕 MA20 波动"
@@ -86,15 +46,15 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     print(f"[DEBUG] {PAIR}-{interval_label}: Signal={signal}, Reason={reason}, RSI={rsi:.2f}, Close={close:.2f}")
     return signal, reason
 
-def _calc_trade(price: float, atr: float, signal: str) -> tuple:
+def _calc_trade(entry: float, atr: float, signal: str) -> tuple:
     if "多" in signal:
-        sl = price - ATR_MULT_SL * atr
-        tp = price + ATR_MULT_TP * atr
-        qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "long")
+        sl = entry - ATR_MULT_SL * atr
+        tp = entry + ATR_MULT_TP * atr
+        qty = calc_position_size(entry, RISK_USD, ATR_MULT_SL, atr, "long")
     elif "空" in signal:
-        sl = price + ATR_MULT_SL * atr
-        tp = price - ATR_MULT_TP * atr
-        qty = calc_position_size(price, RISK_USD, ATR_MULT_SL, atr, "short")
+        sl = entry + ATR_MULT_SL * atr
+        tp = entry - ATR_MULT_TP * atr
+        qty = calc_position_size(entry, RISK_USD, ATR_MULT_SL, atr, "short")
     else:
         sl, tp, qty = None, None, 0.0
     return sl, tp, qty
@@ -111,31 +71,31 @@ def get_eth_analysis() -> dict:
     win_rate = backtest_signals(df1h, "ETH-1h")
 
     last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
-    price15, price1h, price4h = float(last15['Close']), float(last1h['Close']), float(last4h['Close'])
-    atr15, atr1h, atr4h = float(last15['ATR']), float(last1h['ATR']), float(last4h['ATR'])
+    atr1h = float(last1h['ATR'])
 
-    sl15, tp15, qty15 = _calc_trade(price15, atr15, s15)
-    sl1h, tp1h, qty1h = _calc_trade(price1h, atr1h, s1h)
-    sl4h, tp4h, qty4h = _calc_trade(price4h, atr4h, s4h)
+    # 建仓价使用 MA20 作为中枢预测价
+    predicted_entry = float(last1h['MA20'])
+    sl1h, tp1h, qty1h = _calc_trade(predicted_entry, atr1h, s1h)
 
     update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
 
     return {
-        "price": price1h,
+        "price": predicted_entry,
         "ma20": float(last1h['MA20']),
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-        "signal_4h": s4h,
-        "signal_1h": s1h,
-        "signal_15m": s15,
-        "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
-        "entry_1h":  price1h, "sl_1h":  sl1h, "tp_1h":  tp1h,  "qty_1h":  qty1h,
-        "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
+        "entry_1h":  predicted_entry,
+        "sl_1h":  sl1h,
+        "tp_1h":  tp1h,
+        "qty_1h":  qty1h,
         "risk_usd": RISK_USD,
         "update_time": update_time,
         "reason_15m": l15,
         "reason_1h": l1h,
         "reason_4h": l4h,
+        "signal_15m": s15,
+        "signal_1h": s1h,
+        "signal_4h": s4h,
         "win_rate": win_rate,
     }
