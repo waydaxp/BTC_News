@@ -5,6 +5,31 @@ from utils.fetch_macro_events import get_macro_event_summary
 from utils.strategy_helper import get_strategy_explanation
 from datetime import datetime, timedelta, timezone
 
+
+def judge_style(signal: str, rsi: float, atr: float) -> str:
+    """
+    根据信号、RSI、ATR 判断建仓风格。
+    """
+    if "强烈" in signal or (rsi > 65 and atr > 50):
+        return "激进"
+    elif "做多" in signal or "做空" in signal:
+        return "平衡"
+    else:
+        return "保守"
+
+
+def judge_trend_consistency(s15: str, s1h: str, s4h: str) -> str:
+    """
+    判断多周期趋势是否一致
+    """
+    if all("多" in s for s in [s15, s1h, s4h]):
+        return "📈 多头趋势一致"
+    elif all("空" in s for s in [s15, s1h, s4h]):
+        return "📉 空头趋势一致"
+    else:
+        return "⏸ 趋势分歧（注意回撤）"
+
+
 def get_all_analysis() -> dict:
     # 获取分析数据
     btc = get_btc_analysis()
@@ -15,6 +40,10 @@ def get_all_analysis() -> dict:
     # 设置北京时间
     beijing_tz = timezone(timedelta(hours=8))
     page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
+
+    # === 趋势一致性判断 ===
+    btc_trend_note = judge_trend_consistency(btc["signal_15m"], btc["signal_1h"], btc["signal_4h"])
+    eth_trend_note = judge_trend_consistency(eth["signal_15m"], eth["signal_1h"], eth["signal_4h"])
 
     return {
         # === BTC 数据 ===
@@ -47,6 +76,8 @@ def get_all_analysis() -> dict:
         "btc_strategy_15m": get_strategy_explanation(btc.get("signal_15m", "")),
         "btc_strategy_1h":  get_strategy_explanation(btc.get("signal_1h", "")),
         "btc_strategy_4h":  get_strategy_explanation(btc.get("signal_4h", "")),
+        "btc_style_1h":     judge_style(btc.get("signal_1h", ""), btc.get("rsi", 50), btc.get("atr", 20)),
+        "btc_trend_note":   btc_trend_note,
 
         # === ETH 数据 ===
         "eth_price":        eth.get("price"),
@@ -78,6 +109,8 @@ def get_all_analysis() -> dict:
         "eth_strategy_15m": get_strategy_explanation(eth.get("signal_15m", "")),
         "eth_strategy_1h":  get_strategy_explanation(eth.get("signal_1h", "")),
         "eth_strategy_4h":  get_strategy_explanation(eth.get("signal_4h", "")),
+        "eth_style_1h":     judge_style(eth.get("signal_1h", ""), eth.get("rsi", 50), eth.get("atr", 20)),
+        "eth_trend_note":   eth_trend_note,
 
         # === 市场情绪 & 宏观事件 ===
         "fg_idx":           fg_idx,
