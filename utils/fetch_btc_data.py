@@ -22,12 +22,22 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     close = last['Close']
     rsi = last['RSI']
     ma20 = last['MA20']
-    ma5_val = df['MA5'].iloc[-1]
-    prev_candle = df.iloc[-2]
+    ma5_val = last['MA5']
+    macd = last['MACD']
+    macd_signal = last['MACD_Signal']
+    vol = last['Volume']
+    avg_vol = df['Volume'].rolling(20).mean().iloc[-1]
+    prev = df.iloc[-2]
+
+    prev_macd = prev['MACD']
+    prev_macd_signal = prev['MACD_Signal']
 
     signal, reason = "⏸ 中性信号", "未检测到显著信号"
 
-    if rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
+    if rsi > 50 and prev_macd < prev_macd_signal and macd > macd_signal and vol > avg_vol * 1.5:
+        signal = "🟢 强烈短线做多信号（突破爆发型）"
+        reason = "RSI > 50，MACD 金叉刚发生，成交量超过过去均值 1.5 倍"
+    elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
         signal = "🟢 底部反转（可尝试做多）"
         reason = "RSI 超跌 + 回升至 MA20 上方"
     elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
@@ -70,10 +80,8 @@ def get_btc_analysis() -> dict:
 
     win_rate = backtest_signals(df1h, "BTC-1h")
 
-    last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
+    last1h = df1h.iloc[-1]
     atr1h = float(last1h['ATR'])
-
-    # 预测建仓价 = MA20（趋势中枢）
     predicted_entry = float(last1h['MA20'])
     sl1h, tp1h, qty1h = _calc_trade(predicted_entry, atr1h, s1h)
 
@@ -85,10 +93,10 @@ def get_btc_analysis() -> dict:
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-        "entry_1h":  predicted_entry,
-        "sl_1h":  sl1h,
-        "tp_1h":  tp1h,
-        "qty_1h":  qty1h,
+        "entry_1h": predicted_entry,
+        "sl_1h": sl1h,
+        "tp_1h": tp1h,
+        "qty_1h": qty1h,
         "risk_usd": RISK_USD,
         "update_time": update_time,
         "reason_15m": l15,
