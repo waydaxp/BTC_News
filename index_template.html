@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Crypto 技术面仪表盘</title>
+  <meta http-equiv="refresh" content="30"> <!-- 每30秒自动刷新一次页面 -->
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
@@ -25,16 +26,9 @@
       font-weight: bold;
       margin-bottom: 12px;
     }
-    .title.eth {
-      color: #2962FF;
-    }
-    .metric {
-      margin-bottom: 6px;
-    }
-    .sub {
-      font-size: 14px;
-      color: #666;
-    }
+    .title.eth { color: #2962FF; }
+    .metric { margin-bottom: 6px; }
+    .sub { font-size: 14px; color: #666; }
     .signal-header {
       font-size: 20px;
       font-weight: bold;
@@ -47,16 +41,8 @@
       color: #333;
       margin-bottom: 6px;
     }
-    .signal-neutral {
-      color: #e67e22;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .signal-long {
-      color: #27ae60;
-      font-weight: bold;
-      font-size: 18px;
-    }
+    .signal-neutral { color: #e67e22; font-weight: bold; font-size: 18px; }
+    .signal-long { color: #27ae60; font-weight: bold; font-size: 18px; }
     .signal-reason {
       font-size: 18px;
       color: #c0392b;
@@ -83,13 +69,6 @@
       white-space: pre-line;
       line-height: 1.6;
     }
-    pre {
-      background: #f4f4f4;
-      padding: 12px;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body>
@@ -109,34 +88,17 @@
     <div class="metric">💰 风险金额: {{ btc_risk }}</div>
   </div>
 
-  <!-- BTC 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
 
-    <div style="font-size:14px; color:#555; margin-bottom:8px;">
-      📌 <strong>建仓价说明</strong>：本建仓价为<span style="color:#d35400;font-weight:bold;">建议入场价格</span>，基于趋势中枢（如 MA20）、技术信号与回调确认计算，<strong>非实时价格</strong>，请结合市场实际判断执行。
-    </div>
-
     <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
       {% if tf == '15m' %}
-      <div style="margin-bottom: 8px;">
-        <strong>📍 短线建议（15分钟）</strong><br>
-        适用于超短期操作，以 15 分钟 K 线为参考。<br>
-        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
-      </div>
+        <strong>📍 适用于超短期操作，以 15 分钟 K 线为参考。</strong><br>持仓时间不超过数小时。
       {% elif tf == '1h' %}
-      <div style="margin-bottom: 8px;">
-        <strong>📍 中期建议（1小时）</strong><br>
-        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
-        综合短期波动与中期趋势，适合日内或隔夜持仓。
-      </div>
+        <strong>📍 适用于日内或隔夜操作，以 1 小时 K 线为依据。</strong><br>适合持仓 6 小时至 1 天。
       {% elif tf == '4h' %}
-      <div>
-        <strong>📍 长期建议（4小时）</strong><br>
-        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
-        聚焦中期价格动能和趋势延续。
-      </div>
+        <strong>📍 波段趋势分析，以 4 小时 K 线为依据。</strong><br>适合持仓 1 天至 1 周。
       {% endif %}
     </div>
 
@@ -168,34 +130,17 @@
     <div class="metric">💰 风险金额: {{ eth_risk }}</div>
   </div>
 
-  <!-- ETH 各周期建议 -->
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
 
-    <div style="font-size:14px; color:#555; margin-bottom:8px;">
-      📌 <strong>建仓价说明</strong>：本建仓价为<span style="color:#d35400;font-weight:bold;">建议入场价格</span>，基于趋势中枢（如 MA20）、技术信号与回调确认计算，<strong>非实时价格</strong>，请结合市场实际判断执行。
-    </div>
-
     <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
       {% if tf == '15m' %}
-      <div style="margin-bottom: 8px;">
-        <strong>📍 短线建议（15分钟）</strong><br>
-        适用于超短期操作，以 15 分钟 K 线为参考。<br>
-        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
-      </div>
+        <strong>📍 适用于超短期操作，以 15 分钟 K 线为参考。</strong><br>持仓时间不超过数小时。
       {% elif tf == '1h' %}
-      <div style="margin-bottom: 8px;">
-        <strong>📍 中期建议（1小时）</strong><br>
-        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
-        综合短期波动与中期趋势，适合日内或隔夜持仓。
-      </div>
+        <strong>📍 适用于日内或隔夜操作，以 1 小时 K 线为依据。</strong><br>适合持仓 6 小时至 1 天。
       {% elif tf == '4h' %}
-      <div>
-        <strong>📍 长期建议（4小时）</strong><br>
-        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
-        聚焦中期价格动能和趋势延续。
-      </div>
+        <strong>📍 波段趋势分析，以 4 小时 K 线为依据。</strong><br>适合持仓 1 天至 1 周。
       {% endif %}
     </div>
 
@@ -211,12 +156,6 @@
     </div>
   </div>
   {% endfor %}
-
-  <!-- 宏观事件提醒 -->
-  <div class="card">
-    <div class="title">📅 宏观事件提醒</div>
-    <pre>{{ macro_events }}</pre>
-  </div>
 
   <!-- 恐惧与贪婪指数 -->
   <div class="card">
