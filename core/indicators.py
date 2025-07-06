@@ -15,7 +15,7 @@ def calc_rsi(series: pd.Series) -> pd.Series:
     roll_down = down.rolling(RSI_WIN).mean()
     rs = roll_up / roll_down
     rsi = 100 - 100 / (1 + rs)
-    return rsi.reindex(series.index, method='pad')
+    return rsi.reindex(series.index, method='pad').fillna(0)
 
 # === ATR ===
 def calc_atr(df: pd.DataFrame) -> pd.Series:
@@ -51,21 +51,24 @@ def add_macd_boll_kdj(df: pd.DataFrame) -> pd.DataFrame:
     # KDJ
     low_min = df['Low'].rolling(window=9).min()
     high_max = df['High'].rolling(window=9).max()
-    rsv = (df['Close'] - low_min) / (high_max - low_min) * 100
+    divisor = (high_max - low_min).replace(0, 1e-5)
+    rsv = (df['Close'] - low_min) / divisor * 100
     df['K'] = rsv.ewm(com=2).mean()
     df['D'] = df['K'].ewm(com=2).mean()
     df['J'] = 3 * df['K'] - 2 * df['D']
 
+    print(f"[指标] 加载成功: MACD, BOLL, KDJ 共 {len(df)} 行")
     return df
 
 # === 简单历史胜率回测 ===
 def backtest_signals(df: pd.DataFrame, label="") -> float:
     trades = []
+    ma5_series = df['Close'].rolling(5).mean()
     for i in range(10, len(df) - 10):
         rsi = df['RSI'].iloc[i]
         ma20 = df['MA20'].iloc[i]
         close = df['Close'].iloc[i]
-        ma5 = df['Close'].rolling(5).mean().iloc[i]
+        ma5 = ma5_series.iloc[i]
         entry = close
         exit_price = df['Close'].iloc[i + 8]
 
@@ -75,5 +78,5 @@ def backtest_signals(df: pd.DataFrame, label="") -> float:
             trades.append(1 if exit_price < entry else 0)
 
     win_rate = round(sum(trades) / len(trades) * 100, 1) if trades else 0.0
-    print(f"[回测] {label} 胜率: {win_rate}% ，共 {len(trades)} 笔")
+    print(f"[回测] {label:>8} 胜率: {win_rate}% ，共 {len(trades)} 笔")
     return win_rate
