@@ -70,6 +70,11 @@
       white-space: pre-line;
       line-height: 1.6;
     }
+    .hint {
+      font-size: 14px;
+      color: #888;
+      margin-top: 6px;
+    }
   </style>
   <script>
     setTimeout(() => {
@@ -100,6 +105,7 @@
     <div class="metric">📌 建仓价（建议参考）: {{ ctx['btc_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损（建议参考）: {{ ctx['btc_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈（建议参考）: {{ ctx['btc_tp_' ~ tf] }}</div>
+    <div class="hint">📌 所有价格基于未来3根K线均值回测计算，非实时价格，具备前瞻性参考价值。</div>
     <div class="signal-header">🧭 技术信号:</div>
     <div class="signal-line">📍 信号: {{ ctx['btc_signal_' ~ tf] }}</div>
     <div class="signal-reason">📌 信号依据: {{ ctx['btc_reason_' ~ tf] }}</div>
@@ -125,6 +131,7 @@
     <div class="metric">📌 建仓价（建议参考）: {{ ctx['eth_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损（建议参考）: {{ ctx['eth_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈（建议参考）: {{ ctx['eth_tp_' ~ tf] }}</div>
+    <div class="hint">📌 所有价格基于未来3根K线均值回测计算，非实时价格，具备前瞻性参考价值。</div>
     <div class="signal-header">🧭 技术信号:</div>
     <div class="signal-line">📍 信号: {{ ctx['eth_signal_' ~ tf] }}</div>
     <div class="signal-reason">📌 信号依据: {{ ctx['eth_reason_' ~ tf] }}</div>
