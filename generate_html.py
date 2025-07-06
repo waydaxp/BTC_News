@@ -2,6 +2,7 @@ from generate_data import get_all_analysis
 from jinja2 import Environment, FileSystemLoader
 import os
 
+
 def main():
     # 获取当前目录
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +49,7 @@ def main():
         f.write(html)
 
     print("✅ index.html 已生成并部署到 /var/www/html ✅")
+
 
 if __name__ == "__main__":
     main()
