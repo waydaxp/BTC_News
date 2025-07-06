@@ -33,6 +33,7 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     ma5_val = ma5.iloc[-1]
     vol = last['Volume']
     avg_vol = df['Volume'].rolling(10).mean().iloc[-1]
+    macd_cross = df['MACD'].iloc[-2] < df['MACD_Signal'].iloc[-2] and df['MACD'].iloc[-1] > df['MACD_Signal'].iloc[-1]
 
     recent = df['Close'].tail(5) > df['MA20'].tail(5)
     above_ma20 = recent.sum() >= 3
@@ -42,7 +43,10 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     reason = "未检测到显著信号"
     signal = "⏸ 中性信号"
 
-    if rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
+    if rsi > 50 and macd_cross and vol > 1.5 * avg_vol:
+        signal = "🚀 强烈短线做多信号（突破爆发型）"
+        reason = "RSI > 50 且 MACD 金叉且成交量放大"
+    elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
         signal = "🟢 底部反转（可尝试做多）"
         reason = "RSI 超跌连续低位 + 价格回升至 MA20 上方"
     elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
@@ -117,14 +121,11 @@ def get_eth_analysis() -> dict:
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-
         "entry_15m": price15, "sl_15m": sl15, "tp_15m": tp15, "qty_15m": qty15,
         "entry_1h":  price1h, "sl_1h":  sl1h, "tp_1h":  tp1h,  "qty_1h":  qty1h,
         "entry_4h":  price4h, "sl_4h":  sl4h, "tp_4h":  tp4h,  "qty_4h":  qty4h,
-
         "risk_usd": RISK_USD,
         "update_time": update_time,
-
         "reason_15m": l15,
         "reason_1h": l1h,
         "reason_4h": l4h,
