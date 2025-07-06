@@ -114,6 +114,10 @@
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
 
+    <div style="font-size:14px; color:#555; margin-bottom:8px;">
+      📌 <strong>建仓价说明</strong>：本建仓价为<span style="color:#d35400;font-weight:bold;">建议入场价格</span>，基于趋势中枢（如 MA20）、技术信号与回调确认计算，<strong>非实时价格</strong>，请结合市场实际判断执行。
+    </div>
+
     <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
       {% if tf == '15m' %}
       <div style="margin-bottom: 8px;">
@@ -168,6 +172,10 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
+
+    <div style="font-size:14px; color:#555; margin-bottom:8px;">
+      📌 <strong>建仓价说明</strong>：本建仓价为<span style="color:#d35400;font-weight:bold;">建议入场价格</span>，基于趋势中枢（如 MA20）、技术信号与回调确认计算，<strong>非实时价格</strong>，请结合市场实际判断执行。
+    </div>
 
     <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
       {% if tf == '15m' %}
