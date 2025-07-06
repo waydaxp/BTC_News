@@ -1,13 +1,34 @@
-# core/risk.py
-
 from typing import Literal
 
+# 总账户资金
 ACCOUNT_SIZE_USD: float = 10_000
-RISK_PCT_PER_TRADE: float = 0.002
-RISK_USD: float = ACCOUNT_SIZE_USD * RISK_PCT_PER_TRADE
 
-ATR_MULT_SL: float = 1.5
-ATR_MULT_TP: float = 2.0
+# 风格模式：conservative, balanced, aggressive
+DEFAULT_MODE: Literal["conservative", "balanced", "aggressive"] = "balanced"
+
+# 风格配置参数
+MODE_CONFIG = {
+    "conservative": {
+        "risk_pct": 0.001,
+        "atr_sl": 1.2,
+        "atr_tp": 1.8,
+    },
+    "balanced": {
+        "risk_pct": 0.002,
+        "atr_sl": 1.5,
+        "atr_tp": 2.0,
+    },
+    "aggressive": {
+        "risk_pct": 0.004,
+        "atr_sl": 1.8,
+        "atr_tp": 2.5,
+    },
+}
+
+def get_risk_params(mode: Literal["conservative", "balanced", "aggressive"] = DEFAULT_MODE):
+    cfg = MODE_CONFIG.get(mode, MODE_CONFIG["balanced"])
+    risk_usd = ACCOUNT_SIZE_USD * cfg["risk_pct"]
+    return cfg["atr_sl"], cfg["atr_tp"], risk_usd
 
 def calc_position_size(
     price: float,
@@ -23,8 +44,7 @@ def calc_position_size(
     return qty
 
 __all__ = [
-    "RISK_USD",
-    "ATR_MULT_SL",
-    "ATR_MULT_TP",
+    "DEFAULT_MODE",
+    "get_risk_params",
     "calc_position_size",
 ]
