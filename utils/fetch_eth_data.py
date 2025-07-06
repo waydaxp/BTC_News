@@ -7,6 +7,7 @@ from core.risk import calc_position_size, ATR_MULT_SL, ATR_MULT_TP, RISK_USD
 
 PAIR = "ETH-USD"
 
+
 def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
     if isinstance(df.columns, pd.MultiIndex):
@@ -17,26 +18,34 @@ def _download_tf(interval: str, period: str) -> pd.DataFrame:
     df = add_macd_boll_kdj(df)
     return df.dropna()
 
+
 def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
     last = df.iloc[-1]
+    prev = df.iloc[-2]
     close = last['Close']
     rsi = last['RSI']
     ma20 = last['MA20']
-    ma5_val = df['MA5'].iloc[-1]
-    prev_candle = df.iloc[-2]
+    ma5 = last['MA5']
+    macd, macd_signal = last['MACD'], last['MACD_Signal']
+    prev_macd, prev_macd_signal = prev['MACD'], prev['MACD_Signal']
+    vol = last['Volume']
+    avg_vol = df['Volume'].rolling(20).mean().iloc[-1]
 
     signal, reason = "⏸ 中性信号", "未检测到显著信号"
 
-    if rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
+    if rsi > 50 and prev_macd < prev_macd_signal and macd > macd_signal and vol > avg_vol * 1.5:
+        signal = "🟢 强烈短线做多信号（突破爆发型）"
+        reason = "RSI > 50，MACD 金叉刚发生，成交量超过过去均值 1.5 倍"
+    elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
         signal = "🟢 底部反转（可尝试做多）"
         reason = "RSI 超跌 + 回升至 MA20 上方"
     elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
         signal = "🔻 顶部反转（可尝试做空）"
         reason = "RSI 高位回落 + 跌破 MA20"
-    elif close > ma20 and rsi > 50 and close > ma5_val:
+    elif close > ma20 and rsi > 50 and close > ma5:
         signal = "🟢 做多信号"
         reason = "价格站上 MA20 且 RSI 强"
-    elif close < ma20 and rsi < 50 and close < ma5_val:
+    elif close < ma20 and rsi < 50 and close < ma5:
         signal = "🔻 做空信号"
         reason = "价格低于 MA20 且 RSI 弱"
     elif abs(close - ma20) / ma20 < 0.005:
@@ -45,6 +54,7 @@ def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
 
     print(f"[DEBUG] {PAIR}-{interval_label}: Signal={signal}, Reason={reason}, RSI={rsi:.2f}, Close={close:.2f}")
     return signal, reason
+
 
 def _calc_trade(entry: float, atr: float, signal: str) -> tuple:
     if "多" in signal:
@@ -59,6 +69,7 @@ def _calc_trade(entry: float, atr: float, signal: str) -> tuple:
         sl, tp, qty = None, None, 0.0
     return sl, tp, qty
 
+
 def get_eth_analysis() -> dict:
     df15 = _download_tf("15m", "3d")
     df1h = _download_tf("1h", "7d")
@@ -72,9 +83,8 @@ def get_eth_analysis() -> dict:
 
     last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
     atr1h = float(last1h['ATR'])
-
-    # 建仓价使用 MA20 作为中枢预测价
     predicted_entry = float(last1h['MA20'])
+
     sl1h, tp1h, qty1h = _calc_trade(predicted_entry, atr1h, s1h)
 
     update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
@@ -85,10 +95,10 @@ def get_eth_analysis() -> dict:
         "rsi": float(last1h['RSI']),
         "atr": atr1h,
         "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-        "entry_1h":  predicted_entry,
-        "sl_1h":  sl1h,
-        "tp_1h":  tp1h,
-        "qty_1h":  qty1h,
+        "entry_1h": predicted_entry,
+        "sl_1h": sl1h,
+        "tp_1h": tp1h,
+        "qty_1h": qty1h,
         "risk_usd": RISK_USD,
         "update_time": update_time,
         "reason_15m": l15,
