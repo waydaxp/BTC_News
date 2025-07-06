@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Crypto 技术面仪表盘</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
@@ -31,10 +32,6 @@
     .metric {
       margin-bottom: 6px;
     }
-    .sub {
-      font-size: 14px;
-      color: #666;
-    }
     .signal-header {
       font-size: 20px;
       font-weight: bold;
@@ -44,18 +41,8 @@
     .signal-line {
       font-size: 18px;
       font-weight: bold;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .signal-neutral {
       color: #e67e22;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .signal-long {
-      color: #27ae60;
-      font-weight: bold;
-      font-size: 18px;
+      margin-bottom: 6px;
     }
     .signal-reason {
       font-size: 18px;
@@ -83,233 +70,75 @@
       white-space: pre-line;
       line-height: 1.6;
     }
-    pre {
-      background: #f4f4f4;
-      padding: 12px;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
   </style>
+  <script>
+    setTimeout(() => {
+      window.location.reload();
+    }, 30000); // 每 30 秒刷新一次页面
+  </script>
 </head>
 <body>
-
-  <!-- BTC 技术分析 -->
-  <div class="card">
-    <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格: 108962.3515625</div>
-    <div class="metric">MA20: 108203.735546875</div>
-    <div class="metric">RSI: 70.92490925180141</div>
-    <div class="metric">ATR: 203.08984375</div>
-  </div>
-
-  <!-- BTC 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（BTC）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-  </div>
-
-  <!-- BTC 各周期建议 -->
-  
-  <div class="card">
-    <div class="title">📍 短线建议（15分钟）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div style="margin-bottom: 8px;">
-        <strong>📍 短线建议（15分钟）</strong><br>
-        适用于超短期操作，以 15 分钟 K 线为参考。<br>
-        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 108962.3515625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">⏸ 中性信号</span></div>
-    <div class="signal-reason">📌 信号依据: 未检测到显著信号</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <div class="title">📍 中期建议（1小时）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div style="margin-bottom: 8px;">
-        <strong>📍 中期建议（1小时）</strong><br>
-        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
-        综合短期波动与中期趋势，适合日内或隔夜持仓。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 108962.3515625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">🟢 反转信号</span></div>
-    <div class="signal-reason">📌 信号依据: RSI 回升 + 均线突破 + 成交量放大 + 多头 K 线形态</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <div class="title">📍 长期建议（4小时）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div>
-        <strong>📍 长期建议（4小时）</strong><br>
-        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
-        聚焦中期价格动能和趋势延续。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 108962.3515625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">🟢 反转信号</span></div>
-    <div class="signal-reason">📌 信号依据: RSI 回升 + 均线突破 + 成交量放大 + 多头 K 线形态</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-
-  <!-- ETH 技术分析 -->
-  <div class="card">
-    <div class="title eth">📉 ETH 技术分析</div>
-    <div class="metric">当前价格: 2563.31884765625</div>
-    <div class="metric">MA20: 2519.8458251953125</div>
-    <div class="metric">RSI: 74.30272383997543</div>
-    <div class="metric">ATR: 10.568551199776786</div>
-  </div>
-
-  <!-- ETH 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（ETH）</div>
-    <div class="metric">💰 风险金额: 20.0</div>
-  </div>
-
-  <!-- ETH 各周期建议 -->
-  
-  <div class="card">
-    <div class="title">📍 短线建议（15分钟）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div style="margin-bottom: 8px;">
-        <strong>📍 短线建议（15分钟）</strong><br>
-        适用于超短期操作，以 15 分钟 K 线为参考。<br>
-        通常用于捕捉快速波动、日内高频买卖机会，持仓时间一般不超过数小时。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 2563.31884765625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">⏸ 中性信号</span></div>
-    <div class="signal-reason">📌 信号依据: 未检测到显著信号</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <div class="title">📍 中期建议（1小时）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div style="margin-bottom: 8px;">
-        <strong>📍 中期建议（1小时）</strong><br>
-        以 1 小时 K 线为基础判断趋势，适合持仓 6 小时至 1 天的交易者。<br>
-        综合短期波动与中期趋势，适合日内或隔夜持仓。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 2563.31884765625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">🟢 反转信号</span></div>
-    <div class="signal-reason">📌 信号依据: RSI 回升 + 均线突破 + 成交量放大 + 多头 K 线形态</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <div class="title">📍 长期建议（4小时）</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      
-      <div>
-        <strong>📍 长期建议（4小时）</strong><br>
-        以 4 小时 K 线周期为基础，适合持仓 1 天至 1 周的波段交易者。<br>
-        聚焦中期价格动能和趋势延续。
-      </div>
-      
-    </div>
-
-    <div class="metric">📌 建仓价: 2563.31884765625</div>
-    <div class="metric">🛑 止损: None</div>
-    <div class="metric">🎯 止盈: None</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">🟢 反转信号</span></div>
-    <div class="signal-reason">📌 信号依据: RSI 回升 + 均线突破 + 成交量放大 + 多头 K 线形态</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">⏸ 市场状态：震荡区间，中性信号，暂不建议进场。
-📊 仓位控制：建议观望，避免频繁交易。
-🛑 风控建议：等待有效突破支撑/阻力位后再介入。</div>
-    </div>
-  </div>
-  
-
-  <!-- 宏观事件提醒 -->
-  <div class="card">
-    <div class="title">📅 宏观事件提醒</div>
-    <pre>- 美国 CPI（2025-06-28，-9 天后）：超预期则 BTC 承压
-- FOMC 利率会议（2025-07-03，-4 天后）：或引发波动
-- SEC 比特币 ETF（2025-07-10，3 天后）：若通过大涨</pre>
-  </div>
-
-  <!-- 恐惧与贪婪指数 -->
-  <div class="card">
-    <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: 66（Greed）😊</div>
-  </div>
 
   <!-- 页面更新时间 -->
   <div class="card">
     <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">2025-07-06 22:41:16（北京时间）</div>
+    <div class="metric">{{ page_update }}（北京时间）</div>
+  </div>
+
+  <!-- BTC 技术分析 -->
+  <div class="card">
+    <div class="title">📉 BTC 技术分析</div>
+    <div class="metric">当前价格（预测参考）: {{ btc_price }}</div>
+    <div class="metric">MA20: {{ btc_ma20 }}</div>
+    <div class="metric">RSI: {{ btc_rsi }}</div>
+    <div class="metric">ATR: {{ btc_atr }}</div>
+  </div>
+
+  {% for tf in ['15m', '1h', '4h'] %}
+  <div class="card">
+    <div class="title">📍 建议周期：{{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
+    <div class="metric">📌 建仓价（建议参考）: {{ ctx['btc_entry_' ~ tf] }}</div>
+    <div class="metric">🛑 止损（建议参考）: {{ ctx['btc_sl_' ~ tf] }}</div>
+    <div class="metric">🎯 止盈（建议参考）: {{ ctx['btc_tp_' ~ tf] }}</div>
+    <div class="signal-header">🧭 技术信号:</div>
+    <div class="signal-line">📍 信号: {{ ctx['btc_signal_' ~ tf] }}</div>
+    <div class="signal-reason">📌 信号依据: {{ ctx['btc_reason_' ~ tf] }}</div>
+    <div class="strategy-explanation">
+      <div class="strategy-title">📋 当前策略说明：</div>
+      <div class="strategy-content">{{ ctx['btc_strategy_' ~ tf] }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- ETH 技术分析 -->
+  <div class="card">
+    <div class="title eth">📉 ETH 技术分析</div>
+    <div class="metric">当前价格（预测参考）: {{ eth_price }}</div>
+    <div class="metric">MA20: {{ eth_ma20 }}</div>
+    <div class="metric">RSI: {{ eth_rsi }}</div>
+    <div class="metric">ATR: {{ eth_atr }}</div>
+  </div>
+
+  {% for tf in ['15m', '1h', '4h'] %}
+  <div class="card">
+    <div class="title">📍 建议周期：{{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
+    <div class="metric">📌 建仓价（建议参考）: {{ ctx['eth_entry_' ~ tf] }}</div>
+    <div class="metric">🛑 止损（建议参考）: {{ ctx['eth_sl_' ~ tf] }}</div>
+    <div class="metric">🎯 止盈（建议参考）: {{ ctx['eth_tp_' ~ tf] }}</div>
+    <div class="signal-header">🧭 技术信号:</div>
+    <div class="signal-line">📍 信号: {{ ctx['eth_signal_' ~ tf] }}</div>
+    <div class="signal-reason">📌 信号依据: {{ ctx['eth_reason_' ~ tf] }}</div>
+    <div class="strategy-explanation">
+      <div class="strategy-title">📋 当前策略说明：</div>
+      <div class="strategy-content">{{ ctx['eth_strategy_' ~ tf] }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- 恐惧与贪婪指数 -->
+  <div class="card">
+    <div class="title">😨/😊 恐惧与贪婪指数</div>
+    <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
   </div>
 
 </body>
