@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Crypto 技术面仪表盘</title>
-  <meta http-equiv="refresh" content="30"> <!-- 每30秒自动刷新一次页面 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
@@ -26,9 +26,16 @@
       font-weight: bold;
       margin-bottom: 12px;
     }
-    .title.eth { color: #2962FF; }
-    .metric { margin-bottom: 6px; }
-    .sub { font-size: 14px; color: #666; }
+    .title.eth {
+      color: #2962FF;
+    }
+    .metric {
+      margin-bottom: 6px;
+    }
+    .sub {
+      font-size: 14px;
+      color: #666;
+    }
     .signal-header {
       font-size: 20px;
       font-weight: bold;
@@ -41,8 +48,16 @@
       color: #333;
       margin-bottom: 6px;
     }
-    .signal-neutral { color: #e67e22; font-weight: bold; font-size: 18px; }
-    .signal-long { color: #27ae60; font-weight: bold; font-size: 18px; }
+    .signal-neutral {
+      color: #e67e22;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .signal-long {
+      color: #27ae60;
+      font-weight: bold;
+      font-size: 18px;
+    }
     .signal-reason {
       font-size: 18px;
       color: #c0392b;
@@ -70,6 +85,14 @@
       line-height: 1.6;
     }
   </style>
+
+  <!-- ✅ 每 30 秒自动刷新页面 -->
+  <script>
+    setTimeout(() => {
+      window.location.reload();
+    }, 30000);  // 每 30 秒刷新页面
+  </script>
+
 </head>
 <body>
 
@@ -91,17 +114,6 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      {% if tf == '15m' %}
-        <strong>📍 适用于超短期操作，以 15 分钟 K 线为参考。</strong><br>持仓时间不超过数小时。
-      {% elif tf == '1h' %}
-        <strong>📍 适用于日内或隔夜操作，以 1 小时 K 线为依据。</strong><br>适合持仓 6 小时至 1 天。
-      {% elif tf == '4h' %}
-        <strong>📍 波段趋势分析，以 4 小时 K 线为依据。</strong><br>适合持仓 1 天至 1 周。
-      {% endif %}
-    </div>
-
     <div class="metric">📌 建仓价: {{ ctx['btc_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损: {{ ctx['btc_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈: {{ ctx['btc_tp_' ~ tf] }}</div>
@@ -133,17 +145,6 @@
   {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
     <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-
-    <div style="margin-top: 10px; line-height: 1.8; font-size: 15px; color: #333;">
-      {% if tf == '15m' %}
-        <strong>📍 适用于超短期操作，以 15 分钟 K 线为参考。</strong><br>持仓时间不超过数小时。
-      {% elif tf == '1h' %}
-        <strong>📍 适用于日内或隔夜操作，以 1 小时 K 线为依据。</strong><br>适合持仓 6 小时至 1 天。
-      {% elif tf == '4h' %}
-        <strong>📍 波段趋势分析，以 4 小时 K 线为依据。</strong><br>适合持仓 1 天至 1 周。
-      {% endif %}
-    </div>
-
     <div class="metric">📌 建仓价: {{ ctx['eth_entry_' ~ tf] }}</div>
     <div class="metric">🛑 止损: {{ ctx['eth_sl_' ~ tf] }}</div>
     <div class="metric">🎯 止盈: {{ ctx['eth_tp_' ~ tf] }}</div>
