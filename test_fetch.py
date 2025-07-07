@@ -1,4 +1,4 @@
-from fetch_btc_data import get_btc_analysis
+from utils.fetch_btc_data import get_btc_analysis
 import json
 
 btc = get_btc_analysis()
