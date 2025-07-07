@@ -84,6 +84,6 @@ def fetch_eth_data():
         }
 
     return data
-    # ✅ 关键补充函数，供外部调用
+    # ✅ 加上这一段，generate_data.py 才能 import 成功！
     def get_eth_analysis():
         return fetch_eth_data()
