@@ -52,44 +52,44 @@
   <div class="card">
     <div class="title">📉 BTC 技术指标</div>
     <div class="explain">技术指标用于衡量当前市场趋势及强度，辅助决策。</div>
-    <div class="metric">当前价格: {{ btc_price }}</div>
-    <div class="metric">MA20（20周期均线）: {{ btc_ma20 }}</div>
-    <div class="metric">RSI（相对强弱指数）: {{ btc_rsi }} <span class="explain">>70 超买，<30 超卖</span></div>
-    <div class="metric">ATR（平均真实波幅）: {{ btc_atr }} <span class="explain">用于衡量波动性，常用于设置止盈止损</span></div>
-    <div class="metric">成交量（5均）: {{ btc_volume }}</div>
-    <div class="metric">支撑区间: {{ btc_support }}</div>
-    <div class="metric">阻力区间: {{ btc_resistance }}</div>
-    <div class="metric">资金费率: {{ btc_funding_rate }} <span class="explain">>0多头付空头，<0空头付多头</span></div>
+    <div class="metric">当前价格: {{ btc.price }}</div>
+    <div class="metric">MA20（20周期均线）: {{ btc.ma20 }}</div>
+    <div class="metric">RSI（相对强弱指数）: {{ btc.rsi }} <span class="explain">>70 超买，<30 超卖</span></div>
+    <div class="metric">ATR（平均真实波幅）: {{ btc.atr }} <span class="explain">用于衡量波动性，常用于设置止盈止损</span></div>
+    <div class="metric">成交量（5均）: {{ btc.volume }}</div>
+    <div class="metric">支撑区间: {{ btc.support_4h }}</div>
+    <div class="metric">阻力区间: {{ btc.resistance_4h }}</div>
+    <div class="metric">资金费率: {{ btc.funding }} <span class="explain">>0 多头付空头，<0 空头付多头</span></div>
   </div>
 
   <div class="card">
     <div class="title">📊 BTC 策略建议</div>
-    <div class="metric">信号: {{ btc_signal }}</div>
-    <div class="metric">止盈价: {{ btc_tp }}</div>
-    <div class="metric">止损价: {{ btc_sl }}</div>
-    <div class="strategy-section">{{ btc_strategy_note }}</div>
+    <div class="metric">建仓价: {{ btc.entry_4h }}</div>
+    <div class="metric">止盈价: {{ btc.tp_4h }}</div>
+    <div class="metric">止损价: {{ btc.sl_4h }}</div>
+    <div class="strategy-section">{{ btc.strategy_4h }}</div>
   </div>
 
   <!-- ETH 技术分析 -->
   <div class="card">
     <div class="title eth">📉 ETH 技术指标</div>
     <div class="explain">根据 ETH/USDT 永续合约 4H 级别技术图形判断短期动向。</div>
-    <div class="metric">当前价格: {{ eth_price }}</div>
-    <div class="metric">MA20（20周期均线）: {{ eth_ma20 }}</div>
-    <div class="metric">RSI（相对强弱指数）: {{ eth_rsi }}</div>
-    <div class="metric">ATR（平均真实波幅）: {{ eth_atr }}</div>
-    <div class="metric">成交量（5均）: {{ eth_volume }}</div>
-    <div class="metric">支撑区间: {{ eth_support }}</div>
-    <div class="metric">阻力区间: {{ eth_resistance }}</div>
-    <div class="metric">资金费率: {{ eth_funding_rate }}</div>
+    <div class="metric">当前价格: {{ eth.price }}</div>
+    <div class="metric">MA20（20周期均线）: {{ eth.ma20 }}</div>
+    <div class="metric">RSI（相对强弱指数）: {{ eth.rsi }}</div>
+    <div class="metric">ATR（平均真实波幅）: {{ eth.atr }}</div>
+    <div class="metric">成交量（5均）: {{ eth.volume }}</div>
+    <div class="metric">支撑区间: {{ eth.support_4h }}</div>
+    <div class="metric">阻力区间: {{ eth.resistance_4h }}</div>
+    <div class="metric">资金费率: {{ eth.funding }}</div>
   </div>
 
   <div class="card">
     <div class="title">📊 ETH 策略建议</div>
-    <div class="metric">信号: {{ eth_signal }}</div>
-    <div class="metric">止盈价: {{ eth_tp }}</div>
-    <div class="metric">止损价: {{ eth_sl }}</div>
-    <div class="strategy-section">{{ eth_strategy_note }}</div>
+    <div class="metric">建仓价: {{ eth.entry_4h }}</div>
+    <div class="metric">止盈价: {{ eth.tp_4h }}</div>
+    <div class="metric">止损价: {{ eth.sl_4h }}</div>
+    <div class="strategy-section">{{ eth.strategy_4h }}</div>
   </div>
 
   <!-- 恐惧与贪婪指数 -->
