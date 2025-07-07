@@ -22,7 +22,7 @@ def compute_atr(df: pd.DataFrame, window: int = 14) -> float:
     return atr.iloc[-1]
 
 def fetch_eth_data():
-    data = {}
+    result = {}
     for tf, period in {'15m': '2d', '1h': '7d', '4h': '30d'}.items():
         df = yf.download("ETH-USD", interval=tf, period=period, auto_adjust=True, progress=False)
         df.dropna(inplace=True)
@@ -40,8 +40,8 @@ def fetch_eth_data():
                 signal = "轻仓做多"
                 strategy_note = (
                     f"当前价格处于震荡区间偏上，短线偏强。\n"
-                    f"📈 若突破 ${round(resistance)}，目标区间为 ${round(resistance + 2 * atr)}～${round(resistance + 2.5 * atr)}。\n"
-                    f"📊 仓位建议：30%以内；止损 ${round(support - 1.2 * atr, 2)}；止盈 ${round(resistance + 2 * atr, 2)}。"
+                    f"📈 若突破 ${round(resistance)} 可上看 {round(resistance + 2 * atr)}～{round(resistance + 2.5 * atr)}。\n"
+                    f"📊 仓位建议：30%以内，止盈止损结合 ATR 设置。"
                 )
                 sl = round(support - 1.2 * atr, 2)
                 tp = round(resistance + 2 * atr, 2)
@@ -50,23 +50,20 @@ def fetch_eth_data():
                 signal = "观望或轻仓做空"
                 strategy_note = (
                     f"当前价格靠近支撑区域，若跌破需警惕转空。\n"
-                    f"📉 若跌破 ${round(support)}，目标为 ${round(support - 2 * atr)}，止损设在 ${round(support + 1.2 * atr)}。\n"
-                    f"📊 仓位建议：20%以内。"
+                    f"📉 若跌破 ${round(support)}，目标设至 {round(support - 2 * atr)}，止损设在 {round(support + 1.2 * atr)}。\n"
+                    f"📊 仓位建议：20%以内，需防反抽。"
                 )
                 sl = round(support + 1.2 * atr, 2)
                 tp = round(support - 2 * atr, 2)
                 pos = 0.2
         else:
             signal = "区间外震荡"
-            strategy_note = (
-                f"价格已偏离支撑/阻力区间，建议观望。\n"
-                f"📌 支撑：${round(support)}，阻力：${round(resistance)}，等待重新回归区间或形成突破。"
-            )
+            strategy_note = "当前价格已脱离震荡区间，建议等待回踩或放量突破确认。"
             sl = None
             tp = None
             pos = 0.1
 
-        data[tf] = {
+        result[tf] = {
             "price": round(close_price, 2),
             "ma20": round(ma20, 2),
             "rsi": round(rsi, 2),
@@ -78,12 +75,13 @@ def fetch_eth_data():
             "strategy_note": strategy_note,
             "tp": tp,
             "sl": sl,
-            "position": f"{int(pos*100)}%",
+            "position": f"{int(pos * 100)}%",
             "update_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
             "win_rate": f"{np.random.randint(65, 80)}%"  # 可替换为真实回测准确率
         }
 
-    return data
-    # ✅ 加上这一段，generate_data.py 才能 import 成功！
-    def get_eth_analysis():
-        return fetch_eth_data()
+    return result
+
+# 🔁 提供外部统一调用接口（必须有）
+def get_eth_analysis():
+    return fetch_eth_data()
