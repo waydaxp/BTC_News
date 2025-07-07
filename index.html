@@ -76,17 +76,18 @@
   </style>
 </head>
 <body>
+
   <div class="card">
     <div class="title btc">BTC 技术指标</div>
     <div class="explain">用于衡量市场趋势与强度，辅助判断做多/做空时机。</div>
     <div class="metric"><span class="label">当前价格:</span> {{ btc_price }}</div>
-    <div class="metric"><span class="label">MA20:</span> {{ btc_ma20 }} <span class="explain">（20周期均线，趋势判断）</span></div>
-    <div class="metric"><span class="label">RSI:</span> {{ btc_rsi }} <span class="explain">（>70 超买，<30 超卖）</span></div>
-    <div class="metric"><span class="label">ATR:</span> {{ btc_atr }} <span class="explain">（波动强度，辅助设置止盈止损）</span></div>
-    <div class="metric"><span class="label">成交量:</span> {{ btc_volume }}（5周期均量）</div>
+    <div class="metric"><span class="label">MA20:</span> {{ btc_ma20 }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ btc_rsi }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ btc_atr }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ btc_volume }}</div>
     <div class="metric"><span class="label">支撑区间:</span> {{ btc_support }}</div>
     <div class="metric"><span class="label">阻力区间:</span> {{ btc_resistance }}</div>
-    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding_rate }} <span class="explain">（>0 多头付费，<0 空头付费）</span></div>
+    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding_rate }}</div>
   </div>
 
   <div class="card">
