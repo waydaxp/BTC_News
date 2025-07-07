@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <title>Crypto 技术面仪表盘</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="30">
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
       font-size: 17px;
-      background: #fafafa;
+      background: #f5f5f5;
       color: #222;
       margin: 0;
       padding: 0;
@@ -26,126 +27,83 @@
       font-weight: bold;
       margin-bottom: 12px;
     }
-    .title.eth {
-      color: #2962FF;
-    }
+    .title.eth { color: #2962FF; }
     .metric {
       margin-bottom: 6px;
     }
-    .signal-header {
-      font-size: 20px;
-      font-weight: bold;
-      color: #0a60d1;
-      margin-bottom: 12px;
-    }
-    .signal-line {
-      font-size: 18px;
-      font-weight: bold;
-      color: #e67e22;
-      margin-bottom: 6px;
-    }
-    .signal-reason {
-      font-size: 18px;
-      color: #c0392b;
-      font-weight: bold;
-      margin: 6px 0 14px 0;
-    }
-    .strategy-explanation {
-      font-size: 15px;
-      background: #fdf9f3;
-      border-left: 4px solid #f39c12;
-      padding: 10px 14px;
-      margin: 10px 0 14px 0;
-      border-radius: 4px;
-    }
-    .strategy-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-    .strategy-content {
-      font-size: 16px;
-      color: #444;
-      white-space: pre-line;
-      line-height: 1.6;
-    }
-    .hint {
+    .explain {
       font-size: 14px;
       color: #888;
-      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .strategy-section {
+      margin-top: 16px;
+      background: #fcfcfc;
+      padding: 12px 16px;
+      border-left: 4px solid #f39c12;
+      border-radius: 5px;
+      white-space: pre-line;
     }
   </style>
-  <script>
-    setTimeout(() => {
-      window.location.reload();
-    }, 30000); // 每 30 秒刷新一次页面
-  </script>
 </head>
 <body>
 
-  <!-- 页面更新时间 -->
-  <div class="card">
-    <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">{{ page_update }}（北京时间）</div>
-  </div>
-
   <!-- BTC 技术分析 -->
   <div class="card">
-    <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格（预测参考）: {{ btc_price }}</div>
-    <div class="metric">MA20: {{ btc_ma20 }}</div>
-    <div class="metric">RSI: {{ btc_rsi }}</div>
-    <div class="metric">ATR: {{ btc_atr }}</div>
+    <div class="title">📉 BTC 技术指标</div>
+    <div class="explain">技术指标用于衡量当前市场趋势及强度，辅助决策。</div>
+    <div class="metric">当前价格: {{ btc_price }}</div>
+    <div class="metric">MA20（20周期均线）: {{ btc_ma20 }}</div>
+    <div class="metric">RSI（相对强弱指数）: {{ btc_rsi }} <span class="explain">>70 超买，<30 超卖</span></div>
+    <div class="metric">ATR（平均真实波幅）: {{ btc_atr }} <span class="explain">用于衡量波动性，常用于设置止盈止损</span></div>
+    <div class="metric">成交量（5均）: {{ btc_volume }}</div>
+    <div class="metric">支撑区间: {{ btc_support }}</div>
+    <div class="metric">阻力区间: {{ btc_resistance }}</div>
+    <div class="metric">资金费率: {{ btc_funding_rate }} <span class="explain">>0多头付空头，<0空头付多头</span></div>
   </div>
 
-  {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
-    <div class="title">📍 建议周期：{{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价（建议参考）: {{ ctx['btc_entry_' ~ tf] }}</div>
-    <div class="metric">🛑 止损（建议参考）: {{ ctx['btc_sl_' ~ tf] }}</div>
-    <div class="metric">🎯 止盈（建议参考）: {{ ctx['btc_tp_' ~ tf] }}</div>
-    <div class="hint">📌 所有价格基于未来3根K线均值回测计算，非实时价格，具备前瞻性参考价值。</div>
-    <div class="signal-header">🧭 技术信号:</div>
-    <div class="signal-line">📍 信号: {{ ctx['btc_signal_' ~ tf] }}</div>
-    <div class="signal-reason">📌 信号依据: {{ ctx['btc_reason_' ~ tf] }}</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">{{ ctx['btc_strategy_' ~ tf] }}</div>
-    </div>
+    <div class="title">📊 BTC 策略建议</div>
+    <div class="metric">信号: {{ btc_signal }}</div>
+    <div class="metric">止盈价: {{ btc_tp }}</div>
+    <div class="metric">止损价: {{ btc_sl }}</div>
+    <div class="strategy-section">{{ btc_strategy_note }}</div>
   </div>
-  {% endfor %}
 
   <!-- ETH 技术分析 -->
   <div class="card">
-    <div class="title eth">📉 ETH 技术分析</div>
-    <div class="metric">当前价格（预测参考）: {{ eth_price }}</div>
-    <div class="metric">MA20: {{ eth_ma20 }}</div>
-    <div class="metric">RSI: {{ eth_rsi }}</div>
-    <div class="metric">ATR: {{ eth_atr }}</div>
+    <div class="title eth">📉 ETH 技术指标</div>
+    <div class="explain">根据 ETH/USDT 永续合约 4H 级别技术图形判断短期动向。</div>
+    <div class="metric">当前价格: {{ eth_price }}</div>
+    <div class="metric">MA20（20周期均线）: {{ eth_ma20 }}</div>
+    <div class="metric">RSI（相对强弱指数）: {{ eth_rsi }}</div>
+    <div class="metric">ATR（平均真实波幅）: {{ eth_atr }}</div>
+    <div class="metric">成交量（5均）: {{ eth_volume }}</div>
+    <div class="metric">支撑区间: {{ eth_support }}</div>
+    <div class="metric">阻力区间: {{ eth_resistance }}</div>
+    <div class="metric">资金费率: {{ eth_funding_rate }}</div>
   </div>
 
-  {% for tf in ['15m', '1h', '4h'] %}
   <div class="card">
-    <div class="title">📍 建议周期：{{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价（建议参考）: {{ ctx['eth_entry_' ~ tf] }}</div>
-    <div class="metric">🛑 止损（建议参考）: {{ ctx['eth_sl_' ~ tf] }}</div>
-    <div class="metric">🎯 止盈（建议参考）: {{ ctx['eth_tp_' ~ tf] }}</div>
-    <div class="hint">📌 所有价格基于未来3根K线均值回测计算，非实时价格，具备前瞻性参考价值。</div>
-    <div class="signal-header">🧭 技术信号:</div>
-    <div class="signal-line">📍 信号: {{ ctx['eth_signal_' ~ tf] }}</div>
-    <div class="signal-reason">📌 信号依据: {{ ctx['eth_reason_' ~ tf] }}</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">{{ ctx['eth_strategy_' ~ tf] }}</div>
-    </div>
+    <div class="title">📊 ETH 策略建议</div>
+    <div class="metric">信号: {{ eth_signal }}</div>
+    <div class="metric">止盈价: {{ eth_tp }}</div>
+    <div class="metric">止损价: {{ eth_sl }}</div>
+    <div class="strategy-section">{{ eth_strategy_note }}</div>
   </div>
-  {% endfor %}
 
   <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
     <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
+    <div class="explain">数值 <50 表示恐惧，>50 表示贪婪，辅助判断市场情绪。</div>
+  </div>
+
+  <!-- 页面更新时间 -->
+  <div class="card">
+    <div class="title">⏰ 页面更新时间</div>
+    <div class="metric">{{ page_update }}（UTC）</div>
+    <div class="explain">每 30 秒自动刷新数据。</div>
   </div>
 
 </body>
