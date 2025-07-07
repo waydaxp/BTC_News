@@ -1,109 +1,138 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Crypto 技术面仪表盘</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="30">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content="60" />
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
-      font-size: 17px;
-      background: #f5f5f5;
-      color: #222;
+      font-size: 16px;
+      background: #f7f9fb;
+      color: #333;
       margin: 0;
       padding: 0;
     }
     .card {
-      background: #fff;
+      background: #ffffff;
       border-left: 6px solid #2ecc71;
-      padding: 18px 22px;
-      margin: 16px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin: 20px auto;
+      padding: 20px 24px;
+      width: 90%;
+      max-width: 900px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
     }
     .title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
     }
-    .title.eth { color: #2962FF; }
+    .title.eth { color: #6a1b9a; }     /* ETH 紫色 */
+    .title.btc { color: #1565c0; }     /* BTC 蓝色 */
+    .title::before {
+      content: "📈";
+      margin-right: 8px;
+    }
+    .section-label {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+      color: #444;
+    }
     .metric {
       margin-bottom: 6px;
+      line-height: 1.6;
+    }
+    .metric span.label {
+      display: inline-block;
+      min-width: 100px;
+      font-weight: bold;
+      color: #333;
     }
     .explain {
-      font-size: 14px;
+      font-size: 13px;
       color: #888;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .strategy-section {
-      margin-top: 16px;
-      background: #fcfcfc;
+      margin-top: 10px;
+      background: #fdfdfd;
       padding: 12px 16px;
       border-left: 4px solid #f39c12;
       border-radius: 5px;
+      font-size: 15px;
       white-space: pre-line;
+    }
+    .update {
+      font-size: 13px;
+      color: #777;
+      text-align: right;
+      margin-top: -10px;
     }
   </style>
 </head>
 <body>
 
-  <!-- BTC 技术分析 -->
+  <!-- BTC 技术指标 -->
   <div class="card">
-    <div class="title">📉 BTC 技术指标</div>
-    <div class="explain">技术指标用于衡量当前市场趋势及强度，辅助决策。</div>
-    <div class="metric">当前价格: {{ btc.price }}</div>
-    <div class="metric">MA20（20周期均线）: {{ btc.ma20 }}</div>
-    <div class="metric">RSI（相对强弱指数）: {{ btc.rsi }} <span class="explain">>70 超买，<30 超卖</span></div>
-    <div class="metric">ATR（平均真实波幅）: {{ btc.atr }} <span class="explain">用于衡量波动性，常用于设置止盈止损</span></div>
-    <div class="metric">成交量（5均）: {{ btc.volume }}</div>
-    <div class="metric">支撑区间: {{ btc.support_4h }}</div>
-    <div class="metric">阻力区间: {{ btc.resistance_4h }}</div>
-    <div class="metric">资金费率: {{ btc.funding }} <span class="explain">>0 多头付空头，<0 空头付多头</span></div>
+    <div class="title btc">BTC 技术指标</div>
+    <div class="explain">用于衡量市场趋势与强度，辅助判断做多/做空时机。</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ btc_price }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ btc_ma20 }} <span class="explain">（20周期均线，趋势判断）</span></div>
+    <div class="metric"><span class="label">RSI:</span> {{ btc_rsi }} <span class="explain">（>70 超买，<30 超卖）</span></div>
+    <div class="metric"><span class="label">ATR:</span> {{ btc_atr }} <span class="explain">（波动强度，辅助设置止盈止损）</span></div>
+    <div class="metric"><span class="label">成交量:</span> {{ btc_volume }}（5周期均量）</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ btc_support }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ btc_resistance }}</div>
+    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding_rate }} <span class="explain">（>0 多头付费，<0 空头付费）</span></div>
   </div>
 
+  <!-- BTC 策略建议 -->
   <div class="card">
     <div class="title">📊 BTC 策略建议</div>
-    <div class="metric">建仓价: {{ btc.entry_4h }}</div>
-    <div class="metric">止盈价: {{ btc.tp_4h }}</div>
-    <div class="metric">止损价: {{ btc.sl_4h }}</div>
-    <div class="strategy-section">{{ btc.strategy_4h }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ btc_signal }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ btc_tp }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ btc_sl }}</div>
+    <div class="strategy-section">{{ btc_strategy_note }}</div>
   </div>
 
-  <!-- ETH 技术分析 -->
+  <!-- ETH 技术指标 -->
   <div class="card">
-    <div class="title eth">📉 ETH 技术指标</div>
-    <div class="explain">根据 ETH/USDT 永续合约 4H 级别技术图形判断短期动向。</div>
-    <div class="metric">当前价格: {{ eth.price }}</div>
-    <div class="metric">MA20（20周期均线）: {{ eth.ma20 }}</div>
-    <div class="metric">RSI（相对强弱指数）: {{ eth.rsi }}</div>
-    <div class="metric">ATR（平均真实波幅）: {{ eth.atr }}</div>
-    <div class="metric">成交量（5均）: {{ eth.volume }}</div>
-    <div class="metric">支撑区间: {{ eth.support_4h }}</div>
-    <div class="metric">阻力区间: {{ eth.resistance_4h }}</div>
-    <div class="metric">资金费率: {{ eth.funding }}</div>
+    <div class="title eth">ETH 技术指标</div>
+    <div class="explain">基于 ETH/USDT 永续合约，分析4H级别短期走势。</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ eth_price }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ eth_ma20 }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ eth_rsi }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ eth_atr }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ eth_volume }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ eth_support }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ eth_resistance }}</div>
+    <div class="metric"><span class="label">资金费率:</span> {{ eth_funding_rate }}</div>
   </div>
 
+  <!-- ETH 策略建议 -->
   <div class="card">
     <div class="title">📊 ETH 策略建议</div>
-    <div class="metric">建仓价: {{ eth.entry_4h }}</div>
-    <div class="metric">止盈价: {{ eth.tp_4h }}</div>
-    <div class="metric">止损价: {{ eth.sl_4h }}</div>
-    <div class="strategy-section">{{ eth.strategy_4h }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ eth_signal }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ eth_tp }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ eth_sl }}</div>
+    <div class="strategy-section">{{ eth_strategy_note }}</div>
   </div>
 
   <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
-    <div class="explain">数值 <50 表示恐惧，>50 表示贪婪，辅助判断市场情绪。</div>
+    <div class="metric"><span class="label">当前值:</span> {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
+    <div class="explain">指数反映市场情绪：<50 表示恐惧，>50 表示贪婪。</div>
   </div>
 
   <!-- 页面更新时间 -->
-  <div class="card">
-    <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">{{ page_update }}（UTC）</div>
-    <div class="explain">每 30 秒自动刷新数据。</div>
+  <div class="card update">
+    页面更新时间：{{ page_update }}（UTC）｜每 60 秒自动刷新
   </div>
 
 </body>
