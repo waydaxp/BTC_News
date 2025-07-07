@@ -6,18 +6,22 @@ from utils.strategy_helper import generate_strategy_text_dynamic
 from datetime import datetime, timedelta, timezone
 
 def wrap_asset(asset: dict) -> dict:
-    print("[wrap_asset] 输入数据:", asset)  # 调试日志
+    print("[wrap_asset] 输入数据:", asset)
 
     try:
-        price = asset.get("price") or "-"
-        ma20 = asset.get("ma20") or "-"
-        rsi = asset.get("rsi") or "-"
-        atr = asset.get("atr") or "-"
-        volume = asset.get("volume") or "-"
-        funding = asset.get("funding") or "-"
+        tf_data = asset.get("4h", {})  # 默认使用 4h 数据
+        price = float(tf_data.get("price", 0))
+        ma20 = float(tf_data.get("ma20", 0))
+        rsi = float(tf_data.get("rsi", 0))
+        atr = float(tf_data.get("atr", 0))
+        volume = float(tf_data.get("volume", 0))
+        funding = float(tf_data.get("funding", 0)) if tf_data.get("funding") not in [None, "-"] else "-"
 
-        support_4h = asset.get("support_4h") or "-"
-        resistance_4h = asset.get("resistance_4h") or "-"
+        support = float(tf_data.get("support", 0))
+        resistance = float(tf_data.get("resistance", 0))
+        entry = price
+        sl = float(tf_data.get("sl", 0)) if tf_data.get("sl") else "-"
+        tp = float(tf_data.get("tp", 0)) if tf_data.get("tp") else "-"
 
         return {
             "price": price,
@@ -26,21 +30,14 @@ def wrap_asset(asset: dict) -> dict:
             "atr": atr,
             "volume": volume,
             "funding": funding,
-
-            "entry_4h": asset.get("entry_4h") or "-",
-            "sl_4h": asset.get("sl_4h") or "-",
-            "tp_4h": asset.get("tp_4h") or "-",
-            "support_4h": support_4h,
-            "resistance_4h": resistance_4h,
-
-            "strategy_4h": generate_strategy_text_dynamic(
-                price=price if isinstance(price, (int, float)) else 0,
-                support=support_4h,
-                resistance=resistance_4h,
-                atr=atr if isinstance(atr, (int, float)) else 0,
-                volume_up=asset.get("volume_up", False)
-            )
+            "entry_4h": entry,
+            "sl_4h": sl,
+            "tp_4h": tp,
+            "support_4h": support,
+            "resistance_4h": resistance,
+            "strategy_4h": tf_data.get("strategy_note", "-"),
         }
+
     except Exception as e:
         print(f"[wrap_asset] Error: {e}")
         return {}
@@ -88,6 +85,5 @@ def get_all_analysis() -> dict:
         "page_update": page_update
     }
 
-    print("[最终上下文 ctx]:", ctx)  # 可选调试
-
+    print("[最终上下文 ctx]:", ctx)
     return ctx
