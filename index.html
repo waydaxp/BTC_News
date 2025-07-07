@@ -86,18 +86,18 @@
     <div class="metric"><span class="label">RSI:</span> {{ btc_rsi }} <span class="explain">（>70 超买，<30 超卖）</span></div>
     <div class="metric"><span class="label">ATR:</span> {{ btc_atr }} <span class="explain">（波动强度，辅助设置止盈止损）</span></div>
     <div class="metric"><span class="label">成交量:</span> {{ btc_volume }}（5周期均量）</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ btc_support }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ btc_resistance }}</div>
-    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding_rate }} <span class="explain">（>0 多头付费，<0 空头付费）</span></div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ btc_support_4h }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ btc_resistance_4h }}</div>
+    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding }}</div>
   </div>
 
   <!-- BTC 策略建议 -->
   <div class="card">
     <div class="title">📊 BTC 策略建议</div>
-    <div class="metric"><span class="label">信号:</span> {{ btc_signal }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ btc_tp }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ btc_sl }}</div>
-    <div class="strategy-section">{{ btc_strategy_note }}</div>
+    <div class="metric"><span class="label">建仓价:</span> {{ btc_entry_4h }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ btc_tp_4h }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ btc_sl_4h }}</div>
+    <div class="strategy-section">{{ btc_strategy_4h }}</div>
   </div>
 
   <!-- ETH 技术指标 -->
@@ -109,18 +109,18 @@
     <div class="metric"><span class="label">RSI:</span> {{ eth_rsi }}</div>
     <div class="metric"><span class="label">ATR:</span> {{ eth_atr }}</div>
     <div class="metric"><span class="label">成交量:</span> {{ eth_volume }}</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ eth_support }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ eth_resistance }}</div>
-    <div class="metric"><span class="label">资金费率:</span> {{ eth_funding_rate }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ eth_support_4h }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ eth_resistance_4h }}</div>
+    <div class="metric"><span class="label">资金费率:</span> {{ eth_funding }}</div>
   </div>
 
   <!-- ETH 策略建议 -->
   <div class="card">
     <div class="title">📊 ETH 策略建议</div>
-    <div class="metric"><span class="label">信号:</span> {{ eth_signal }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ eth_tp }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ eth_sl }}</div>
-    <div class="strategy-section">{{ eth_strategy_note }}</div>
+    <div class="metric"><span class="label">建仓价:</span> {{ eth_entry_4h }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ eth_tp_4h }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ eth_sl_4h }}</div>
+    <div class="strategy-section">{{ eth_strategy_4h }}</div>
   </div>
 
   <!-- 恐惧与贪婪指数 -->
