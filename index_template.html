@@ -1,179 +1,106 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Crypto 技术面仪表盘</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content="60" />
   <style>
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
-      font-size: 17px;
-      background: #fafafa;
-      color: #222;
+      font-size: 16px;
+      background: #f7f9fb;
+      color: #333;
       margin: 0;
       padding: 0;
     }
     .card {
-      background: #fff;
+      background: #ffffff;
       border-left: 6px solid #2ecc71;
-      padding: 18px 22px;
-      margin: 16px;
-      border-radius: 6px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin: 20px auto;
+      padding: 20px 24px;
+      width: 90%;
+      max-width: 900px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
     }
     .title {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
     }
-    .title.eth {
-      color: #2962FF;
+    .title.eth { color: #6a1b9a; }
+    .title.btc { color: #1565c0; }
+    .title::before {
+      content: "📈";
+      margin-right: 8px;
     }
     .metric {
       margin-bottom: 6px;
-    }
-    .sub {
-      font-size: 14px;
-      color: #666;
-    }
-    .signal-header {
-      font-size: 20px;
-      font-weight: bold;
-      color: #0a60d1;
-      margin-bottom: 12px;
-    }
-    .signal-line {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 6px;
-    }
-    .signal-neutral {
-      color: #e67e22;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .signal-long {
-      color: #27ae60;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .signal-reason {
-      font-size: 18px;
-      color: #c0392b;
-      font-weight: bold;
-      margin: 6px 0 14px 0;
-    }
-    .strategy-explanation {
-      font-size: 15px;
-      background: #fdf9f3;
-      border-left: 4px solid #f39c12;
-      padding: 10px 14px;
-      margin: 10px 0 14px 0;
-      border-radius: 4px;
-    }
-    .strategy-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #2c3e50;
-      margin-bottom: 8px;
-    }
-    .strategy-content {
-      font-size: 16px;
-      color: #444;
-      white-space: pre-line;
       line-height: 1.6;
     }
+    .metric span.label {
+      display: inline-block;
+      min-width: 100px;
+      font-weight: bold;
+      color: #333;
+    }
+    .strategy-section {
+      margin-top: 10px;
+      background: #fdfdfd;
+      padding: 12px 16px;
+      border-left: 4px solid #f39c12;
+      border-radius: 5px;
+      font-size: 15px;
+      white-space: pre-line;
+    }
+    .update {
+      font-size: 13px;
+      color: #777;
+      text-align: right;
+      margin-top: -10px;
+    }
   </style>
-
-  <!-- ✅ 每 30 秒自动刷新页面 -->
-  <script>
-    setTimeout(() => {
-      window.location.reload();
-    }, 30000);  // 每 30 秒刷新页面
-  </script>
-
 </head>
 <body>
 
-  <!-- 建仓价说明 -->
+  {% set periods = ["15m", "1h", "4h"] %}
+
+  {% for tf in periods %}
   <div class="card">
-    <div class="title">📘 建仓价说明</div>
-    <div class="metric">{{ predict_entry_comment }}</div>
+    <div class="title btc">BTC {{ tf }} 技术指标</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ attribute(_context, "btc_price_" ~ tf) }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ attribute(_context, "btc_ma20_" ~ tf) }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ attribute(_context, "btc_rsi_" ~ tf) }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ attribute(_context, "btc_atr_" ~ tf) }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ attribute(_context, "btc_volume_" ~ tf) }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ attribute(_context, "btc_support_" ~ tf) }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ attribute(_context, "btc_resistance_" ~ tf) }}</div>
+    <div class="metric"><span class="label">资金费率:</span> {{ attribute(_context, "btc_funding_" ~ tf) }}</div>
   </div>
 
-  <!-- BTC 技术分析 -->
   <div class="card">
-    <div class="title">📉 BTC 技术分析</div>
-    <div class="metric">当前价格: {{ btc_price }}</div>
-    <div class="metric">MA20: {{ btc_ma20 }}</div>
-    <div class="metric">RSI: {{ btc_rsi }}</div>
-    <div class="metric">ATR: {{ btc_atr }}</div>
-  </div>
-
-  <!-- BTC 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（BTC）</div>
-    <div class="metric">💰 风险金额: {{ btc_risk }}</div>
-  </div>
-
-  {% for tf in ['15m', '1h', '4h'] %}
-  <div class="card">
-    <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ ctx['btc_entry_' ~ tf] }}</div>
-    <div class="metric">🛑 止损: {{ ctx['btc_sl_' ~ tf] }}</div>
-    <div class="metric">🎯 止盈: {{ ctx['btc_tp_' ~ tf] }}</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ ctx['btc_signal_' ~ tf] }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ ctx['btc_reason_' ~ tf] }}</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">{{ ctx['btc_strategy_' ~ tf] }}</div>
-    </div>
-  </div>
-  {% endfor %}
-
-  <!-- ETH 技术分析 -->
-  <div class="card">
-    <div class="title eth">📉 ETH 技术分析</div>
-    <div class="metric">当前价格: {{ eth_price }}</div>
-    <div class="metric">MA20: {{ eth_ma20 }}</div>
-    <div class="metric">RSI: {{ eth_rsi }}</div>
-    <div class="metric">ATR: {{ eth_atr }}</div>
-  </div>
-
-  <!-- ETH 操作建议 -->
-  <div class="card">
-    <div class="title">📊 操作建议（ETH）</div>
-    <div class="metric">💰 风险金额: {{ eth_risk }}</div>
-  </div>
-
-  {% for tf in ['15m', '1h', '4h'] %}
-  <div class="card">
-    <div class="title">📍 {{ {'15m': '短线建议（15分钟）','1h': '中期建议（1小时）','4h': '长期建议（4小时）'}[tf] }}</div>
-    <div class="metric">📌 建仓价: {{ ctx['eth_entry_' ~ tf] }}</div>
-    <div class="metric">🛑 止损: {{ ctx['eth_sl_' ~ tf] }}</div>
-    <div class="metric">🎯 止盈: {{ ctx['eth_tp_' ~ tf] }}</div>
-    <div class="signal-header">📌 技术信号:</div>
-    <div class="signal-line">🔎 信号: <span class="signal-neutral">{{ ctx['eth_signal_' ~ tf] }}</span></div>
-    <div class="signal-reason">📌 信号依据: {{ ctx['eth_reason_' ~ tf] }}</div>
-    <div class="strategy-explanation">
-      <div class="strategy-title">📋 当前策略说明：</div>
-      <div class="strategy-content">{{ ctx['eth_strategy_' ~ tf] }}</div>
-    </div>
+    <div class="title">📊 BTC {{ tf }} 策略建议</div>
+    <div class="metric"><span class="label">信号:</span> {{ attribute(_context, "btc_signal_" ~ tf) }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ attribute(_context, "btc_tp_" ~ tf) }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ attribute(_context, "btc_sl_" ~ tf) }}</div>
+    <div class="strategy-section">{{ attribute(_context, "btc_strategy_note_" ~ tf) }}</div>
   </div>
   {% endfor %}
 
   <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
-    <div class="metric">当前值: {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
+    <div class="metric"><span class="label">当前值:</span> {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
+    <div class="metric"><span class="label">时间:</span> {{ fg_ts }}</div>
+    <div class="metric"><span class="label">说明:</span> 指数 < 50 为恐惧，> 50 为贪婪</div>
   </div>
 
   <!-- 页面更新时间 -->
-  <div class="card">
-    <div class="title">⏰ 页面更新时间</div>
-    <div class="metric">{{ page_update }}（北京时间）</div>
+  <div class="card update">
+    页面更新时间：{{ page_update }}（北京时间）｜每 60 秒自动刷新
   </div>
 
 </body>
