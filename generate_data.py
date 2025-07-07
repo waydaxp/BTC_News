@@ -50,4 +50,4 @@ def get_all_analysis() -> dict:
         "page_update": page_update
     }
     def get_eth_analysis():
-    return fetch_eth_data()
+        return fetch_eth_data()
