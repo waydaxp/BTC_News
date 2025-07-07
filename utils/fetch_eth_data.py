@@ -85,5 +85,5 @@ def fetch_eth_data():
 
     return data
     # ✅ 关键补充函数，供外部调用
-    def get_btc_analysis():
-        return fetch_btc_data()
+    def get_eth_analysis():
+        return fetch_eth_data()
