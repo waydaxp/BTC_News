@@ -1,80 +1,98 @@
-def get_strategy_explanation(signal: str) -> str:
+def get_strategy_explanation(signal: str, symbol: str = "BTC", timeframe: str = "1h", price: float = None, rsi: float = None, atr: float = None, volume_change: float = None, funding_rate: float = None) -> str:
     """
-    根据技术信号内容，返回具体策略说明。
-    支持多空判断 + 策略风格建议。
+    结构化策略输出，根据技术信号及指标生成完整的策略说明。
+    参数：
+    - signal: 技术信号文本
+    - symbol: 币种，例如 BTC、ETH
+    - timeframe: 分析周期，例如 15m, 1h, 4h
+    - price: 当前价格
+    - rsi: RSI 指标数值
+    - atr: 平均真实波动幅度
+    - volume_change: 近几根K线的成交量变化百分比（相对平均值）
+    - funding_rate: 资金费率
     """
-    if not signal:
-        return "暂无信号数据，建议观望。"
+    signal = signal.strip() if signal else ""
+    direction = "中性"
+    bias = "震荡观望"
+    
+    if "做多" in signal or "偏多" in signal or "反弹" in signal:
+        direction = "多"
+        bias = "看涨偏多"
+    elif "做空" in signal or "偏空" in signal or "回调" in signal:
+        direction = "空"
+        bias = "看空偏空"
 
-    # 标准处理（剔除空格）
-    signal = signal.strip()
+    # === 技术指标判断追加 ===
+    indicator_summary = []
+    if rsi is not None:
+        if rsi > 70:
+            indicator_summary.append(f"RSI = {rsi:.1f}（超买风险）")
+        elif rsi < 30:
+            indicator_summary.append(f"RSI = {rsi:.1f}（超卖反弹预期）")
+        else:
+            indicator_summary.append(f"RSI = {rsi:.1f}（中性区域）")
 
-    # 做多类信号
-    if "强烈短线做多" in signal or "突破爆发" in signal:
-        return (
-            "📈 策略类型：激进型做多（突破爆发）\n"
-            "🧠 判断依据：RSI 强势 + MACD 金叉 + 放量确认\n"
-            "📊 仓位控制：最多不超过总资金的30%，需快速止盈止损。\n"
-            "🛑 止损策略：入场价下方 1.5 倍 ATR\n"
-            "🎯 止盈策略：入场价上方 2～2.5 倍 ATR 或出现 RSI 顶背离\n"
-            "📌 预期逻辑：市场短期动能强劲，快速建仓博取突破收益"
+    if atr is not None:
+        if atr > 3:
+            indicator_summary.append(f"ATR = {atr:.2f}（波动放大，需注意止损）")
+        else:
+            indicator_summary.append(f"ATR = {atr:.2f}（波动收敛，等待突破）")
+
+    if volume_change is not None:
+        if volume_change > 10:
+            indicator_summary.append(f"成交量明显放大（+{volume_change:.1f}%）")
+        elif volume_change < -10:
+            indicator_summary.append(f"成交量大幅萎缩（{volume_change:.1f}%）")
+
+    if funding_rate is not None:
+        if abs(funding_rate) > 0.01:
+            directionality = "多头拥挤" if funding_rate > 0 else "空头拥挤"
+            indicator_summary.append(f"资金费率 = {funding_rate:.4f}（{directionality}）")
+
+    summary_text = "\n• ".join(indicator_summary)
+
+    explanation = f"""📊 技术分析综述（{symbol}/{timeframe}）
+
+• 当前信号为：{signal if signal else "无明确信号"}。
+• 当前判断倾向：{bias}
+"""
+
+    if summary_text:
+        explanation += f"• 指标评估：\n• {summary_text}\n"
+
+    explanation += f"""
+🔍 策略建议（未来 {timeframe}）
+
+| 情况 | 行动建议 |
+|------|----------|
+"""
+    if direction == "多":
+        explanation += (
+            "| **守住支撑 & 成交量回暖** | 建议顺势做多，目标设在前高阻力附近，止损设在支撑位下方。 |\n"
+            "| **未能突破关键区或成交量不足** | 建议观望，等待确认。 |\n"
         )
-
-    elif "底部反转" in signal:
-        return (
-            "📈 策略类型：平衡型做多（底部博反弹）\n"
-            "🧠 判断依据：RSI 超跌反弹 + MA20 重新站上\n"
-            "📊 仓位控制：初始不超过20%，根据形态演化加仓\n"
-            "🛑 止损策略：前低下方或 1.5 倍 ATR\n"
-            "🎯 止盈策略：压力位前止盈，或 RSI 高位回落信号\n"
-            "📌 预期逻辑：短期构筑底部结构，存在反弹空间"
+    elif direction == "空":
+        explanation += (
+            "| **跌破支撑伴随放量** | 可考虑做空，止盈设于下方支撑，止损设在关键阻力上方。 |\n"
+            "| **回踩确认失败或走势反转** | 建议观望或止盈退出空单。 |\n"
         )
-
-    elif "做多" in signal:
-        return (
-            "📈 策略类型：保守型做多（趋势跟随）\n"
-            "🧠 判断依据：RSI > 50，价格在 MA20 之上\n"
-            "📊 仓位控制：小仓位试多（10%-15%），观察量能与形态\n"
-            "🛑 止损策略：MA20 或短期支撑位下方设止损\n"
-            "🎯 止盈策略：当前价格上方 2 倍 ATR 或压力位\n"
-            "📌 预期逻辑：趋势温和上行，顺势轻仓试探"
-        )
-
-    # 做空类信号
-    elif "顶部反转" in signal:
-        return (
-            "📉 策略类型：平衡型做空（顶部回落）\n"
-            "🧠 判断依据：RSI 高位钝化 + 跌破 MA20\n"
-            "📊 仓位控制：控制在15%-20%，等待反弹补空\n"
-            "🛑 止损策略：反弹高点或 1.5 倍 ATR\n"
-            "🎯 止盈策略：支撑位前止盈，或 RSI 超卖信号\n"
-            "📌 预期逻辑：阶段性顶部成立，可能进入回调趋势"
-        )
-
-    elif "做空" in signal:
-        return (
-            "📉 策略类型：保守型做空（趋势跟随）\n"
-            "🧠 判断依据：RSI < 50，价格在 MA20 之下\n"
-            "📊 仓位控制：小仓位试空（10%-15%），结合量能验证\n"
-            "🛑 止损策略：前高或 MA20 上方\n"
-            "🎯 止盈策略：当前价格下方 2 倍 ATR 或支撑位\n"
-            "📌 预期逻辑：趋势逐步走弱，轻仓顺势做空"
-        )
-
-    # 中性 / 无操作
-    elif "震荡" in signal or "中性" in signal:
-        return (
-            "⏸ 策略类型：观望型 / 区间震荡\n"
-            "🧠 判断依据：价格围绕 MA20 波动，指标未明显背离\n"
-            "📊 仓位控制：避免进场，等待明确趋势出现\n"
-            "🛑 风控建议：不追高杀跌，等待放量突破或跌破关键支撑/阻力\n"
-            "📌 预期逻辑：震荡格局中风险收益比低，观望为宜"
-        )
-
-    # 默认兜底
     else:
-        return (
-            "⚠️ 无法识别的技术信号。\n"
-            "建议回顾最近 3 根 K 线走势、RSI/MACD 状态、成交量变化后再做判断。\n"
-            "📊 风控建议：保持仓位谨慎，确认信号再入场。"
+        explanation += (
+            "| **震荡整理 & 成交量萎缩** | 建议观望，等待放量突破关键位再入场。 |\n"
+            "| **快速放量突破** | 可择机顺势追单，结合风控建仓。 |\n"
         )
+
+    explanation += f"""
+✅ 结论推荐
+• 当前偏向：{bias}。
+• 保守策略：等待确认支撑/阻力区有效，再入场。
+• 激进策略：结合成交量或K线形态择机入场，严格风控。
+
+⚠️ 风险提示
+• 请务必设置止损，控制仓位，防止强平风险。
+• 信号基于程序自动判断，需结合实际盘面与资金流动态综合决策。
+• 留意资金费率变化，过高时可能产生额外持仓成本。
+
+📌 本策略分析为自动化生成，仅供参考，不构成投资建议。
+"""
+    return explanation
