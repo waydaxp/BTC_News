@@ -69,46 +69,46 @@
 {% for tf in ["15m", "1h", "4h"] %}
   <div class="card">
     <div class="title btc">BTC 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span> {{ attribute(_self, "btc_price_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span> {{ attribute(_self, "btc_ma20_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span> {{ attribute(_self, "btc_rsi_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span> {{ attribute(_self, "btc_atr_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span> {{ attribute(_self, "btc_volume_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ attribute(_self, "btc_support_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ attribute(_self, "btc_resistance_" ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ globals()["btc_price_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ globals()["btc_ma20_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ globals()["btc_rsi_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ globals()["btc_atr_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ globals()["btc_volume_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ globals()["btc_support_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ globals()["btc_resistance_" + tf] | default("-") }}</div>
     <div class="metric"><span class="label">资金费率:</span> {{ btc_funding | default("-") }}</div>
   </div>
 
   <div class="card">
     <div class="title">📊 BTC 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span> {{ attribute(_self, "btc_signal_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ attribute(_self, "btc_tp_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ attribute(_self, "btc_sl_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span> {{ attribute(_self, "btc_win_rate_" ~ tf) | default("-") }}</div>
-    <div class="strategy-section">{{ attribute(_self, "btc_strategy_" ~ tf) | default("暂无策略") }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ globals()["btc_signal_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ globals()["btc_tp_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ globals()["btc_sl_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span> {{ globals()["btc_win_rate_" + tf] | default("-") }}</div>
+    <div class="strategy-section">{{ globals()["btc_strategy_" + tf] | default("暂无策略") }}</div>
   </div>
 {% endfor %}
 
 {% for tf in ["15m", "1h", "4h"] %}
   <div class="card">
     <div class="title eth">ETH 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span> {{ attribute(_self, "eth_price_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span> {{ attribute(_self, "eth_ma20_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span> {{ attribute(_self, "eth_rsi_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span> {{ attribute(_self, "eth_atr_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span> {{ attribute(_self, "eth_volume_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ attribute(_self, "eth_support_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ attribute(_self, "eth_resistance_" ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ globals()["eth_price_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ globals()["eth_ma20_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ globals()["eth_rsi_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ globals()["eth_atr_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ globals()["eth_volume_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ globals()["eth_support_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ globals()["eth_resistance_" + tf] | default("-") }}</div>
     <div class="metric"><span class="label">资金费率:</span> {{ eth_funding | default("-") }}</div>
   </div>
 
   <div class="card">
     <div class="title">📊 ETH 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span> {{ attribute(_self, "eth_signal_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ attribute(_self, "eth_tp_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ attribute(_self, "eth_sl_" ~ tf) | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span> {{ attribute(_self, "eth_win_rate_" ~ tf) | default("-") }}</div>
-    <div class="strategy-section">{{ attribute(_self, "eth_strategy_" ~ tf) | default("暂无策略") }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ globals()["eth_signal_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ globals()["eth_tp_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ globals()["eth_sl_" + tf] | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span> {{ globals()["eth_win_rate_" + tf] | default("-") }}</div>
+    <div class="strategy-section">{{ globals()["eth_strategy_" + tf] | default("暂无策略") }}</div>
   </div>
 {% endfor %}
 
