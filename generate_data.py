@@ -6,10 +6,13 @@ from utils.strategy_helper import generate_strategy_text_dynamic
 from datetime import datetime, timedelta, timezone
 
 def wrap_asset(asset: dict) -> dict:
+    """
+    提取 4h 数据并附加策略分析，返回精简上下文
+    """
     print("[wrap_asset] 输入数据:", asset)
 
     try:
-        tf_data = asset.get("4h", {})  # 默认使用 4h 数据
+        tf_data = asset.get("4h", {})  # 默认以 4h 数据为主
         price = float(tf_data.get("price", 0))
         ma20 = float(tf_data.get("ma20", 0))
         rsi = float(tf_data.get("rsi", 0))
@@ -19,9 +22,19 @@ def wrap_asset(asset: dict) -> dict:
 
         support = float(tf_data.get("support", 0))
         resistance = float(tf_data.get("resistance", 0))
-        entry = price
         sl = float(tf_data.get("sl", 0)) if tf_data.get("sl") else "-"
         tp = float(tf_data.get("tp", 0)) if tf_data.get("tp") else "-"
+
+        # 自动生成策略说明文本
+        strategy_note = generate_strategy_text_dynamic(
+            price=price,
+            support=support,
+            resistance=resistance,
+            atr=atr,
+            volume_up=volume > 0,
+            timeframe="4h",
+            funding_rate=None if funding == "-" else funding
+        )
 
         return {
             "price": price,
@@ -30,12 +43,12 @@ def wrap_asset(asset: dict) -> dict:
             "atr": atr,
             "volume": volume,
             "funding": funding,
-            "entry_4h": entry,
+            "entry_4h": price,
             "sl_4h": sl,
             "tp_4h": tp,
             "support_4h": support,
             "resistance_4h": resistance,
-            "strategy_4h": tf_data.get("strategy_note", "-"),
+            "strategy_4h": strategy_note
         }
 
     except Exception as e:
@@ -43,9 +56,12 @@ def wrap_asset(asset: dict) -> dict:
         return {}
 
 def get_all_analysis() -> dict:
+    """
+    获取 BTC/ETH 技术分析、市场情绪、宏观事件并整合为模板上下文
+    """
     btc, eth = {}, {}
     fg_idx, fg_txt, fg_emoji, fg_ts = 0, "未知", "❓", "N/A"
-    macro = []
+    macro = "-"
 
     try:
         btc = get_btc_analysis()
