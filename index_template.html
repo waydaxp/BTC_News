@@ -33,10 +33,6 @@
     }
     .title.eth { color: #6a1b9a; }
     .title.btc { color: #1565c0; }
-    .title::before {
-      content: "📈";
-      margin-right: 8px;
-    }
     .metric {
       margin-bottom: 6px;
       line-height: 1.6;
@@ -69,57 +65,55 @@
 {% for tf in ["15m", "1h", "4h"] %}
   <div class="card">
     <div class="title btc">BTC 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span> {{ globals()["btc_price_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span> {{ globals()["btc_ma20_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span> {{ globals()["btc_rsi_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span> {{ globals()["btc_atr_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span> {{ globals()["btc_volume_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ globals()["btc_support_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ globals()["btc_resistance_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">资金费率:</span> {{ btc_funding | default("-") }}</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ ('btc_price_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ ('btc_ma20_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ ('btc_rsi_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ ('btc_atr_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ ('btc_volume_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ ('btc_support_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ ('btc_resistance_' ~ tf) | default("-") }}</div>
   </div>
 
   <div class="card">
     <div class="title">📊 BTC 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span> {{ globals()["btc_signal_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ globals()["btc_tp_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ globals()["btc_sl_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span> {{ globals()["btc_win_rate_" + tf] | default("-") }}</div>
-    <div class="strategy-section">{{ globals()["btc_strategy_" + tf] | default("暂无策略") }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ ('btc_signal_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ ('btc_tp_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ ('btc_sl_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span> {{ ('btc_win_rate_' ~ tf) | default("-") }}</div>
+    <div class="strategy-section">{{ ('btc_strategy_' ~ tf) | default("暂无策略") }}</div>
   </div>
 {% endfor %}
 
 {% for tf in ["15m", "1h", "4h"] %}
   <div class="card">
     <div class="title eth">ETH 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span> {{ globals()["eth_price_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span> {{ globals()["eth_ma20_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span> {{ globals()["eth_rsi_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span> {{ globals()["eth_atr_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span> {{ globals()["eth_volume_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span> {{ globals()["eth_support_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span> {{ globals()["eth_resistance_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">资金费率:</span> {{ eth_funding | default("-") }}</div>
+    <div class="metric"><span class="label">当前价格:</span> {{ ('eth_price_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span> {{ ('eth_ma20_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span> {{ ('eth_rsi_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span> {{ ('eth_atr_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span> {{ ('eth_volume_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span> {{ ('eth_support_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span> {{ ('eth_resistance_' ~ tf) | default("-") }}</div>
   </div>
 
   <div class="card">
     <div class="title">📊 ETH 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span> {{ globals()["eth_signal_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span> {{ globals()["eth_tp_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span> {{ globals()["eth_sl_" + tf] | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span> {{ globals()["eth_win_rate_" + tf] | default("-") }}</div>
-    <div class="strategy-section">{{ globals()["eth_strategy_" + tf] | default("暂无策略") }}</div>
+    <div class="metric"><span class="label">信号:</span> {{ ('eth_signal_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span> {{ ('eth_tp_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span> {{ ('eth_sl_' ~ tf) | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span> {{ ('eth_win_rate_' ~ tf) | default("-") }}</div>
+    <div class="strategy-section">{{ ('eth_strategy_' ~ tf) | default("暂无策略") }}</div>
   </div>
 {% endfor %}
 
 <div class="card">
-  <div class="title">😨/😊 恐惧与贪婪指数</div>
+  <div class="title">📉/📈 恐惧与贪婪指数</div>
   <div class="metric"><span class="label">当前值:</span> {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
-  <div class="explain">指数反映市场情绪：&lt;50 表示恐惧，&gt;50 表示贪婪。</div>
+  <div class="metric"><span class="label">说明:</span> 指数反映市场情绪：<50 表示恐惧，>50 表示贪婪。</div>
 </div>
 
 <div class="card update">
-  页面更新时间：{{ page_update }}（UTC）｜每 2 分钟自动刷新
+  页面更新时间：{{ page_update }}（北京时间）｜每 2 分钟自动刷新
 </div>
 
 </body>
