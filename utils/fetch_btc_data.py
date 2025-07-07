@@ -27,24 +27,21 @@ def fetch_btc_data():
         df = yf.download("BTC-USD", interval=tf, period=period, auto_adjust=True, progress=False)
         df.dropna(inplace=True)
 
-        if df.empty:
-            continue  # 防止空数据崩溃
-
         close_price = df["Close"].iloc[-1]
-        support = float(df["Low"].tail(20).min())
-        resistance = float(df["High"].tail(20).max())
-        atr = float(compute_atr(df))
-        ma20 = float(df["Close"].rolling(window=20).mean().iloc[-1])
-        rsi = float(compute_rsi(df["Close"]))
-        volume = float(df["Volume"].rolling(window=5).mean().iloc[-1])
+        support = df["Low"].tail(20).min().item()
+        resistance = df["High"].tail(20).max().item()
+        atr = compute_atr(df)
+        ma20 = df["Close"].rolling(window=20).mean().iloc[-1].item()
+        rsi = compute_rsi(df["Close"])
+        volume = df["Volume"].rolling(window=5).mean().iloc[-1].item()
 
         if support < close_price < resistance:
             if close_price > (support + resistance) / 2:
                 signal = "轻仓做多"
                 strategy_note = (
                     f"当前价格处于震荡区间偏上，短线偏强。\n"
-                    f"📈 若突破 ${round(resistance)} 可上看 {round(resistance + 2 * atr)}～{round(resistance + 2.5 * atr)}。\n"
-                    f"📊 仓位建议：30%以内，止盈止损结合 ATR 设置。"
+                    f"\U0001F4C8 若突破 ${round(resistance)} 可上看 {round(resistance + 2 * atr)}～{round(resistance + 2.5 * atr)}。\n"
+                    f"\U0001F4CA 仓位建议：30%以内，止盈止损结合 ATR 设置。"
                 )
                 sl = round(support - 1.2 * atr, 2)
                 tp = round(resistance + 2 * atr, 2)
@@ -53,8 +50,8 @@ def fetch_btc_data():
                 signal = "观望或轻仓做空"
                 strategy_note = (
                     f"当前价格靠近支撑区域，若跌破需警惕转空。\n"
-                    f"📉 若跌破 ${round(support)}，目标设至 {round(support - 2 * atr)}，止损设在 {round(support + 1.2 * atr)}。\n"
-                    f"📊 仓位建议：20%以内，需防反抽。"
+                    f"\U0001F4C9 若跌破 ${round(support)}，目标设至 {round(support - 2 * atr)}，止损设在 {round(support + 1.2 * atr)}。\n"
+                    f"\U0001F4CA 仓位建议：20%以内，需防反抽。"
                 )
                 sl = round(support + 1.2 * atr, 2)
                 tp = round(support - 2 * atr, 2)
@@ -83,9 +80,8 @@ def fetch_btc_data():
             "win_rate": f"{np.random.randint(65, 80)}%"  # 可替换为真实回测准确率
         }
 
-    # 默认使用 4h 分析结果作为主数据
-    return data.get("4h", {})
+    return data
 
-# 供外部调用
+# ✅ 关键补充函数，供外部调用
 def get_btc_analysis():
     return fetch_btc_data()
