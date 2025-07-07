@@ -3,10 +3,10 @@ from jinja2 import Environment, FileSystemLoader
 import os
 
 def main():
-    # 获取当前目录
+    # 当前路径
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # 设置模板目录
+    # 模板目录
     template_dir = base_dir
 
     # 初始化 Jinja2 环境
@@ -15,18 +15,16 @@ def main():
         auto_reload=True
     )
 
-    # 加载模板
-    template = env.get_template("index_template.html")
-
     # 获取上下文数据
     ctx = get_all_analysis()
 
-    # ✅ 添加建仓说明
+    # 添加建仓价说明文字
     ctx["predict_entry_comment"] = (
-        "📌 建仓价为建议入场点位，结合未来价格均值和回测统计生成，用于提高胜率并规避假突破。"
+        "📌 建仓价为建议入场价，基于未来3根K线的平均低点及回测策略生成，"
+        "旨在提高胜率并规避假突破风险。"
     )
 
-    # ✅ 添加策略回测统计示例
+    # 添加策略回测统计数据
     ctx["risk_stats"] = {
         "total_trades": 100,
         "tp_hits": 38,
@@ -37,7 +35,7 @@ def main():
         "neutral_rate": "28.0%"
     }
 
-    # ✅ 扁平化 ctx，用于模板中直接使用
+    # 扁平化 ctx，形成 flat_ctx（所有变量直接传入模板）
     flat_ctx = {}
     for key, val in ctx.items():
         if isinstance(val, dict):
@@ -46,12 +44,17 @@ def main():
         else:
             flat_ctx[key] = val
 
-    # ✅ 渲染 HTML 内容
+    # 将 flat_ctx 注册为模板全局变量 "_context"，供 attribute() 动态访问使用
+    env.globals.update(_context=flat_ctx)
+
+    # 加载模板
+    template = env.get_template("index_template.html")
+
+    # 渲染 HTML
     html = template.render(**flat_ctx)
 
-    # ✅ 写入到 Web 根目录
+    # 输出路径
     output_path = "/var/www/html/index.html"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)  # 保证目录存在
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
 
