@@ -21,13 +21,12 @@ def main():
     # 获取上下文数据
     ctx = get_all_analysis()
 
-    # 添加建仓价说明文字
+    # ✅ 添加建仓说明
     ctx["predict_entry_comment"] = (
-        "📌 建仓价为建议入场价，基于未来3根K线的平均低点及回测策略生成，"
-        "旨在提高胜率并规避假突破风险。"
+        "📌 建仓价为建议入场点位，结合未来价格均值和回测统计生成，用于提高胜率并规避假突破。"
     )
 
-    # 添加策略回测统计数据
+    # ✅ 添加策略回测统计示例
     ctx["risk_stats"] = {
         "total_trades": 100,
         "tp_hits": 38,
@@ -38,7 +37,7 @@ def main():
         "neutral_rate": "28.0%"
     }
 
-    # 扁平化 ctx 以便模板中直接使用变量名
+    # ✅ 扁平化 ctx，用于模板中直接使用
     flat_ctx = {}
     for key, val in ctx.items():
         if isinstance(val, dict):
@@ -47,11 +46,12 @@ def main():
         else:
             flat_ctx[key] = val
 
-    # 渲染 HTML
+    # ✅ 渲染 HTML 内容
     html = template.render(**flat_ctx)
 
-    # 输出到指定位置
+    # ✅ 写入到 Web 根目录
     output_path = "/var/www/html/index.html"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)  # 保证目录存在
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
 
