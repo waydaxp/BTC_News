@@ -49,3 +49,5 @@ def get_all_analysis() -> dict:
         "macro_events": macro,
         "page_update": page_update
     }
+    def get_eth_analysis():
+    return fetch_eth_data()
