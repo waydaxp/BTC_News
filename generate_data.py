@@ -7,25 +7,35 @@ from datetime import datetime, timedelta, timezone
 
 def wrap_asset(asset: dict) -> dict:
     try:
-        return {
-            "price": asset.get("price"),
-            "ma20": asset.get("ma20"),
-            "rsi": asset.get("rsi"),
-            "atr": asset.get("atr"),
-            "volume": asset.get("volume"),
-            "funding": asset.get("funding"),
+        price = asset.get("price", 0)
+        ma20 = asset.get("ma20", 0)
+        rsi = asset.get("rsi", 0)
+        atr = asset.get("atr", 0)
+        volume = asset.get("volume", 0)
+        funding = asset.get("funding", 0)
 
-            "entry_4h": asset.get("entry_4h"),
-            "sl_4h": asset.get("sl_4h"),
-            "tp_4h": asset.get("tp_4h"),
-            "support_4h": asset.get("support_4h"),
-            "resistance_4h": asset.get("resistance_4h"),
+        support_4h = asset.get("support_4h", 0)
+        resistance_4h = asset.get("resistance_4h", 0)
+
+        return {
+            "price": price,
+            "ma20": ma20,
+            "rsi": rsi,
+            "atr": atr,
+            "volume": volume,
+            "funding": funding,
+
+            "entry_4h": asset.get("entry_4h", 0),
+            "sl_4h": asset.get("sl_4h", 0),
+            "tp_4h": asset.get("tp_4h", 0),
+            "support_4h": support_4h,
+            "resistance_4h": resistance_4h,
 
             "strategy_4h": generate_strategy_text_dynamic(
-                price=asset.get("price"),
-                support=asset.get("support_4h"),
-                resistance=asset.get("resistance_4h"),
-                atr=asset.get("atr"),
+                price=price,
+                support=support_4h,
+                resistance=resistance_4h,
+                atr=atr,
                 volume_up=asset.get("volume_up", False)
             )
         }
