@@ -74,58 +74,53 @@
   {% for tf in ["15m", "1h", "4h"] %}
     <div class="card">
       <div class="title btc">BTC 技术指标（{{ tf }}）</div>
-      <div class="metric"><span class="label">当前价格:</span> {{ ("btc_price_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">MA20:</span> {{ ("btc_ma20_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">RSI:</span> {{ ("btc_rsi_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">ATR:</span> {{ ("btc_atr_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">成交量:</span> {{ ("btc_volume_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">支撑区间:</span> {{ ("btc_support_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">阻力区间:</span> {{ ("btc_resistance_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">当前价格:</span> {{ attribute(_context, "btc_price_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">MA20:</span> {{ attribute(_context, "btc_ma20_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">RSI:</span> {{ attribute(_context, "btc_rsi_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">ATR:</span> {{ attribute(_context, "btc_atr_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">成交量:</span> {{ attribute(_context, "btc_volume_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">支撑区间:</span> {{ attribute(_context, "btc_support_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">阻力区间:</span> {{ attribute(_context, "btc_resistance_" ~ tf) | default("-") }}</div>
       <div class="metric"><span class="label">资金费率:</span> {{ btc_funding | default("-") }}</div>
     </div>
 
     <div class="card">
       <div class="title">📊 BTC 策略建议（{{ tf }}）</div>
-      <div class="metric"><span class="label">信号:</span> {{ ("btc_signal_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">止盈价:</span> {{ ("btc_tp_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">止损价:</span> {{ ("btc_sl_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">胜率:</span> {{ ("btc_win_rate_" ~ tf) | default("-") }}</div>
-      <div class="strategy-section">{{ ("btc_strategy_" ~ tf) | default("暂无策略") }}</div>
+      <div class="metric"><span class="label">信号:</span> {{ attribute(_context, "btc_signal_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">止盈价:</span> {{ attribute(_context, "btc_tp_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">止损价:</span> {{ attribute(_context, "btc_sl_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">胜率:</span> {{ attribute(_context, "btc_win_rate_" ~ tf) | default("-") }}</div>
+      <div class="strategy-section">{{ attribute(_context, "btc_strategy_" ~ tf) | default("暂无策略") }}</div>
     </div>
   {% endfor %}
 
   {% for tf in ["15m", "1h", "4h"] %}
     <div class="card">
       <div class="title eth">ETH 技术指标（{{ tf }}）</div>
-      <div class="metric"><span class="label">当前价格:</span> {{ ("eth_price_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">MA20:</span> {{ ("eth_ma20_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">RSI:</span> {{ ("eth_rsi_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">ATR:</span> {{ ("eth_atr_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">成交量:</span> {{ ("eth_volume_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">支撑区间:</span> {{ ("eth_support_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">阻力区间:</span> {{ ("eth_resistance_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">当前价格:</span> {{ attribute(_context, "eth_price_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">MA20:</span> {{ attribute(_context, "eth_ma20_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">RSI:</span> {{ attribute(_context, "eth_rsi_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">ATR:</span> {{ attribute(_context, "eth_atr_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">成交量:</span> {{ attribute(_context, "eth_volume_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">支撑区间:</span> {{ attribute(_context, "eth_support_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">阻力区间:</span> {{ attribute(_context, "eth_resistance_" ~ tf) | default("-") }}</div>
       <div class="metric"><span class="label">资金费率:</span> {{ eth_funding | default("-") }}</div>
     </div>
 
     <div class="card">
       <div class="title">📊 ETH 策略建议（{{ tf }}）</div>
-      <div class="metric"><span class="label">信号:</span> {{ ("eth_signal_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">止盈价:</span> {{ ("eth_tp_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">止损价:</span> {{ ("eth_sl_" ~ tf) | default("-") }}</div>
-      <div class="metric"><span class="label">胜率:</span> {{ ("eth_win_rate_" ~ tf) | default("-") }}</div>
-      <div class="strategy-section">{{ ("eth_strategy_" ~ tf) | default("暂无策略") }}</div>
+      <div class="metric"><span class="label">信号:</span> {{ attribute(_context, "eth_signal_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">止盈价:</span> {{ attribute(_context, "eth_tp_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">止损价:</span> {{ attribute(_context, "eth_sl_" ~ tf) | default("-") }}</div>
+      <div class="metric"><span class="label">胜率:</span> {{ attribute(_context, "eth_win_rate_" ~ tf) | default("-") }}</div>
+      <div class="strategy-section">{{ attribute(_context, "eth_strategy_" ~ tf) | default("暂无策略") }}</div>
     </div>
   {% endfor %}
 
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
     <div class="metric"><span class="label">当前值:</span> {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
-    <div class="explain">指数反映市场情绪：<50 表示恐惧，>50 表示贪婪。</div>
-  </div>
-
-  <div class="card">
-    <div class="title">🌍 宏观事件提醒</div>
-    <div class="strategy-section">{{ macro_events | default("暂无数据") }}</div>
+    <div class="explain">指数反映市场情绪：&lt;50 表示恐惧，&gt;50 表示贪婪。</div>
   </div>
 
   <div class="card update">
