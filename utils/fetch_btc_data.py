@@ -1,121 +1,90 @@
+# fetch_btc_data.py
+
 import yfinance as yf
 import pandas as pd
-from datetime import datetime
-from pytz import timezone
-from core.indicators import add_basic_indicators, add_macd_boll_kdj, backtest_signals
-from core.risk import calc_position_size, get_risk_params, DEFAULT_MODE
+import numpy as np
+from datetime import datetime, timedelta
 
-PAIR = "BTC-USD"
+def get_btc_analysis():
+    data = yf.download("BTC-USD", interval="1h", period="7d", progress=False)
 
+    # 清洗
+    data.dropna(inplace=True)
+    data["MA20"] = data["Close"].rolling(window=20).mean()
+    data["RSI"] = compute_rsi(data["Close"], 14)
+    data["ATR"] = compute_atr(data, 14)
 
-def _download_tf(interval: str, period: str) -> pd.DataFrame:
-    df = yf.download(PAIR, interval=interval, period=period, progress=False, auto_adjust=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df = df.xs(PAIR, level=1, axis=1)
-    df = df.rename(columns=str.title)
-    df.index = df.index.tz_localize(None)
-    df = add_basic_indicators(df)
-    df = add_macd_boll_kdj(df)
-    return df.dropna()
-
-
-def _judge_signal(df: pd.DataFrame, interval_label="") -> tuple:
-    last = df.iloc[-1]
-    prev = df.iloc[-2]
-    close = last['Close']
-    rsi = last['RSI']
-    ma20 = last['MA20']
-    ma5 = last['MA5']
-    macd, macd_signal = last['MACD'], last['MACD_Signal']
-    prev_macd, prev_macd_signal = prev['MACD'], prev['MACD_Signal']
-    vol = last['Volume']
-    avg_vol = df['Volume'].rolling(20).mean().iloc[-1]
-
-    signal, reason = "⏸ 中性信号", "未检测到显著信号"
-
-    if rsi > 50 and prev_macd < prev_macd_signal and macd > macd_signal and vol > avg_vol * 1.5:
-        signal = "🟢 强烈短线做多信号（突破爆发型）"
-        reason = "RSI > 50，MACD 金叉刚发生，成交量超过过去均值 1.5 倍"
-    elif rsi < 35 and df['RSI'].iloc[-2] < 30 and close > ma20:
-        signal = "🟢 底部反转（可尝试做多）"
-        reason = "RSI 超跌 + 回升至 MA20 上方"
-    elif rsi > 65 and df['RSI'].iloc[-2] > 70 and close < ma20:
-        signal = "🔻 顶部反转（可尝试做空）"
-        reason = "RSI 高位回落 + 跌破 MA20"
-    elif close > ma20 and rsi > 50 and close > ma5:
-        signal = "🟢 做多信号"
-        reason = "价格站上 MA20 且 RSI 强"
-    elif close < ma20 and rsi < 50 and close < ma5:
-        signal = "🔻 做空信号"
-        reason = "价格低于 MA20 且 RSI 弱"
-    elif abs(close - ma20) / ma20 < 0.005:
-        signal = "⏸ 震荡中性"
-        reason = "价格围绕 MA20 波动"
-
-    print(f"[DEBUG] {PAIR}-{interval_label}: Signal={signal}, Reason={reason}, RSI={rsi:.2f}, Close={close:.2f}")
-    return signal, reason
-
-
-def _calc_trade(entry: float, atr: float, signal: str, mode: str = DEFAULT_MODE) -> tuple:
-    atr_sl, atr_tp, risk_usd = get_risk_params(mode)
-    if "多" in signal:
-        sl = entry - atr_sl * atr
-        tp = entry + atr_tp * atr
-        qty = calc_position_size(entry, risk_usd, atr_sl, atr, "long")
-    elif "空" in signal:
-        sl = entry + atr_sl * atr
-        tp = entry - atr_tp * atr
-        qty = calc_position_size(entry, risk_usd, atr_sl, atr, "short")
-    else:
-        sl, tp, qty = None, None, 0.0
-    return sl, tp, qty
-
-
-def get_btc_analysis() -> dict:
-    df15 = _download_tf("15m", "3d")
-    df1h = _download_tf("1h", "7d")
-    df4h = _download_tf("4h", "30d")
-
-    s15, l15 = _judge_signal(df15, "15m")
-    s1h, l1h = _judge_signal(df1h, "1h")
-    s4h, l4h = _judge_signal(df4h, "4h")
-
-    win_rate = backtest_signals(df1h, "BTC-1h")
-
-    last15, last1h, last4h = df15.iloc[-1], df1h.iloc[-1], df4h.iloc[-1]
-    atr15, atr1h, atr4h = float(last15['ATR']), float(last1h['ATR']), float(last4h['ATR'])
-    entry15, entry1h, entry4h = float(last15['MA20']), float(last1h['MA20']), float(last4h['MA20'])
-
-    sl15, tp15, qty15 = _calc_trade(entry15, atr15, s15)
-    sl1h, tp1h, qty1h = _calc_trade(entry1h, atr1h, s1h)
-    sl4h, tp4h, qty4h = _calc_trade(entry4h, atr4h, s4h)
-
-    update_time = datetime.now(timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S")
+    # 模拟资金费率（替换为真实 API 可接）
+    funding_rate = 0.018 if data.iloc[-1]["Close"] > data.iloc[-1]["MA20"] else -0.015
+    volume = float(data.iloc[-1]["Volume"])
 
     return {
-        "price": entry1h,
-        "ma20": float(last1h['MA20']),
-        "rsi": float(last1h['RSI']),
-        "atr": atr1h,
-        "signal": f"{s4h} ({l4h}, 4h) / {s1h} ({l1h}, 1h) / {s15} ({l15}, 15m)",
-        "entry_15m": entry15,
-        "sl_15m": sl15,
-        "tp_15m": tp15,
-        "qty_15m": qty15,
-        "entry_1h": entry1h,
-        "sl_1h": sl1h,
-        "tp_1h": tp1h,
-        "qty_1h": qty1h,
-        "entry_4h": entry4h,
-        "sl_4h": sl4h,
-        "tp_4h": tp4h,
-        "qty_4h": qty4h,
-        "update_time": update_time,
-        "reason_15m": l15,
-        "reason_1h": l1h,
-        "reason_4h": l4h,
-        "signal_15m": s15,
-        "signal_1h": s1h,
-        "signal_4h": s4h,
-        "win_rate": win_rate,
+        "price": round(data.iloc[-1]["Close"], 2),
+        "ma20": round(data.iloc[-1]["MA20"], 2),
+        "rsi": round(data.iloc[-1]["RSI"], 2),
+        "atr": round(data.iloc[-1]["ATR"], 2),
+        "funding_rate": funding_rate,
+        "volume": round(volume, 2),
+        "entry_15m": estimate_entry_price(data, tf="15m"),
+        "sl_15m": estimate_sl(data),
+        "tp_15m": estimate_tp(data),
+        "entry_1h": estimate_entry_price(data, tf="1h"),
+        "sl_1h": estimate_sl(data),
+        "tp_1h": estimate_tp(data),
+        "entry_4h": estimate_entry_price(data, tf="4h"),
+        "sl_4h": estimate_sl(data),
+        "tp_4h": estimate_tp(data),
+        "signal_15m": detect_signal(data, tf="15m"),
+        "signal_1h": detect_signal(data, tf="1h"),
+        "signal_4h": detect_signal(data, tf="4h"),
+        "reason_15m": explain_signal(data, tf="15m"),
+        "reason_1h": explain_signal(data, tf="1h"),
+        "reason_4h": explain_signal(data, tf="4h"),
+        "update_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
     }
+
+def compute_rsi(series, period):
+    delta = series.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
+def compute_atr(data, period=14):
+    high_low = data["High"] - data["Low"]
+    high_close = np.abs(data["High"] - data["Close"].shift())
+    low_close = np.abs(data["Low"] - data["Close"].shift())
+    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    atr = tr.rolling(window=period).mean()
+    return atr
+
+def estimate_entry_price(data, tf):
+    return round(data["Low"].tail(3).mean(), 2)
+
+def estimate_sl(data):
+    return round(data["Close"].iloc[-1] - 1.5 * data["ATR"].iloc[-1], 2)
+
+def estimate_tp(data):
+    return round(data["Close"].iloc[-1] + 2.0 * data["ATR"].iloc[-1], 2)
+
+def detect_signal(data, tf):
+    rsi = data["RSI"].iloc[-1]
+    price = data["Close"].iloc[-1]
+    ma = data["MA20"].iloc[-1]
+    if rsi > 60 and price > ma:
+        return "强烈短线做多"
+    elif rsi < 40 and price < ma:
+        return "做空趋势延续"
+    else:
+        return "震荡中性"
+
+def explain_signal(data, tf):
+    rsi = data["RSI"].iloc[-1]
+    price = data["Close"].iloc[-1]
+    ma = data["MA20"].iloc[-1]
+    if rsi > 60 and price > ma:
+        return "RSI 强势，价格突破 MA20，趋势向上"
+    elif rsi < 40 and price < ma:
+        return "RSI 弱势，价格跌破 MA20，空头延续"
+    else:
+        return "价格围绕 MA20 震荡，暂无明显趋势"
