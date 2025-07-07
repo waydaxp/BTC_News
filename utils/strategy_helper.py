@@ -1,98 +1,72 @@
-def get_strategy_explanation(signal: str, symbol: str = "BTC", timeframe: str = "1h", price: float = None, rsi: float = None, atr: float = None, volume_change: float = None, funding_rate: float = None) -> str:
+# strategy_helper.py
+
+def get_strategy_explanation(signal: str, tf: str = "1h", price: float = None,
+                              support_range: tuple = None, resistance_range: tuple = None,
+                              volume_rising: bool = False) -> str:
     """
-    结构化策略输出，根据技术信号及指标生成完整的策略说明。
+    返回结构化策略说明，支持动态区间建议。
     参数：
-    - signal: 技术信号文本
-    - symbol: 币种，例如 BTC、ETH
-    - timeframe: 分析周期，例如 15m, 1h, 4h
-    - price: 当前价格
-    - rsi: RSI 指标数值
-    - atr: 平均真实波动幅度
-    - volume_change: 近几根K线的成交量变化百分比（相对平均值）
-    - funding_rate: 资金费率
+        - signal: 技术信号（如 "做多"、"做空"、"震荡"）
+        - tf: 时间周期（"15m", "1h", "4h"）
+        - price: 当前价格
+        - support_range: 支撑区间（元组）
+        - resistance_range: 压力区间（元组）
+        - volume_rising: 成交量是否回暖
     """
-    signal = signal.strip() if signal else ""
-    direction = "中性"
-    bias = "震荡观望"
-    
-    if "做多" in signal or "偏多" in signal or "反弹" in signal:
-        direction = "多"
-        bias = "看涨偏多"
-    elif "做空" in signal or "偏空" in signal or "回调" in signal:
-        direction = "空"
-        bias = "看空偏空"
+    explain = []
+    explain.append(f"⏱ 当前周期：{tf.upper()}，价格：${price if price else '—'}")
 
-    # === 技术指标判断追加 ===
-    indicator_summary = []
-    if rsi is not None:
-        if rsi > 70:
-            indicator_summary.append(f"RSI = {rsi:.1f}（超买风险）")
-        elif rsi < 30:
-            indicator_summary.append(f"RSI = {rsi:.1f}（超卖反弹预期）")
+    if signal is None or signal.strip() == "":
+        explain.append("📭 暂无明确信号，建议观望等待趋势明确。")
+        return "\n".join(explain)
+
+    if signal in ["震荡", "中性"]:
+        explain.append("\n🧠 技术分析综述：")
+        explain.append("• 价格围绕 MA20 波动，暂无趋势确认。")
+        if support_range and resistance_range:
+            explain.append(f"• 支撑区间：${support_range[0]}–${support_range[1]}，阻力区间：${resistance_range[0]}–${resistance_range[1]}。")
+        explain.append("\n🔍 策略建议：")
+        explain.append("• 建议观望，等待放量突破关键支撑/阻力再入场。")
+        explain.append("• 若突破上轨伴随放量，可择机做多，反之做空。")
+
+    elif "做多" in signal:
+        explain.append("\n🧠 技术分析综述：")
+        explain.append("• RSI 上行、价格守稳 EMA 支撑，有望继续上攻。")
+        if support_range:
+            explain.append(f"• 关键支撑：${support_range[0]}–${support_range[1]}。")
+        if resistance_range:
+            explain.append(f"• 若突破阻力区 ${resistance_range[0]}–${resistance_range[1]}，目标可见更高位。")
+
+        explain.append("\n🔍 短线策略建议：")
+        if volume_rising:
+            explain.append("• 成交量回暖，建议小仓位做多。")
         else:
-            indicator_summary.append(f"RSI = {rsi:.1f}（中性区域）")
+            explain.append("• 成交量未明显放大，建议谨慎跟随。")
+        if support_range:
+            explain.append(f"• 止损建议设在支撑下方，如 ${support_range[0] - 10}。")
+        if resistance_range:
+            explain.append(f"• 初步止盈可设至 ${resistance_range[1]} 或更高。")
 
-    if atr is not None:
-        if atr > 3:
-            indicator_summary.append(f"ATR = {atr:.2f}（波动放大，需注意止损）")
+    elif "做空" in signal:
+        explain.append("\n🧠 技术分析综述：")
+        explain.append("• RSI 回落，价格失守短期均线支撑。")
+        if resistance_range:
+            explain.append(f"• 压力区：${resistance_range[0]}–${resistance_range[1]}。")
+        if support_range:
+            explain.append(f"• 若跌破支撑区 ${support_range[0]}–${support_range[1]}，下方空间打开。")
+
+        explain.append("\n🔍 短线策略建议：")
+        if volume_rising:
+            explain.append("• 若跌破支撑且放量，建议短线做空。")
         else:
-            indicator_summary.append(f"ATR = {atr:.2f}（波动收敛，等待突破）")
+            explain.append("• 未出现放量，不宜盲目追空。")
+        if resistance_range:
+            explain.append(f"• 止损设在 ${resistance_range[1] + 10} 上方。")
+        if support_range:
+            explain.append(f"• 止盈可先看 ${support_range[0]} 或以下位置。")
 
-    if volume_change is not None:
-        if volume_change > 10:
-            indicator_summary.append(f"成交量明显放大（+{volume_change:.1f}%）")
-        elif volume_change < -10:
-            indicator_summary.append(f"成交量大幅萎缩（{volume_change:.1f}%）")
-
-    if funding_rate is not None:
-        if abs(funding_rate) > 0.01:
-            directionality = "多头拥挤" if funding_rate > 0 else "空头拥挤"
-            indicator_summary.append(f"资金费率 = {funding_rate:.4f}（{directionality}）")
-
-    summary_text = "\n• ".join(indicator_summary)
-
-    explanation = f"""📊 技术分析综述（{symbol}/{timeframe}）
-
-• 当前信号为：{signal if signal else "无明确信号"}。
-• 当前判断倾向：{bias}
-"""
-
-    if summary_text:
-        explanation += f"• 指标评估：\n• {summary_text}\n"
-
-    explanation += f"""
-🔍 策略建议（未来 {timeframe}）
-
-| 情况 | 行动建议 |
-|------|----------|
-"""
-    if direction == "多":
-        explanation += (
-            "| **守住支撑 & 成交量回暖** | 建议顺势做多，目标设在前高阻力附近，止损设在支撑位下方。 |\n"
-            "| **未能突破关键区或成交量不足** | 建议观望，等待确认。 |\n"
-        )
-    elif direction == "空":
-        explanation += (
-            "| **跌破支撑伴随放量** | 可考虑做空，止盈设于下方支撑，止损设在关键阻力上方。 |\n"
-            "| **回踩确认失败或走势反转** | 建议观望或止盈退出空单。 |\n"
-        )
     else:
-        explanation += (
-            "| **震荡整理 & 成交量萎缩** | 建议观望，等待放量突破关键位再入场。 |\n"
-            "| **快速放量突破** | 可择机顺势追单，结合风控建仓。 |\n"
-        )
+        explain.append("⚠️ 当前信号未匹配标准策略，建议结合盘面灵活应对。")
 
-    explanation += f"""
-✅ 结论推荐
-• 当前偏向：{bias}。
-• 保守策略：等待确认支撑/阻力区有效，再入场。
-• 激进策略：结合成交量或K线形态择机入场，严格风控。
-
-⚠️ 风险提示
-• 请务必设置止损，控制仓位，防止强平风险。
-• 信号基于程序自动判断，需结合实际盘面与资金流动态综合决策。
-• 留意资金费率变化，过高时可能产生额外持仓成本。
-
-📌 本策略分析为自动化生成，仅供参考，不构成投资建议。
-"""
-    return explanation
+    explain.append("\n⚠️ 风险提示：合约交易波动大，请控制杠杆并设置止损。")
+    return "\n".join(explain)
