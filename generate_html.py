@@ -1,31 +1,29 @@
 import os
-import datetime
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 from utils.generate_data import get_all_analysis
 
-def flatten_ctx(ctx):
+def flatten_ctx(ctx: dict) -> dict:
     """
-    将多周期嵌套的 ctx 扁平化为 Jinja2 可用的上下文
-    例如：ctx['btc']['15m']['price'] -> btc_price_15m
+    将嵌套的多周期 ctx 展平为扁平 key，例如 btc_price_4h 等
     """
     flat = {}
+    for coin in ["btc", "eth"]:
+        data = ctx.get(coin, {})
+        for tf in ["15m", "1h", "4h"]:
+            for k in ["price", "ma20", "rsi", "atr", "volume", "support", "resistance", "signal", "tp", "sl", "win_rate", "strategy"]:
+                val = data.get(f"{k}_{tf}", "-")
+                flat[f"{coin}_{k}_{tf}"] = val
+        flat[f"{coin}_funding"] = data.get("funding", "-")
 
-    for symbol in ['btc', 'eth']:
-        for tf in ['15m', '1h', '4h']:
-            data = ctx.get(symbol, {}).get(tf, {})
-            for key, value in data.items():
-                flat[f"{symbol}_{key}_{tf}"] = value
-
-        # 每个 symbol 顶级数据（如 funding、4h entry/sl/tp 等）
-        for key in ['funding', 'entry_4h', 'sl_4h', 'tp_4h', 'support_4h', 'resistance_4h', 'strategy_4h']:
-            flat[f"{symbol}_{key}"] = ctx.get(symbol, {}).get(key, '-')
-
-    # 全局信息
-    flat['fg_idx'] = ctx.get('fg_idx', '-')
-    flat['fg_txt'] = ctx.get('fg_txt', '-')
-    flat['fg_emoji'] = ctx.get('fg_emoji', '')
-    flat['page_update'] = ctx.get('page_update', datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
-
+    # 直接加入原始字段
+    flat.update({
+        "fg_idx": ctx.get("fg_idx", "-"),
+        "fg_txt": ctx.get("fg_txt", "-"),
+        "fg_emoji": ctx.get("fg_emoji", "-"),
+        "fg_ts": ctx.get("fg_ts", "-"),
+        "macro_events": ctx.get("macro_events", "暂无数据"),
+        "page_update": ctx.get("page_update", "")
+    })
     return flat
 
 def main():
@@ -33,12 +31,8 @@ def main():
         ctx = get_all_analysis()
         flat_ctx = flatten_ctx(ctx)
 
-        env = Environment(
-            loader=FileSystemLoader(searchpath='.'),
-            autoescape=select_autoescape(['html', 'xml'])
-        )
+        env = Environment(loader=FileSystemLoader("."))
         template = env.get_template("index_template.html")
-
         html = template.render(**flat_ctx)
 
         output_path = "/var/www/html/index.html"
@@ -46,10 +40,9 @@ def main():
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html)
 
-        print("✅ index.html 已生成并部署到 /var/www/html")
-
+        print(f"✅ 页面已生成: {output_path}")
     except Exception as e:
-        print("❌ 页面生成失败:", str(e))
+        print(f"❌ 页面生成失败: {e}")
 
 if __name__ == "__main__":
     main()
