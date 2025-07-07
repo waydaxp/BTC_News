@@ -31,10 +31,10 @@
       display: flex;
       align-items: center;
     }
-    .title.eth { color: #6a1b9a; }     /* ETH 紫色 */
-    .title.btc { color: #1565c0; }     /* BTC 蓝色 */
+    .title.eth { color: #6a1b9a; }
+    .title.btc { color: #1565c0; }
     .title::before {
-      content: "📈";
+      content: "\1F4C8";
       margin-right: 8px;
     }
     .section-label {
@@ -77,7 +77,6 @@
 </head>
 <body>
 
-  <!-- BTC 技术指标 -->
   <div class="card">
     <div class="title btc">BTC 技术指标</div>
     <div class="explain">用于衡量市场趋势与强度，辅助判断做多/做空时机。</div>
@@ -91,7 +90,6 @@
     <div class="metric"><span class="label">资金费率:</span> {{ btc_funding_rate }} <span class="explain">（>0 多头付费，<0 空头付费）</span></div>
   </div>
 
-  <!-- BTC 策略建议 -->
   <div class="card">
     <div class="title">📊 BTC 策略建议</div>
     <div class="metric"><span class="label">信号:</span> {{ btc_signal }}</div>
@@ -100,7 +98,6 @@
     <div class="strategy-section">{{ btc_strategy_note }}</div>
   </div>
 
-  <!-- ETH 技术指标 -->
   <div class="card">
     <div class="title eth">ETH 技术指标</div>
     <div class="explain">基于 ETH/USDT 永续合约，分析4H级别短期走势。</div>
@@ -114,7 +111,6 @@
     <div class="metric"><span class="label">资金费率:</span> {{ eth_funding_rate }}</div>
   </div>
 
-  <!-- ETH 策略建议 -->
   <div class="card">
     <div class="title">📊 ETH 策略建议</div>
     <div class="metric"><span class="label">信号:</span> {{ eth_signal }}</div>
@@ -123,14 +119,12 @@
     <div class="strategy-section">{{ eth_strategy_note }}</div>
   </div>
 
-  <!-- 恐惧与贪婪指数 -->
   <div class="card">
     <div class="title">😨/😊 恐惧与贪婪指数</div>
     <div class="metric"><span class="label">当前值:</span> {{ fg_idx }}（{{ fg_txt }}）{{ fg_emoji }}</div>
     <div class="explain">指数反映市场情绪：<50 表示恐惧，>50 表示贪婪。</div>
   </div>
 
-  <!-- 页面更新时间 -->
   <div class="card update">
     页面更新时间：{{ page_update }}（UTC）｜每 60 秒自动刷新
   </div>
