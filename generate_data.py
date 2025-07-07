@@ -1,21 +1,23 @@
 from utils.fetch_btc_data import get_btc_analysis
 from utils.fetch_eth_data import get_eth_analysis
-from utils.fetch_fear_greed import get_fear_and_greed
+from utils.fetch_fear_and_greed import get_fear_and_greed
 from utils.fetch_macro_events import get_macro_event_summary
 from utils.strategy_helper import generate_strategy_text_dynamic
 from datetime import datetime, timedelta, timezone
 
 def wrap_asset(asset: dict) -> dict:
-    try:
-        price = asset.get("price", 0)
-        ma20 = asset.get("ma20", 0)
-        rsi = asset.get("rsi", 0)
-        atr = asset.get("atr", 0)
-        volume = asset.get("volume", 0)
-        funding = asset.get("funding", 0)
+    print("[wrap_asset] 输入数据:", asset)  # 调试日志
 
-        support_4h = asset.get("support_4h", 0)
-        resistance_4h = asset.get("resistance_4h", 0)
+    try:
+        price = asset.get("price") or "-"
+        ma20 = asset.get("ma20") or "-"
+        rsi = asset.get("rsi") or "-"
+        atr = asset.get("atr") or "-"
+        volume = asset.get("volume") or "-"
+        funding = asset.get("funding") or "-"
+
+        support_4h = asset.get("support_4h") or "-"
+        resistance_4h = asset.get("resistance_4h") or "-"
 
         return {
             "price": price,
@@ -25,17 +27,17 @@ def wrap_asset(asset: dict) -> dict:
             "volume": volume,
             "funding": funding,
 
-            "entry_4h": asset.get("entry_4h", 0),
-            "sl_4h": asset.get("sl_4h", 0),
-            "tp_4h": asset.get("tp_4h", 0),
+            "entry_4h": asset.get("entry_4h") or "-",
+            "sl_4h": asset.get("sl_4h") or "-",
+            "tp_4h": asset.get("tp_4h") or "-",
             "support_4h": support_4h,
             "resistance_4h": resistance_4h,
 
             "strategy_4h": generate_strategy_text_dynamic(
-                price=price,
+                price=price if isinstance(price, (int, float)) else 0,
                 support=support_4h,
                 resistance=resistance_4h,
-                atr=atr,
+                atr=atr if isinstance(atr, (int, float)) else 0,
                 volume_up=asset.get("volume_up", False)
             )
         }
@@ -44,7 +46,6 @@ def wrap_asset(asset: dict) -> dict:
         return {}
 
 def get_all_analysis() -> dict:
-    # 初始化各项数据
     btc, eth = {}, {}
     fg_idx, fg_txt, fg_emoji, fg_ts = 0, "未知", "❓", "N/A"
     macro = []
@@ -73,11 +74,10 @@ def get_all_analysis() -> dict:
     except Exception as e:
         print(f"[分析] 宏观事件失败: {e}")
 
-    # 获取北京时间
     beijing_tz = timezone(timedelta(hours=8))
     page_update = datetime.now(beijing_tz).strftime("%Y-%m-%d %H:%M:%S")
 
-    return {
+    ctx = {
         "btc": wrap_asset(btc),
         "eth": wrap_asset(eth),
         "fg_idx": fg_idx,
@@ -87,3 +87,7 @@ def get_all_analysis() -> dict:
         "macro_events": macro,
         "page_update": page_update
     }
+
+    print("[最终上下文 ctx]:", ctx)  # 可选调试
+
+    return ctx
