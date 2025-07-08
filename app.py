@@ -1,17 +1,29 @@
-from flask import Flask, render_template
-from generate_data import get_all_analysis
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-app = Flask(__name__)
+from flask import Flask, send_from_directory, jsonify
+import os
 
+# 如果你后面还有 API 需要保留，可以在这里 import
+# from generate_data import get_all_analysis
+
+app = Flask(
+    __name__,
+    static_folder='.',       # 静态文件根目录设为当前目录
+    static_url_path=''       # 根路径 '' 对应 static_folder
+)
+
+# 首页：直接返回静态生成的 index.html
 @app.route('/')
 def index():
-    try:
-        ctx = get_all_analysis()
-        return render_template('index.html', **ctx)
-    except Exception as e:
-        return f"<h1>加载失败</h1><p>{e}</p>", 500
+    return send_from_directory(app.static_folder, 'index.html')
 
-# 不再使用 Flask 自带调试服务，Gunicorn 会作为生产服务运行
+# 示例：如果你还想保留一个 /api/analysis 接口
+# @app.route('/api/analysis')
+# def api_analysis():
+#     ctx = get_all_analysis()
+#     return jsonify(ctx)
+
 if __name__ == '__main__':
-    # 仅用于本地测试，请使用 Gunicorn 启动生产服务
+    # 本地调试时用
     app.run(debug=True, host='0.0.0.0', port=5000)
