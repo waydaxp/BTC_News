@@ -1,57 +1,97 @@
-#!/usr/bin/env python3
-# generate_html.py
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>Crypto 技术面仪表盘</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="refresh" content="120" />
+  <style>
+    body { font-family:"Segoe UI",system-ui,sans-serif; font-size:16px;
+           background:#f7f9fb; color:#333; margin:0; padding:0; }
+    .card { background:#fff; border-left:6px solid #2ecc71;
+      margin:20px auto; padding:20px; width:90%; max-width:900px;
+      border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    .title { font-size:22px; font-weight:bold; margin-bottom:12px; }
+    .btc .title { color:#1565c0; }
+    .eth .title { color:#6a1b9a; }
+    .metric { margin-bottom:8px; line-height:1.5; }
+    .metric span.label { display:inline-block; min-width:100px; font-weight:bold; }
+    .strategy-section {
+      margin-top:10px; padding:12px; border-left:4px solid #f39c12;
+      background:#fdfdfd; white-space:pre-line;
+    }
+    .update { text-align:right; color:#777; margin:20px; font-size:13px; }
+  </style>
+</head>
+<body>
 
-import os
-from datetime import datetime
-from jinja2 import Environment, FileSystemLoader
-from utils.generate_data import get_all_analysis
+{% set tfs = ["15m","1h","4h"] %}
 
-def flatten_ctx(ctx: dict) -> dict:
-    """
-    把 btc/eth 的三周期数据扁平化为模板可以直接访问的字段：
-      btc_price_15m, btc_strategy_4h, eth_tp_1h, ...
-    并加上 fg_idx, fg_txt, fg_emoji, page_update.
-    """
-    flat = {}
-    tfs = ["15m", "1h", "4h"]
+{# BTC #}
+{% for tf in tfs %}
+  <div class="card btc">
+    <div class="title">BTC 技术指标（{{ tf }}）</div>
+    <div class="metric"><span class="label">当前价格:</span>{{ data["btc_price_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span>{{ data["btc_ma20_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span>{{ data["btc_rsi_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span>{{ data["btc_atr_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span>{{ data["btc_volume_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span>{{ data["btc_support_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span>{{ data["btc_resistance_" ~ tf] | default("-") }}</div>
+  </div>
 
-    for symbol in ("btc", "eth"):
-        symbol_data = ctx.get(symbol, {})
-        for tf in tfs:
-            tf_data = symbol_data.get(tf, {})
-            for key, val in tf_data.items():
-                flat[f"{symbol}_{key}_{tf}"] = val
+  <div class="card">
+    <div class="title">📊 BTC 策略建议（{{ tf }}）</div>
+    <div class="metric"><span class="label">信号:</span>{{ data["btc_signal_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span>{{ data["btc_tp_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span>{{ data["btc_sl_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span>{{ data["btc_win_rate_" ~ tf] | default("-") }}</div>
+    <div class="strategy-section">
+      {{ data["btc_strategy_" ~ tf] | default("暂无策略") }}
+    </div>
+  </div>
+{% endfor %}
 
-    # 恐惧贪婪等全局字段
-    flat["fg_idx"] = ctx.get("fg_idx", "-")
-    flat["fg_txt"] = ctx.get("fg_txt", "-")
-    flat["fg_emoji"] = ctx.get("fg_emoji", "")
-    flat["page_update"] = ctx.get(
-        "page_update",
-        datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-    )
 
-    return flat
+{# ETH #}
+{% for tf in tfs %}
+  <div class="card eth">
+    <div class="title">ETH 技术指标（{{ tf }}）</div>
+    <div class="metric"><span class="label">当前价格:</span>{{ data["eth_price_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">MA20:</span>{{ data["eth_ma20_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">RSI:</span>{{ data["eth_rsi_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">ATR:</span>{{ data["eth_atr_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">成交量:</span>{{ data["eth_volume_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">支撑区间:</span>{{ data["eth_support_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">阻力区间:</span>{{ data["eth_resistance_" ~ tf] | default("-") }}</div>
+  </div>
 
-def main():
-    # 1. 取得原始分析上下文
-    ctx = get_all_analysis()
-    # 2. 扁平化
-    data = flatten_ctx(ctx)
-    # 3. 渲染模板
-    here = os.path.dirname(os.path.abspath(__file__))
-    env = Environment(
-        loader=FileSystemLoader(here),
-        autoescape=True
-    )
-    tmpl = env.get_template("index_template.html")
-    html = tmpl.render(data=data)
-    # 4. 写出到静态目录
-    out = "/var/www/html/index.html"
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(html)
-    print("✅ index.html 已更新")
+  <div class="card">
+    <div class="title">📊 ETH 策略建议（{{ tf }}）</div>
+    <div class="metric"><span class="label">信号:</span>{{ data["eth_signal_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止盈价:</span>{{ data["eth_tp_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">止损价:</span>{{ data["eth_sl_" ~ tf] | default("-") }}</div>
+    <div class="metric"><span class="label">胜率:</span>{{ data["eth_win_rate_" ~ tf] | default("-") }}</div>
+    <div class="strategy-section">
+      {{ data["eth_strategy_" ~ tf] | default("暂无策略") }}
+    </div>
+  </div>
+{% endfor %}
 
-if __name__ == "__main__":
-    main()
+
+{# 恐惧贪婪 #}
+<div class="card">
+  <div class="title">📉/😊 恐惧与贪婪指数</div>
+  <div class="metric">
+    <span class="label">当前值:</span>{{ data.fg_idx }}（{{ data.fg_txt }}）{{ data.fg_emoji }}
+  </div>
+  <div class="metric"><span class="label">说明:</span>指数反映市场情绪：<50 恐惧，>50 贪婪。</div>
+</div>
+
+{# 更新时间 #}
+<div class="card update">
+  页面更新时间：{{ data.page_update }}（北京时间）｜每 2 分钟自动刷新
+</div>
+
+</body>
+</html>
