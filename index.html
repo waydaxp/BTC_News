@@ -25,72 +25,172 @@
 </head>
 <body>
 
-{% set tfs = ["15m","1h","4h"] %}
 
-{# BTC #}
-{% for tf in tfs %}
+
+
+
   <div class="card btc">
-    <div class="title">BTC 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span>{{ data["btc_price_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span>{{ data["btc_ma20_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span>{{ data["btc_rsi_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span>{{ data["btc_atr_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span>{{ data["btc_volume_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span>{{ data["btc_support_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span>{{ data["btc_resistance_" ~ tf] | default("-") }}</div>
+    <div class="title">BTC 技术指标（15m）</div>
+    <div class="metric"><span class="label">当前价格:</span>108332.69</div>
+    <div class="metric"><span class="label">MA20:</span>107979.49</div>
+    <div class="metric"><span class="label">RSI:</span>77.83</div>
+    <div class="metric"><span class="label">ATR:</span>80.08</div>
+    <div class="metric"><span class="label">成交量:</span>3746431795.2</div>
+    <div class="metric"><span class="label">支撑区间:</span>107499.55</div>
+    <div class="metric"><span class="label">阻力区间:</span>108375.25</div>
   </div>
 
   <div class="card">
-    <div class="title">📊 BTC 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span>{{ data["btc_signal_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span>{{ data["btc_tp_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span>{{ data["btc_sl_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span>{{ data["btc_win_rate_" ~ tf] | default("-") }}</div>
+    <div class="title">📊 BTC 策略建议（15m）</div>
+    <div class="metric"><span class="label">信号:</span>轻仓做多</div>
+    <div class="metric"><span class="label">止盈价:</span>108535.41</div>
+    <div class="metric"><span class="label">止损价:</span>107403.46</div>
+    <div class="metric"><span class="label">胜率:</span>70%</div>
     <div class="strategy-section">
-      {{ data["btc_strategy_" ~ tf] | default("暂无策略") }}
+      当前价格处于震荡区间偏上，短线偏强。
+📈 若突破 $108375 可上看 108535～108575。
+📊 仓位建议：30%以内，止盈止损结合 ATR 设置。
     </div>
   </div>
-{% endfor %}
+
+  <div class="card btc">
+    <div class="title">BTC 技术指标（1h）</div>
+    <div class="metric"><span class="label">当前价格:</span>108332.69</div>
+    <div class="metric"><span class="label">MA20:</span>108143.35</div>
+    <div class="metric"><span class="label">RSI:</span>57.99</div>
+    <div class="metric"><span class="label">ATR:</span>332.29</div>
+    <div class="metric"><span class="label">成交量:</span>9464615731.2</div>
+    <div class="metric"><span class="label">支撑区间:</span>107499.55</div>
+    <div class="metric"><span class="label">阻力区间:</span>108792.32</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📊 BTC 策略建议（1h）</div>
+    <div class="metric"><span class="label">信号:</span>轻仓做多</div>
+    <div class="metric"><span class="label">止盈价:</span>109456.89</div>
+    <div class="metric"><span class="label">止损价:</span>107100.81</div>
+    <div class="metric"><span class="label">胜率:</span>66%</div>
+    <div class="strategy-section">
+      当前价格处于震荡区间偏上，短线偏强。
+📈 若突破 $108792 可上看 109457～109623。
+📊 仓位建议：30%以内，止盈止损结合 ATR 设置。
+    </div>
+  </div>
+
+  <div class="card btc">
+    <div class="title">BTC 技术指标（4h）</div>
+    <div class="metric"><span class="label">当前价格:</span>108332.69</div>
+    <div class="metric"><span class="label">MA20:</span>108402.69</div>
+    <div class="metric"><span class="label">RSI:</span>51.08</div>
+    <div class="metric"><span class="label">ATR:</span>670.64</div>
+    <div class="metric"><span class="label">成交量:</span>11299115008.0</div>
+    <div class="metric"><span class="label">支撑区间:</span>107499.55</div>
+    <div class="metric"><span class="label">阻力区间:</span>109700.84</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📊 BTC 策略建议（4h）</div>
+    <div class="metric"><span class="label">信号:</span>观望或轻仓做空</div>
+    <div class="metric"><span class="label">止盈价:</span>106158.28</div>
+    <div class="metric"><span class="label">止损价:</span>108304.32</div>
+    <div class="metric"><span class="label">胜率:</span>77%</div>
+    <div class="strategy-section">
+      当前价格靠近支撑区域，若跌破需警惕转空。
+📉 若跌破 $107500，目标设至 106158，止损设在 108304。
+📊 仓位建议：20%以内，需防反抽。
+    </div>
+  </div>
 
 
-{# ETH #}
-{% for tf in tfs %}
+
+
+
   <div class="card eth">
-    <div class="title">ETH 技术指标（{{ tf }}）</div>
-    <div class="metric"><span class="label">当前价格:</span>{{ data["eth_price_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">MA20:</span>{{ data["eth_ma20_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">RSI:</span>{{ data["eth_rsi_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">ATR:</span>{{ data["eth_atr_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">成交量:</span>{{ data["eth_volume_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">支撑区间:</span>{{ data["eth_support_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">阻力区间:</span>{{ data["eth_resistance_" ~ tf] | default("-") }}</div>
+    <div class="title">ETH 技术指标（15m）</div>
+    <div class="metric"><span class="label">当前价格:</span>2561.13</div>
+    <div class="metric"><span class="label">MA20:</span>2541.63</div>
+    <div class="metric"><span class="label">RSI:</span>85.12</div>
+    <div class="metric"><span class="label">ATR:</span>3.66</div>
+    <div class="metric"><span class="label">成交量:</span>3450357555.2</div>
+    <div class="metric"><span class="label">支撑区间:</span>2525.51</div>
+    <div class="metric"><span class="label">阻力区间:</span>2562.62</div>
   </div>
 
   <div class="card">
-    <div class="title">📊 ETH 策略建议（{{ tf }}）</div>
-    <div class="metric"><span class="label">信号:</span>{{ data["eth_signal_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止盈价:</span>{{ data["eth_tp_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">止损价:</span>{{ data["eth_sl_" ~ tf] | default("-") }}</div>
-    <div class="metric"><span class="label">胜率:</span>{{ data["eth_win_rate_" ~ tf] | default("-") }}</div>
+    <div class="title">📊 ETH 策略建议（15m）</div>
+    <div class="metric"><span class="label">信号:</span>轻仓做多</div>
+    <div class="metric"><span class="label">止盈价:</span>2569.93</div>
+    <div class="metric"><span class="label">止损价:</span>2521.13</div>
+    <div class="metric"><span class="label">胜率:</span>68%</div>
     <div class="strategy-section">
-      {{ data["eth_strategy_" ~ tf] | default("暂无策略") }}
+      当前价格处于震荡区间偏上，短线偏强。
+📈 若突破 $2563 可上看 2570～2572。
+📊 仓位建议：30%以内，止盈止损结合 ATR 设置。
     </div>
   </div>
-{% endfor %}
+
+  <div class="card eth">
+    <div class="title">ETH 技术指标（1h）</div>
+    <div class="metric"><span class="label">当前价格:</span>2561.13</div>
+    <div class="metric"><span class="label">MA20:</span>2541.51</div>
+    <div class="metric"><span class="label">RSI:</span>67.76</div>
+    <div class="metric"><span class="label">ATR:</span>13.79</div>
+    <div class="metric"><span class="label">成交量:</span>8841240576.0</div>
+    <div class="metric"><span class="label">支撑区间:</span>2517.9</div>
+    <div class="metric"><span class="label">阻力区间:</span>2566.86</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📊 ETH 策略建议（1h）</div>
+    <div class="metric"><span class="label">信号:</span>轻仓做多</div>
+    <div class="metric"><span class="label">止盈价:</span>2594.45</div>
+    <div class="metric"><span class="label">止损价:</span>2501.35</div>
+    <div class="metric"><span class="label">胜率:</span>70%</div>
+    <div class="strategy-section">
+      当前价格处于震荡区间偏上，短线偏强。
+📈 若突破 $2567 可上看 2594～2601。
+📊 仓位建议：30%以内，止盈止损结合 ATR 设置。
+    </div>
+  </div>
+
+  <div class="card eth">
+    <div class="title">ETH 技术指标（4h）</div>
+    <div class="metric"><span class="label">当前价格:</span>2561.13</div>
+    <div class="metric"><span class="label">MA20:</span>2537.85</div>
+    <div class="metric"><span class="label">RSI:</span>61.45</div>
+    <div class="metric"><span class="label">ATR:</span>30.5</div>
+    <div class="metric"><span class="label">成交量:</span>9911990067.2</div>
+    <div class="metric"><span class="label">支撑区间:</span>2489.31</div>
+    <div class="metric"><span class="label">阻力区间:</span>2603.06</div>
+  </div>
+
+  <div class="card">
+    <div class="title">📊 ETH 策略建议（4h）</div>
+    <div class="metric"><span class="label">信号:</span>轻仓做多</div>
+    <div class="metric"><span class="label">止盈价:</span>2664.06</div>
+    <div class="metric"><span class="label">止损价:</span>2452.71</div>
+    <div class="metric"><span class="label">胜率:</span>66%</div>
+    <div class="strategy-section">
+      当前价格处于震荡区间偏上，短线偏强。
+📈 若突破 $2603 可上看 2664～2679。
+📊 仓位建议：30%以内，止盈止损结合 ATR 设置。
+    </div>
+  </div>
 
 
-{# 恐惧贪婪 #}
+
+
 <div class="card">
   <div class="title">📉/😊 恐惧与贪婪指数</div>
   <div class="metric">
-    <span class="label">当前值:</span>{{ data.fg_idx }}（{{ data.fg_txt }}）{{ data.fg_emoji }}
+    <span class="label">当前值:</span>65（Greed）😊
   </div>
   <div class="metric"><span class="label">说明:</span>指数反映市场情绪：<50 恐惧，>50 贪婪。</div>
 </div>
 
-{# 更新时间 #}
+
 <div class="card update">
-  页面更新时间：{{ data.page_update }}（北京时间）｜每 2 分钟自动刷新
+  页面更新时间：2025-07-08 14:56:03（北京时间）｜每 2 分钟自动刷新
 </div>
 
 </body>
